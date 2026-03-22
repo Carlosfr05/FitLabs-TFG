@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 
 class CrearRutinaScreen extends StatefulWidget {
   const CrearRutinaScreen({super.key});
@@ -8,14 +9,6 @@ class CrearRutinaScreen extends StatefulWidget {
 }
 
 class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
-  // --- COLORES ---
-  final Color _bgTop = const Color(0xFF352B55);
-  final Color _bgBottom = const Color(0xFF1E1A2B);
-  final Color _textColor = Colors.white;
-  final Color _cardBg = const Color(
-    0xFF6A6296,
-  ).withOpacity(0.5); // Fondo tarjetas ejercicios
-  final Color _accentPurple = const Color(0xFF6C63FF); // Botón agregar
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +20,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_bgTop, const Color(0xFF2A223E), _bgBottom],
-          ),
+          gradient: AppColors.bgGradient
         ),
         child: SafeArea(
           child: Column(
@@ -57,7 +46,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
                         child: Text(
                           "Crear Rutina",
                           style: TextStyle(
-                            color: _textColor,
+                            color: AppColors.textColor,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
@@ -206,7 +195,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
 
                       // --- BOTÓN AGREGAR EJERCICIO ---
                       Material(
-                        color: _accentPurple,
+                        color: AppColors.accentPurple,
                         borderRadius: BorderRadius.circular(6),
                         child: InkWell(
                           onTap: () {
@@ -286,7 +275,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 
 class CalendarioScreen extends StatefulWidget {
   const CalendarioScreen({super.key});
@@ -9,18 +10,6 @@ class CalendarioScreen extends StatefulWidget {
 
 class _CalendarioScreenState extends State<CalendarioScreen> {
   int _selectedIndex = 2; // Índice 2 = Calendario
-
-  // --- COLORES ---
-  final Color _bgTop = const Color(0xFF352B55);
-  final Color _bgBottom = const Color(0xFF1E1A2B);
-  final Color _accentLila = const Color(0xFF9F97E6); // Selector de día
-  final Color _textColor = Colors.white;
-  final Color _dimmedColor = Color(0xFFD5D0FF); // Texto secundario y días no actuales
-  final Color _dividerColor = Colors.white24;
-
-  // Colores de las tarjetas de evento
-  final Color _cardBg = const Color(0xFF655EA4);
-  final Color _cardBorder = const Color(0xFFADA4FF);
 
   // --- NAVEGACIÓN ---
   void _onItemTapped(int index) {
@@ -48,12 +37,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       extendBody: true,
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_bgTop, const Color(0xFF2A223E), _bgBottom],
-            stops: const [0.0, 0.3, 1.0],
-          ),
+          gradient: AppColors.bgGradient
         ),
         child: SafeArea(
           bottom: false,
@@ -64,7 +48,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               Text(
                 'Calendario',
                 style: TextStyle(
-                  color: _textColor,
+                  color: AppColors.textColor,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -195,7 +179,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.arrow_back_ios, color: _dimmedColor, size: 14),
+              Icon(Icons.arrow_back_ios, color: AppColors.dimmedColor, size: 14),
               const SizedBox(width: 15),
               const Text(
                 "Diciembre 2025",
@@ -206,7 +190,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                 ),
               ),
               const SizedBox(width: 15),
-              Icon(Icons.arrow_forward_ios, color: _dimmedColor, size: 14),
+              Icon(Icons.arrow_forward_ios, color: AppColors.dimmedColor, size: 14),
             ],
           ),
           const SizedBox(height: 20),
@@ -271,7 +255,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       height: size,
       decoration: isSelected
           ? BoxDecoration(
-              color: _accentLila.withOpacity(0.8),
+              color: AppColors.accentLila.withOpacity(0.8),
               shape: BoxShape.circle,
             )
           : null,
@@ -281,7 +265,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
         style: TextStyle(
           color: isSelected
               ? Colors.white
-              : (isCurrentMonth ? Colors.white : _dimmedColor),
+              : (isCurrentMonth ? Colors.white : AppColors.dimmedColor),
           fontSize: 13,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
@@ -305,9 +289,9 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(time, style: TextStyle(color: _textColor, fontSize: 12)),
+                Text(time, style: TextStyle(color: AppColors.textColor, fontSize: 12)),
                 const SizedBox(height: 5),
-                Container(width: 15, height: 1, color: _dimmedColor),
+                Container(width: 15, height: 1, color: AppColors.dimmedColor),
               ],
             ),
           ),
@@ -319,7 +303,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                 // Línea discontinua detrás
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: TimeDivider(color: _dividerColor.withOpacity(0.5)),
+                  child: TimeDivider(color: AppColors.dividerColor.withOpacity(0.5)),
                 ),
 
                 // Tarjeta
@@ -343,9 +327,9 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border(left: BorderSide(color: _cardBorder, width: 4)),
+        border: Border(left: BorderSide(color: AppColors.cardBorder, width: 4)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.2),
