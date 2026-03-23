@@ -36,9 +36,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.bgGradient
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           bottom: false,
           child: Column(
@@ -179,7 +177,11 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.arrow_back_ios, color: AppColors.dimmedColor, size: 14),
+              Icon(
+                Icons.arrow_back_ios,
+                color: AppColors.dimmedColor,
+                size: 14,
+              ),
               const SizedBox(width: 15),
               const Text(
                 "Diciembre 2025",
@@ -190,7 +192,11 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                 ),
               ),
               const SizedBox(width: 15),
-              Icon(Icons.arrow_forward_ios, color: AppColors.dimmedColor, size: 14),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: AppColors.dimmedColor,
+                size: 14,
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -289,7 +295,10 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(time, style: TextStyle(color: AppColors.textColor, fontSize: 12)),
+                Text(
+                  time,
+                  style: TextStyle(color: AppColors.textColor, fontSize: 12),
+                ),
                 const SizedBox(height: 5),
                 Container(width: 15, height: 1, color: AppColors.dimmedColor),
               ],
@@ -303,7 +312,9 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                 // Línea discontinua detrás
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: TimeDivider(color: AppColors.dividerColor.withOpacity(0.5)),
+                  child: TimeDivider(
+                    color: AppColors.dividerColor.withOpacity(0.5),
+                  ),
                 ),
 
                 // Tarjeta
@@ -368,7 +379,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
   Widget _buildBottomNavBar() {
     return Container(
       height: 80,
-      color: const Color(0xFF413E60),
+      color: AppColors.navBarBg,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -380,7 +391,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
             Icons.mail,
             "Mensajes",
             badgeCount: 2,
-            accentColor: const Color(0xFFFF3B30),
+            accentColor: AppColors.accentRed,
           ),
         ],
       ),
@@ -395,7 +406,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     Color? accentColor,
   }) {
     bool isSelected = _selectedIndex == index;
-    final color = isSelected ? Colors.white : Color(0xFFAFA8D5);
+    final color = isSelected ? Colors.white : AppColors.navIconUnselected;
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       behavior: HitTestBehavior.opaque,
@@ -411,10 +422,14 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                   top: -5,
                   right: -8,
                   child: Container(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 238, 34, 34),
-                      shape: BoxShape.circle,
+                      color: accentColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
                     ),
                     child: Text(
                       '$badgeCount',
@@ -460,12 +475,14 @@ class DashedDivider extends StatelessWidget {
           return Flex(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             direction: Axis.horizontal,
-              children: List.generate(
+            children: List.generate(
               dashCount,
               (_) => SizedBox(
                 width: dashWidth,
                 height: 2,
-                child: DecoratedBox(decoration: BoxDecoration(color: Color(0xFFD5D0FF))),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: AppColors.dimmedColor),
+                ),
               ),
             ),
           );
@@ -489,12 +506,14 @@ class TimeDivider extends StatelessWidget {
         return Flex(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           direction: Axis.horizontal,
-            children: List.generate(
+          children: List.generate(
             dashCount,
             (_) => SizedBox(
               width: dashWidth,
               height: 1,
-              child: DecoratedBox(decoration: BoxDecoration(color: Color(0xFF655EA4))),
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: AppColors.cardBg),
+              ),
             ),
           ),
         );

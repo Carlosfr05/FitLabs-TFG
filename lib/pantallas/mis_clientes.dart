@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/pantallas/detalle_cliente.dart';
 
 class MisClientesScreen extends StatelessWidget {
@@ -76,24 +77,11 @@ class _ClientsScreenState extends State<ClientsScreen> {
   @override
   Widget build(BuildContext context) {
     // Paleta de colores
-    final bgTop = const Color(0xFF352B55);
-    final bgBottom = const Color(0xFF1E1A2B);
-    final searchBarColor = const Color(0xFF4B4584);
-    final filterPillColor = const Color(0xFF413E60);
-    final navBarColor = const Color(0xFF413E60);
-    final accentRed = const Color(0xFFFF3B30);
 
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [bgTop, const Color(0xFF2A223E), bgBottom],
-            stops: const [0.0, 0.3, 1.0],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: Padding(
           padding: const EdgeInsets.only(left: 15, right: 15),
           child: SafeArea(
@@ -118,7 +106,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   child: Container(
                     height: 45,
                     decoration: BoxDecoration(
-                      color: searchBarColor,
+                      color: AppColors.searchBarBg,
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: const Row(
@@ -157,7 +145,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: filterPillColor,
+                          color: AppColors.navBarBg,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: Colors.white12),
                         ),
@@ -193,7 +181,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                     separatorBuilder: (_, __) => const SizedBox(height: 20),
                     itemBuilder: (context, index) {
                       final client = clients[index];
-                      return _buildClientRow(client, accentRed);
+                      return _buildClientRow(client, AppColors.accentRed);
                     },
                   ),
                 ),
@@ -210,7 +198,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
           width: 55,
           height: 55,
           decoration: BoxDecoration(
-            color: const Color(0xFF776DAE),
+            color: AppColors.surfaceColor,
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -224,7 +212,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
       // --- Barra de Navegación ---
       bottomNavigationBar: Container(
         height: 80,
-        color: navBarColor,
+        color: AppColors.navBarBg,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -236,7 +224,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
               Icons.mail,
               "Mensajes",
               badgeCount: 2,
-              accentColor: accentRed,
+              accentColor: AppColors.accentRed,
             ),
           ],
         ),
@@ -345,7 +333,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           color: accentRed,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF1E1A2B),
+                            color: AppColors.bgBottom,
                             width: 1.5,
                           ),
                         ),
@@ -384,7 +372,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     Color? accentColor,
   }) {
     bool isSelected = _selectedIndex == index;
-    final color = isSelected ? Colors.white : Color(0xFFAFA8D5);
+    final color = isSelected ? Colors.white : AppColors.navIconUnselected;
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
@@ -408,10 +396,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                     decoration: BoxDecoration(
                       color: accentColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFF332D43),
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
                     ),
                     child: Text(
                       badgeCount.toString(),

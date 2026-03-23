@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 
 class DetalleClienteScreen extends StatelessWidget {
   const DetalleClienteScreen({super.key});
-
-  // --- PALETA DE COLORES ---
-  final Color _bgTop = const Color(0xFF2E2648);
-  final Color _bgBottom = const Color(0xFF1A1625);
-  final Color _accentLila = const Color(0xFFAEA6E8);
-  final Color _cardSummaryBg = const Color(0xFF3E3666);
-  final Color _cardGraphBg = const Color(0xFF2B253F);
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +11,7 @@ class DetalleClienteScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_bgTop, const Color(0xFF241E32), _bgBottom],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -150,10 +138,12 @@ class DetalleClienteScreen extends StatelessWidget {
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: _accentLila.withOpacity(0.5), width: 2),
+            border: Border.all(
+              color: AppColors.accentLila.withOpacity(0.5),
+              width: 2,
+            ),
           ),
-          child: 
-          const Image(
+          child: const Image(
             image: AssetImage('assets/images/imagenPerfil.png'),
             width: 100,
             height: 100,
@@ -175,14 +165,14 @@ class DetalleClienteScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: _accentLila.withOpacity(0.2),
+            color: AppColors.accentLila.withOpacity(0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: _accentLila.withOpacity(0.5)),
+            border: Border.all(color: AppColors.accentLila.withOpacity(0.5)),
           ),
           child: Text(
             "Cliente Activo",
             style: TextStyle(
-              color: _accentLila,
+              color: AppColors.accentLila,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -232,7 +222,7 @@ class DetalleClienteScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
       decoration: BoxDecoration(
-        color: _cardSummaryBg,
+        color: AppColors.cardSummaryBg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -285,7 +275,7 @@ class DetalleClienteScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardGraphBg,
+        color: AppColors.cardGraphBg,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -332,7 +322,9 @@ class DetalleClienteScreen extends StatelessWidget {
             child: SizedBox(
               height: 150, // Un poco más alto para que quepan los números
               child: CustomPaint(
-                painter: DetailedLineChartPainter(lineColor: _accentLila),
+                painter: DetailedLineChartPainter(
+                  lineColor: AppColors.accentLila,
+                ),
               ),
             ),
           ),
@@ -381,7 +373,7 @@ class DetalleClienteScreen extends StatelessWidget {
               Container(
                 width: 4,
                 decoration: const BoxDecoration(
-                  color: const Color(0xFFD5D0FF),
+                  color: AppColors.dimmedColor,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(10),
                     bottomRight: Radius.circular(10),
@@ -442,7 +434,7 @@ class DetalleClienteScreen extends StatelessWidget {
         if (!isLast)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            child: DashedDivider(color: const Color(0xFFD5D0FF)),
+            child: DashedDivider(color: AppColors.dimmedColor),
           ),
       ],
     );

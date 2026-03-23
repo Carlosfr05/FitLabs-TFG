@@ -9,7 +9,6 @@ class CrearRutinaScreen extends StatefulWidget {
 }
 
 class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,9 +18,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: AppColors.bgGradient
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           child: Column(
             children: [
@@ -74,7 +71,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF5A5290),
+                          color: AppColors.secondarySurface,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -143,7 +140,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
                               // Línea inferior blanca (estado normal)
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFD5D0FF),
+                                  color: AppColors.dimmedColor,
                                   width: 1.0,
                                 ),
                               ),
@@ -231,7 +228,10 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
                         width: 180,
                         height: 45,
                         decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFFD5D0FF), width: 1.5),
+                          border: Border.all(
+                            color: AppColors.dimmedColor,
+                            width: 1.5,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: TextButton(

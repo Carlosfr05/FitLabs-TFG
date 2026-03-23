@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/pantallas/resumen_dia.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
-
-  // --- PALETA DE COLORES (Consistente con las otras pantallas) ---
-  final Color _accentLila = const Color(0xFFD5D0FF); // El lila claro del borde
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +14,7 @@ class LoginScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Color(0xFF3E2B68), Color(0xFF2B2042), Color(0xFF241D35)],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppColors.loginGradient),
         child: SingleChildScrollView(
           child: SizedBox(
             height: size.height, // Asegura que ocupe toda la pantalla
@@ -47,7 +39,7 @@ class LoginScreen extends StatelessWidget {
                   const Text(
                     "FitLabs",
                     style: TextStyle(
-                      color: Color(0xFFD5D0FF),
+                      color: AppColors.dimmedColor,
                       fontSize: 56,
 
                       letterSpacing: 1.5,
@@ -81,16 +73,17 @@ class LoginScreen extends StatelessWidget {
                         );
                       },
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: _accentLila, width: 2),
+                        side: BorderSide(color: AppColors.accentLila, width: 2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        foregroundColor: Colors.white, // Efecto al pulsar
+                        foregroundColor:
+                            AppColors.textColor, // Efecto al pulsar
                       ),
                       child: const Text(
                         "Iniciar Sesión",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.textColor,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -107,13 +100,16 @@ class LoginScreen extends StatelessWidget {
                     },
                     child: RichText(
                       text: const TextSpan(
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(
+                          color: AppColors.textColor,
+                          fontSize: 14,
+                        ),
                         children: [
                           TextSpan(text: "¿No tienes cuenta? "),
                           TextSpan(
                             text: "Regístrate",
                             style: TextStyle(
-                              color: Color(0xFFD5D0FF),
+                              color: AppColors.dimmedColor,
                               fontWeight: FontWeight.bold,
                               decoration: TextDecoration.underline, // Subrayado
                             ),
@@ -140,22 +136,17 @@ class LoginScreen extends StatelessWidget {
         TextFormField(
           obscureText: isPassword,
           textAlign: TextAlign.center, // Texto centrado como en la imagen
-          style: const TextStyle(color: Colors.white, fontSize: 16),
-          cursorColor: _accentLila,
+          style: const TextStyle(color: AppColors.textColor, fontSize: 16),
+          cursorColor: AppColors.accentLila,
           decoration: InputDecoration(
             hintText: label,
-            hintStyle: const TextStyle(
-              color: Color.fromARGB(153, 255, 255, 255),
-            ),
+            hintStyle: const TextStyle(color: AppColors.hintText),
             // Quitamos bordes laterales y superior, dejamos solo la línea abajo
             enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFD5D0FF), width: 2),
+              borderSide: BorderSide(color: AppColors.dimmedColor, width: 2),
             ),
             focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Color.fromARGB(255, 107, 96, 214),
-                width: 2,
-              ),
+              borderSide: BorderSide(color: AppColors.dimmedColor, width: 2),
             ),
             contentPadding: const EdgeInsets.only(bottom: 10),
           ),

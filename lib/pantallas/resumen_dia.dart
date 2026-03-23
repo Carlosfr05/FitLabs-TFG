@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 
 class ResumenDiaScreen extends StatefulWidget {
   const ResumenDiaScreen({super.key});
@@ -10,6 +11,7 @@ class ResumenDiaScreen extends StatefulWidget {
 class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
   // Índice 0 = Inicio (Esta pantalla)
   int _selectedIndex = 0;
+  double surfaceRadius = 0.0;
 
   // Datos de ejemplo
   final List<Map<String, String>> upcomingWorkouts = [
@@ -67,38 +69,13 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
   @override
   Widget build(BuildContext context) {
     // --- COLORES Y ESTILOS AJUSTADOS ---
-    final Color bgTop = const Color(0xFF352B55);
-    final Color bgBottom = const Color(0xFF1E1A2B);
-
-    // NUEVO COLOR: Un tono más oscuro y menos saturado para las tarjetas y botones
-    final Color surfaceColor = const Color(
-      0xFF776DAE,
-    ); // Azul oscuro translúcido
-
-    final Color surfaceColor2 = const Color(
-      0xFF4B4584,
-    ); // Azul oscuro translúcido
-
     // NUEVO RADIO: Bordes más redondeados
     final double surfaceRadius = 0;
-
-    final Color accentRed = const Color(0xFFFF3B30);
-    final Color textColor = Colors.white;
-    final Color subTextColor = Colors.white60;
-    final Color subTextColor2 = const Color(0xFFD5D0FF);
-    final Color dividerColor = Colors.white24;
 
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [bgTop, const Color(0xFF2A223E), bgBottom],
-            stops: const [0.0, 0.3, 1.0],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(
@@ -107,28 +84,22 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Cabecera
-                _buildHeader(accentRed),
+                _buildHeader(),
                 const SizedBox(height: 30),
 
                 // Resumen (Con nuevos estilos)
-                _buildSummaryCard(
-                  surfaceColor2,
-                  surfaceRadius,
-                  textColor,
-                  subTextColor2,
-                  dividerColor,
-                ),
+                _buildSummaryCard(surfaceRadius),
                 const SizedBox(height: 30),
 
                 // Grid Botones (Con nuevos estilos y altura)
-                _buildActionButtonsGrid(surfaceColor, surfaceRadius, textColor),
+                _buildActionButtonsGrid(surfaceRadius),
                 const SizedBox(height: 30),
 
                 // Título
                 Text(
                   'Entrenamientos Próximos',
                   style: TextStyle(
-                    color: textColor,
+                    color: AppColors.textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -136,7 +107,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                 const SizedBox(height: 20),
 
                 // Lista
-                _buildWorkoutList(textColor, subTextColor),
+                _buildWorkoutList(),
               ],
             ),
           ),
@@ -144,7 +115,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
       ),
       bottomNavigationBar: Container(
         height: 80,
-        color: const Color(0xFF413E60),
+        color: AppColors.navBarBg,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -156,7 +127,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
               Icons.mail,
               "Mensajes",
               badgeCount: 2,
-              accentColor: accentRed,
+              accentColor: AppColors.accentRed,
             ),
           ],
         ),
@@ -166,7 +137,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
 
   // --- WIDGETS AUXILIARES ---
 
-  Widget _buildHeader(Color accentRed) {
+  Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -198,7 +169,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: accentRed,
+                      color: AppColors.accentRed,
                       shape: BoxShape.circle,
                     ),
                     child: const Text(
@@ -221,18 +192,12 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
     );
   }
 
-  Widget _buildSummaryCard(
-    Color bg,
-    double radius,
-    Color txt,
-    Color subTxt,
-    Color div,
-  ) {
+  Widget _buildSummaryCard(double radius) {
     return Container(
       padding: const EdgeInsets.all(20),
       // Aplicamos el nuevo color y radio
       decoration: BoxDecoration(
-        color: bg,
+        color: AppColors.surfaceColor2,
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Column(
@@ -241,7 +206,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           Text(
             'Resumen del día',
             style: TextStyle(
-              color: txt,
+              color: AppColors.textColor,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -249,21 +214,21 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           const SizedBox(height: 20),
           Row(
             children: [
-              _item('3', 'Sesiones Realizadas', txt, subTxt),
+              _item('3', 'Sesiones Realizadas'),
               Container(
                 height: 40,
                 width: 1,
-                color: div,
+                color: AppColors.dividerColor,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              _item('5', 'Sesiones Restantes', txt, subTxt),
+              _item('5', 'Sesiones Restantes'),
               Container(
                 height: 40,
                 width: 1,
-                color: div,
+                color: AppColors.dividerColor,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              _item('2', 'Mensajes sin leer', txt, subTxt),
+              _item('2', 'Mensajes sin leer'),
             ],
           ),
         ],
@@ -271,14 +236,14 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
     );
   }
 
-  Widget _item(String val, String label, Color txt, Color subTxt) {
+  Widget _item(String val, String label) {
     return Expanded(
       child: Column(
         children: [
           Text(
             val,
             style: TextStyle(
-              color: txt,
+              color: AppColors.textColor,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -287,35 +252,24 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(color: subTxt, fontSize: 12),
+            style: TextStyle(color: AppColors.dimmedColor, fontSize: 12),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtonsGrid(Color bg, double radius, Color textColor) {
+  Widget _buildActionButtonsGrid(double radius) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(
-              child: _btn(
-                'Añadir nuevo\ncliente',
-                Icons.person_add,
-                bg,
-                radius,
-                textColor,
-              ),
-            ),
+            Expanded(child: _btn('Añadir nuevo\ncliente', Icons.person_add)),
             const SizedBox(width: 15),
             Expanded(
               child: _btn(
                 'Crear nueva\nrutina',
                 Icons.fitness_center,
-                bg,
-                radius,
-                textColor,
                 showPlus: true,
                 onTap: () {
                   Navigator.pushNamed(context, '/crear-rutina');
@@ -327,24 +281,10 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
         const SizedBox(height: 15),
         Row(
           children: [
-            Expanded(
-              child: _btn(
-                'Modificar rutina\nexistente',
-                Icons.edit,
-                bg,
-                radius,
-                textColor,
-              ),
-            ),
+            Expanded(child: _btn('Modificar rutina\nexistente', Icons.edit)),
             const SizedBox(width: 15),
             Expanded(
-              child: _btn(
-                'Revisar pagos\nde clientes',
-                Icons.monetization_on,
-                bg,
-                radius,
-                textColor,
-              ),
+              child: _btn('Revisar pagos\nde clientes', Icons.monetization_on),
             ),
           ],
         ),
@@ -354,23 +294,19 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
 
   Widget _btn(
     String label,
-    IconData? icon,
-    Color bg,
-    double radius,
-    Color txt, {
+    IconData? icon, {
     bool showPlus = false,
-    VoidCallback? onTap, // <--- Añadimos este parámetro
+    VoidCallback? onTap,
   }) {
     return InkWell(
-      // <--- Envolvemos todo en InkWell para el efecto visual de clic
       onTap: onTap,
-      borderRadius: BorderRadius.circular(radius),
+      borderRadius: BorderRadius.circular(surfaceRadius),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         height: 65,
         decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(radius),
+          color: AppColors.surfaceColor,
+          borderRadius: BorderRadius.circular(surfaceRadius),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -379,7 +315,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: txt,
+                  color: AppColors.textColor,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -392,7 +328,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
     );
   }
 
-  Widget _buildWorkoutList(Color txt, Color subTxt) {
+  Widget _buildWorkoutList() {
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -417,7 +353,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                     Text(
                       w['title']!,
                       style: TextStyle(
-                        color: txt,
+                        color: AppColors.textColor,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -425,12 +361,18 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                     const SizedBox(height: 5),
                     Text(
                       w['time']!,
-                      style: TextStyle(color: txt, fontSize: 14),
+                      style: TextStyle(
+                        color: AppColors.textColor,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       w['subtitle']!,
-                      style: TextStyle(color: subTxt, fontSize: 12),
+                      style: TextStyle(
+                        color: AppColors.subTextColor,
+                        fontSize: 12,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -463,7 +405,9 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.white : Color(0xFFAFA8D5),
+                color: isSelected
+                    ? AppColors.textColor
+                    : AppColors.subTextColor,
                 size: 28,
               ),
               if (badgeCount > 0)
@@ -471,14 +415,22 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                   top: -5,
                   right: -8,
                   child: Container(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: accentColor,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
                     ),
                     child: Text(
                       '$badgeCount',
-                      style: const TextStyle(fontSize: 10, color: Colors.white),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -487,7 +439,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.white54,
+              color: isSelected ? AppColors.textColor : AppColors.subTextColor,
               fontSize: 10,
             ),
           ),
@@ -505,7 +457,7 @@ class CurvedSideLine extends StatelessWidget {
     return Container(
       width: 4,
       decoration: BoxDecoration(
-        color: const Color(0xFFD5D0FF),
+        color: AppColors.dimmedColor,
         borderRadius: const BorderRadius.all(Radius.elliptical(4, 40)),
       ),
     );
@@ -532,7 +484,7 @@ class DashedDivider extends StatelessWidget {
                 width: dashWidth,
                 height: 2,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(color: const Color(0xFFD5D0FF)),
+                  decoration: BoxDecoration(color: AppColors.dimmedColor),
                 ),
               ),
             ),

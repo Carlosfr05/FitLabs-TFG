@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 
 class MensajesScreen extends StatelessWidget {
   const MensajesScreen({super.key});
@@ -89,24 +90,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bgDark = const Color(0xFF1E1A2B);
-    final bgLight = const Color(0xFF352B55);
-    final searchBarColor = const Color(0xFF463C6E);
-    final cardColor = const Color(0xFF2E2744);
-    final navBarColor = const Color(0xFF332D43);
-    final accentRed = const Color(0xFFFF3B30);
-
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [bgLight, const Color(0xFF2A223E), bgDark],
-            stops: const [0.0, 0.3, 1.0],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           bottom: false,
           child: Column(
@@ -117,19 +104,19 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppColors.textColor,
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Barra de Búsqueda
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
                   height: 45,
                   decoration: BoxDecoration(
-                    color: searchBarColor,
+                    color: AppColors.searchBarBg,
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: const Row(
@@ -156,7 +143,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final chat = chats[index];
-                    return _buildChatCard(chat, cardColor, accentRed);
+                    return _buildChatCard(chat);
                   },
                 ),
               ),
@@ -172,44 +159,51 @@ class _MessagesScreenState extends State<MessagesScreen> {
           width: 55,
           height: 55,
           decoration: BoxDecoration(
-            color: const Color(0xFF6C639F).withOpacity(0.5),
+            color: AppColors.fabBg.withOpacity(0.5),
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white30, width: 1),
           ),
-          child: const Icon(Icons.add_comment_rounded, color: Colors.white, size: 28),
+          child: const Icon(
+            Icons.add_comment_rounded,
+            color: AppColors.textColor,
+            size: 28,
+          ),
         ),
       ),
 
       // Bottom Navigation Bar
       bottomNavigationBar: Container(
         height: 80,
-        color: navBarColor,
+        color: AppColors.navBarBg,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildNavItem(0, Icons.home_filled, "Inicio"),
             _buildNavItem(1, Icons.people, "Clientes"),
             _buildNavItem(2, Icons.calendar_today, "Calendario"),
-            _buildNavItem(3, Icons.mail, "Mensajes", badgeCount: 2, accentColor: accentRed),
+            _buildNavItem(
+              3,
+              Icons.mail,
+              "Mensajes",
+              badgeCount: 2,
+              accentColor: AppColors.accentRed,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildChatCard(Map<String, dynamic> chat, Color cardColor, Color accentRed) {
+  Widget _buildChatCard(Map<String, dynamic> chat) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: AppColors.chatCardBg,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 25,
-            backgroundColor: Color(0xFFE0E0E0),
-          ),
+          const CircleAvatar(radius: 25, backgroundColor: AppColors.avatarBg),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
@@ -217,7 +211,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
               children: [
                 Text(
                   chat['name'],
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    color: AppColors.textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
@@ -232,19 +230,33 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(chat['time'], style: const TextStyle(color: Colors.white60, fontSize: 11)),
+              Text(
+                chat['time'],
+                style: const TextStyle(color: Colors.white60, fontSize: 11),
+              ),
               const SizedBox(height: 5),
               if (chat['count'] > 0)
                 Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: accentRed, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentRed,
+                    shape: BoxShape.circle,
+                  ),
                   child: Text(
                     chat['count'].toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: AppColors.textColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 )
               else
-                const Icon(Icons.arrow_forward_ios, color: Colors.white60, size: 14),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white60,
+                  size: 14,
+                ),
             ],
           ),
         ],
@@ -252,9 +264,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label, {int badgeCount = 0, Color? accentColor}) {
+  Widget _buildNavItem(
+    int index,
+    IconData icon,
+    String label, {
+    int badgeCount = 0,
+    Color? accentColor,
+  }) {
     bool isSelected = _selectedIndex == index;
-    final color = isSelected ? Colors.white : Colors.white54;
+    final color = isSelected ? AppColors.textColor : Colors.white54;
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
@@ -271,15 +289,22 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   top: -5,
                   right: -8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: accentColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF332D43), width: 1.5),
+                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
                     ),
                     child: Text(
                       badgeCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: AppColors.textColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
