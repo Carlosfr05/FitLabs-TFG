@@ -196,7 +196,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
                         borderRadius: BorderRadius.circular(6),
                         child: InkWell(
                           onTap: () {
-                            // Acción agregar
+                            Navigator.pushNamed(context, '/search-ejercicio');
                           },
                           borderRadius: BorderRadius.circular(6),
                           child: Container(

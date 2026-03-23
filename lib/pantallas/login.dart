@@ -73,7 +73,7 @@ class LoginScreen extends StatelessWidget {
                         );
                       },
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppColors.accentLila, width: 2),
+                        side: BorderSide(color: AppColors.dimmedColor, width: 2),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
