@@ -1,0 +1,12 @@
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    },
+    "dart.previewFlutterUiGuides": true,
+    "dart.showTodos": true,
+    "files.exclude": {
+        "**/.dart_tool": true,
+        "**/.flutter-plugins-dependencies": true
+    }
+}

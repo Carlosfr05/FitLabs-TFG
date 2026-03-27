@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Status](https://img.shields.io/badge/Status-En%20Desarrollo-yellow.svg)
 
-Una aplicación Flutter moderna para que entrenadores personales gestionen clientes, rutinas de entrenamiento, calendarios y mensajes en tiempo real.
+Una aplicación Flutter moderna pensada tanto para **entrenadores personales** como para **usuarios independientes**. Permite la gestión de clientes, creación de rutinas interactivas, comunicación por chat en tiempo real y cuenta con una capa de **red social** para compartir progreso, seguir a otros usuarios y dar "me gusta" o comentar rutinas.
 
 ## 📱 Características
 
@@ -41,8 +41,13 @@ Una aplicación Flutter moderna para que entrenadores personales gestionen clien
 
 - **📝 Crear Rutina**
   - Diseño de entrenamientos
-  - Agregar ejercicios personalizados
+  - Agregar ejercicios interactivos (vía API con animaciones/GIFs)
   - Configurar series, repeticiones y peso
+
+- **🌐 Social y Usuarios Independientes (Nuevo)**
+  - Explorar rutinas públicas en el feed social
+  - Sistema de seguidores (Followers/Following)
+  - Interacciones comunitarias: "Me gusta" (Likes) y Comentarios.
 
 ### Funcionalidades Técnicas
 
@@ -234,11 +239,17 @@ Login → Registrarse → Resumen (Home)
 
 **Estado Actual:** Datos simulados en la app
 
-**Próximas mejoras:**
-- Integración con backend/Firebase
-- Autenticación segura
-- Base de datos en tiempo real
-- Encriptación de mensajes
+### Arquitectura de Base de Datos
+
+Hemos diseñado el siguiente modelo Entidad-Relación para la implementación con **Supabase (PostgreSQL)**:
+
+![Esquema de Base de Datos](documentacion/base_de_datos/diagrama_er.png)
+
+**Próximas mejoras (Stack Elegido):**
+- **Backend (Supabase):** Implementación de PostgreSQL para gestión de Perfiles con Roles, Relaciones Cliente-Entrenador, y el Feed Social.
+- **APIs y Contenido:** Integración con **ExerciseDB (RapidAPI)** para mostrar una galería completa de ejercicios con instrucciones de texto y demostraciones visuales (GIFs).
+- **Comunicación:** Chats nativos en tiempo real con Supabase Realtime.
+- **Autenticación y Seguridad:** Supabase Auth (Email y Social Logins) junto al uso de RLS (Row Level Security) para proteger sesiones privadas.
 
 ## 🛠️ Desarrollo
 
