@@ -5,6 +5,8 @@ import 'package:pantallas_fitlabs/data/exercise_search_repository.dart';
 import 'dart:async';
 
 import 'package:pantallas_fitlabs/data/exercise_search_response.dart';
+import 'package:pantallas_fitlabs/pantallas/exercise_config_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 
 class SearchExerciseScreen extends StatefulWidget {
   const SearchExerciseScreen({super.key});
@@ -79,8 +81,9 @@ class _SearchExerciseScreenState extends State<SearchExerciseScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(cursorColor: AppColors.dimmedColor,
-                      style: TextStyle(color: AppColors.textColor),
+                      child: TextField(
+                        cursorColor: AppColors.dimmedColor,
+                        style: TextStyle(color: AppColors.textColor),
                         decoration: InputDecoration(
                           hintText: "Buscar Ejercicio",
                           hintStyle: TextStyle(color: AppColors.hintText),
@@ -162,7 +165,10 @@ class _SearchExerciseScreenState extends State<SearchExerciseScreen> {
               ],
             );
           } else {
-            return Text("error");
+            return Text(
+              "Estado: ${snapshot.connectionState}, Datos: ${snapshot.data}",
+              style: TextStyle(color: Colors.white),
+            );
           }
         },
       );
@@ -173,150 +179,178 @@ class _SearchExerciseScreenState extends State<SearchExerciseScreen> {
     super.dispose();
   }
 
-  Expanded mostrarVacio() {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.only(top: 15),
-        decoration: BoxDecoration(color: AppColors.bgBottom),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 40, bottom: 20),
-          child: Text(
-            "Busca por nombre o musculo para mostar ejercicios",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w400,
-            ),
+  Container mostrarVacio() {
+    return Container(
+      margin: EdgeInsets.only(top: 15),
+      decoration: BoxDecoration(color: AppColors.bgBottom),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 40, bottom: 20),
+        child: Text(
+          "Busca por nombre o musculo para mostar ejercicios",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: AppColors.textColor,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
           ),
         ),
       ),
     );
   }
 
-Widget itemExercise(Exercise item) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    height: 120, // Un poco más compacto y elegante
-    decoration: BoxDecoration(
-      color: AppColors.cardBg,
-      borderRadius: BorderRadius.circular(20),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.2),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
+  Widget itemExercise(Exercise item) {
+    return GestureDetector(
+      onTap: () async {
+        final configurado = await Navigator.push<ConfiguredExercise>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExerciseConfigScreen(exercise: item),
+          ),
+        );
+
+        //Verificamos si el widget sigue en pantalla
+        if (!mounted) return;
+
+        //Si sigue vivo y hay datos, hacemos el pop
+        if (configurado != null) {
+          Navigator.pop(context, configurado);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        height: 120,
+        decoration: BoxDecoration(
+          color: AppColors.cardBg,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-      ],
-    ),
-    child: Row(
-      children: [
-        // 1. Imagen a la izquierda
-        Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: Container(
-              color: Colors.white.withOpacity(0.05), // Fondo sutil por si el GIF es transparente
-              child: Image.network(
-                item.gifUrl,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return SizedBox(
+        child: Row(
+          children: [
+            // 1. Imagen (Sin cambios)
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Container(
+                  color: Colors.white.withOpacity(0.05),
+                  child: Image.network(
+                    item.thumbnailImageUrl,
                     width: 100,
                     height: 100,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(AppColors.textColor),
-                      ),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 100,
-                  height: 100,
-                  color: Colors.white,
-                  child: const Icon(Icons.fitness_center, color: Colors.black),
+                    fit: BoxFit.cover,
+                    // ... tus builders de carga y error ...
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
 
-        // 2. Información a la derecha
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Nombre del ejercicio (Capitalizado)
-                Text(
-                  item.name.toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.textColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
+            // 2. Información Central (Sin cambios)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 8,
                 ),
-                const SizedBox(height: 6),
-                
-                // Etiqueta del músculo (Target)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.dimmedColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    item.targetMuscles[0], // El músculo principal
-                    style: TextStyle(
-                      color: AppColors.dimmedColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-
-                // Equipo (Equipment) con icono pequeño
-                Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.handyman_outlined, size: 14, color: AppColors.hintText),
-                    const SizedBox(width: 4),
-                    Expanded(
+                    Text(
+                      item.name.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.textColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.dimmedColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                       child: Text(
-                        item.equipments[0],
+                        item.primaryMuscles[0],
                         style: TextStyle(
-                          color: AppColors.hintText,
+                          color: AppColors.dimmedColor,
                           fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.handyman_outlined,
+                          size: 14,
+                          color: AppColors.hintText,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            item.equipment ?? "unknown",
+                            style: TextStyle(
+                              color: AppColors.hintText,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+
+            // 3. LATERAL DERECHO: Botón Info + Flecha
+            Padding(
+              padding: const EdgeInsets.only(right: 8, bottom: 40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceEvenly, // Distribuye info arriba y flecha abajo
+                children: [
+                  // BOTÓN DE INFO
+                  IconButton(
+                    icon: Icon(
+                      Icons.info_outline,
+                      color: AppColors.cardBorder,
+                      size: 22,
+                    ),
+                    onPressed: () {
+                      // AQUÍ LLEVAS A LA PANTALLA DE DETALLES TÉCNICOS
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ExerciseDetailScreen(exercise: item),
+                        ),
+                      );
+                    },
+                  ),
+                  // FLECHA INDICADORA
+                  Icon(Icons.chevron_right, color: AppColors.accentLila),
+                ],
+              ),
+            ),
+          ],
         ),
-        
-        // Flechita indicadora al final
-        Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: Icon(Icons.chevron_right, color: AppColors.hintText.withOpacity(0.5)),
-        ),
-      ],
-    ),
-  );
-}
+      ),
+    );
+  }
 
   Widget _buildPaginator(int totalPages) {
     return Container(

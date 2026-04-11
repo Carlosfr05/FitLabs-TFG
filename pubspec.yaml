@@ -23,6 +23,7 @@ flutter:
   assets:
     - assets/images/
     - assets/fonts/rubik_vinyl/RubikVinyl-Regular.ttf 
+    - assets/json/exercises.json
   
   fonts:
     - family: RubikVinyl
