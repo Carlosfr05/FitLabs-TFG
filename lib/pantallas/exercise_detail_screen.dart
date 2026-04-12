@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
+import 'package:pantallas_fitlabs/data/translator_manager.dart'; 
 
 class ExerciseDetailScreen extends StatefulWidget {
   final Exercise exercise;
@@ -11,12 +12,56 @@ class ExerciseDetailScreen extends StatefulWidget {
 }
 
 class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
-  // Controlador para el carrusel de imágenes
   final PageController _pageController = PageController(viewportFraction: 0.9);
+
+  // Variables de estado
+  bool _isTranslating = true;
+  String _translatedMuscles = "Traduciendo músculos..."; // Texto inicial
+  List<String> _translatedInstructions = ["Traduciendo instrucciones..."]; // Texto inicial
+
+  @override
+  void initState() {
+    super.initState();
+    // Ya no copiamos los datos en inglés al principio para que no se vean
+    _traducirDatos();
+  }
+
+  Future<void> _traducirDatos() async {
+    try {
+      // Traducir músculos
+      String textoMusculos = widget.exercise.primaryMuscles.join(', ');
+      String musculosListos = await TranslatorManager.traducir(textoMusculos);
+
+      // Traducir instrucciones
+      List<String> instruccionesListas = [];
+      for (String paso in widget.exercise.instructions) {
+        String pasoTraducido = await TranslatorManager.traducir(paso);
+        instruccionesListas.add(pasoTraducido);
+      }
+
+      if (mounted) {
+        setState(() {
+          _translatedMuscles = musculosListos.toUpperCase();
+          _translatedInstructions = instruccionesListas;
+          _isTranslating = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error al traducir: $e");
+      if (mounted) {
+        setState(() {
+          // Si falla, aquí sí ponemos el inglés como respaldo
+          _translatedMuscles = widget.exercise.primaryMuscles.join(', ').toUpperCase();
+          _translatedInstructions = widget.exercise.instructions;
+          _isTranslating = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
-    _pageController.dispose(); // Siempre es buena práctica limpiar los controladores
+    _pageController.dispose(); 
     super.dispose();
   }
 
@@ -30,64 +75,46 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- 1. TU CABECERA (App Bar Custom) ---
+            // --- 1. CABECERA ---
             Padding(
-              padding: const EdgeInsets.only(
-                top: 50, // Un poco más de margen superior para el notch del móvil
-                left: 20,
-                right: 20,
-                bottom: 20,
-              ),
+              padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
               child: Row(
                 children: [
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: GestureDetector(
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: AppColors.textColor,
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
+                        child: Icon(Icons.arrow_back, color: AppColors.textColor),
+                        onTap: () => Navigator.pop(context),
                       ),
                     ),
                   ),
                   Text(
                     'Configurar Ejercicio',
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: AppColors.textColor,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, color: AppColors.textColor, fontWeight: FontWeight.bold),
                   ),
                   const Expanded(child: SizedBox()),
                 ],
               ),
             ),
 
-            // --- 2. CONTENIDO DESLIZABLE ---
+            // --- 2. CONTENIDO ---
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // A. Título del Ejercicio
+                    // Título (Este se queda en inglés por tu petición)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
-                        widget.exercise.name, // Usamos widget.exercise por ser StatefulWidget
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textColor,
-                        ),
+                        widget.exercise.name, 
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textColor),
                       ),
                     ),
                     const SizedBox(height: 20),
 
-                    // B. El famoso Carrusel (PageView)
+                    // Carrusel
                     SizedBox(
                       height: 250,
                       child: PageView.builder(
@@ -99,10 +126,10 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: Container(
-                                color: Colors.white, // Fondo blanco por si la imagen tiene transparencias
+                                color: Colors.white, 
                                 child: Image.network(
                                   widget.exercise.allImageUrls[index],
-                                  fit: BoxFit.contain, // Contain para que se vea el ejercicio entero
+                                  fit: BoxFit.contain, 
                                 ),
                               ),
                             ),
@@ -112,7 +139,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // C. Etiquetas (Tags) de nivel y equipamiento
+                    // Chips (Nivel, Equipo...)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Wrap(
@@ -127,7 +154,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // D. Músculos Implicados
+                    // Músculos (Variable de traducción)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -135,23 +162,23 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         children: [
                           Text(
                             'Músculos Principales:',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textColor,
-                            ),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor),
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            widget.exercise.primaryMuscles.join(', ').toUpperCase(),
-                            style: TextStyle(color: AppColors.textColor.withOpacity(0.7), fontSize: 16),
+                            _translatedMuscles, 
+                            style: TextStyle(
+                              color: _isTranslating ? AppColors.textColor.withOpacity(0.4) : AppColors.textColor.withOpacity(0.7), 
+                              fontSize: 16,
+                              fontStyle: _isTranslating ? FontStyle.italic : FontStyle.normal,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
 
-                    // E. Instrucciones
+                    // Instrucciones (Lista de traducción)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -159,46 +186,42 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         children: [
                           Text(
                             'Instrucciones:',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textColor,
-                            ),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textColor),
                           ),
                           const SizedBox(height: 10),
-                          // Generamos los pasos de las instrucciones
-                          ...widget.exercise.instructions.map((paso) {
-                            int index = widget.exercise.instructions.indexOf(paso) + 1;
+                          
+                          ..._translatedInstructions.asMap().entries.map((entry) {
+                            int index = entry.key + 1;
+                            String paso = entry.value;
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 15),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    '$index. ',
-                                    style: TextStyle(
-                                      color: AppColors.textColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                  // Solo mostramos el número si no estamos cargando
+                                  if (!_isTranslating) 
+                                    Text(
+                                      '$index. ',
+                                      style: TextStyle(color: AppColors.textColor, fontWeight: FontWeight.bold, fontSize: 16),
                                     ),
-                                  ),
                                   Expanded(
                                     child: Text(
-                                      paso,
+                                      paso, 
                                       style: TextStyle(
-                                        color: AppColors.textColor.withOpacity(0.8),
+                                        color: _isTranslating ? AppColors.textColor.withOpacity(0.4) : AppColors.textColor.withOpacity(0.8),
                                         height: 1.5,
+                                        fontStyle: _isTranslating ? FontStyle.italic : FontStyle.normal,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40), // Espacio extra al final para que respire
+                    const SizedBox(height: 40), 
                   ],
                 ),
               ),
@@ -209,7 +232,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     );
   }
 
-  // Widget auxiliar para crear las "píldoras" (chips) de información
   Widget _buildChip(String label, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -225,11 +247,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: TextStyle(
-              color: AppColors.textColor,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: AppColors.textColor, fontSize: 12, fontWeight: FontWeight.bold),
           ),
         ],
       ),

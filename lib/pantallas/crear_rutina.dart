@@ -375,13 +375,52 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 40),
-      child: Text(
-        "No hay ejercicios. Pulsa el botón para añadir.",
-        textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.white54),
+Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // IMAGEN PNG
+          // Asegúrate de añadir la ruta en tu pubspec.yaml
+          Image.asset(
+            'assets/images/mancuerna.png', 
+            width: 180, // Ajusta el tamaño según tu imagen
+            height: 180,
+            fit: BoxFit.contain,
+            // Este opacity es opcional, por si el PNG es muy brillante 
+            // y quieres que se fusione mejor con el fondo
+            opacity: const AlwaysStoppedAnimation(0.8), 
+            errorBuilder: (context, error, stackTrace) {
+              // Si aún no has puesto el archivo, mostrará un icono por defecto
+              return const Icon(
+                Icons.add_card,
+                size: 80,
+                color: Colors.white10,
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          // TEXTO
+          const Text(
+            "Tu rutina está vacía",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "Pulsa el botón de abajo para empezar\na configurar tus ejercicios.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 13,
+            ),
+          ),
+        ],
       ),
     );
   }
