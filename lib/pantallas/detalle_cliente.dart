@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/shared_widgets.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
+import 'package:pantallas_fitlabs/data/progreso_service.dart';
 
 class DetalleClienteScreen extends StatefulWidget {
   final String clientId;
@@ -26,6 +27,8 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
   final Color _cardGraphBg = const Color(0xFF2B253F);
 
   List<Map<String, dynamic>> _rutinas = [];
+  List<Map<String, dynamic>> _historial = [];
+  int _sesionesCompletadas = 0;
   bool _cargando = true;
 
   @override
@@ -40,7 +43,19 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
         SessionService.userId!,
         widget.clientId,
       );
-      if (mounted) setState(() => _rutinas = rutinas);
+      final historial = await ProgresoService.fetchHistorialCliente(
+        widget.clientId,
+      );
+      final sesiones = await ProgresoService.contarSesionesCompletadas(
+        widget.clientId,
+      );
+      if (mounted) {
+        setState(() {
+          _rutinas = rutinas;
+          _historial = historial;
+          _sesionesCompletadas = sesiones;
+        });
+      }
     } catch (_) {
       // Silenciar
     } finally {
@@ -93,6 +108,109 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
                       ),
                       const SizedBox(height: 15),
                       _buildWeightProgressCard(),
+
+                      const SizedBox(height: 30),
+
+                      // --- SESIONES COMPLETADAS ---
+                      const Text(
+                        "Sesiones Completadas",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      if (_historial.isEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Column(
+                            children: [
+                              Icon(
+                                Icons.history,
+                                color: Colors.white24,
+                                size: 40,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Sin sesiones completadas a\u00fan',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        ...List.generate(
+                          _historial.length > 5 ? 5 : _historial.length,
+                          (i) {
+                            final s = _historial[i];
+                            final rutina = s['rutina'] as Map<String, dynamic>?;
+                            final titulo =
+                                rutina?['title'] as String? ?? 'Rutina';
+                            final fecha = s['fecha'] as String? ?? '';
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2E4A3E),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.green.shade700,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green.shade400,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          titulo,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          fecha,
+                                          style: const TextStyle(
+                                            color: Colors.white54,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (s['notas'] != null)
+                                    const Icon(
+                                      Icons.note,
+                                      color: Colors.white38,
+                                      size: 18,
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
 
                       const SizedBox(height: 30),
 
@@ -316,7 +434,7 @@ class _DetalleClienteScreenState extends State<DetalleClienteScreen> {
         children: [
           _buildSummaryItem('${_rutinas.length}', "Rutinas"),
           Container(width: 1, height: 35, color: Colors.white12),
-          _buildSummaryItem("Activa", "Suscripción"),
+          _buildSummaryItem('$_sesionesCompletadas', "Completadas"),
           Container(width: 1, height: 35, color: Colors.white12),
           _buildSummaryItem(
             _rutinas.where((r) => r['fecha'] != null).length.toString(),

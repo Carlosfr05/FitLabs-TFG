@@ -4,6 +4,8 @@ import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
+import 'package:pantallas_fitlabs/data/progreso_service.dart';
+import 'package:pantallas_fitlabs/pantallas/completar_rutina_screen.dart';
 
 class ClienteHomeScreen extends StatefulWidget {
   const ClienteHomeScreen({super.key});
@@ -16,6 +18,8 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
   List<Map<String, dynamic>> _rutinasHoy = [];
   List<Map<String, dynamic>> _todasRutinas = [];
   bool _cargando = true;
+  int _sesionesCompletadas = 0;
+  int _rachaSemanal = 0;
 
   @override
   void initState() {
@@ -25,20 +29,36 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
 
   Future<void> _cargarDatos() async {
     try {
-      final hoy = await RutinaService.fetchRutinasHoy(SessionService.userId!);
-      final todas = await RutinaService.fetchRutinasCliente(
-        SessionService.userId!,
-      );
+      final uid = SessionService.userId!;
+      final hoy = await RutinaService.fetchRutinasHoy(uid);
+      final todas = await RutinaService.fetchRutinasCliente(uid);
+      final sesiones = await ProgresoService.contarSesionesCompletadas(uid);
+      final racha = await ProgresoService.calcularRachaSemanal(uid);
       if (mounted) {
         setState(() {
           _rutinasHoy = hoy;
           _todasRutinas = todas;
+          _sesionesCompletadas = sesiones;
+          _rachaSemanal = racha;
         });
       }
     } catch (_) {
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
+  }
+
+  void _abrirCompletarRutina(Map<String, dynamic> rutina) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CompletarRutinaScreen(
+          rutinaId: rutina['id'] as String,
+          rutinaTitle: rutina['title'] as String? ?? 'Sin título',
+        ),
+      ),
+    );
+    if (result == true) _cargarDatos();
   }
 
   Future<void> _logout() async {
@@ -132,7 +152,9 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
                         'Tu entrenador aún no te ha asignado una rutina para hoy.',
                   )
                 else
-                  ..._rutinasHoy.map((r) => _buildRutinaCard(r)),
+                  ..._rutinasHoy.map(
+                    (r) => _buildRutinaCard(r, showComplete: true),
+                  ),
                 const SizedBox(height: 30),
 
                 // Próximas sesiones
@@ -234,7 +256,10 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
     );
   }
 
-  Widget _buildRutinaCard(Map<String, dynamic> rutina) {
+  Widget _buildRutinaCard(
+    Map<String, dynamic> rutina, {
+    bool showComplete = false,
+  }) {
     final titulo = rutina['title'] as String? ?? 'Sin título';
     final fecha = rutina['fecha'] as String? ?? '';
     final horaInicio = rutina['hora_inicio'] as String? ?? '';
@@ -291,6 +316,41 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
               ),
             ),
           ],
+          if (showComplete) ...[
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () => _abrirCompletarRutina(rutina),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade700,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Completar',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -306,7 +366,7 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
       ),
       child: Row(
         children: [
-          _progressItem('0', 'Sesiones\ncompletadas'),
+          _progressItem('$_sesionesCompletadas', 'Sesiones\ncompletadas'),
           Container(
             height: 40,
             width: 1,
@@ -320,7 +380,10 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
             color: AppColors.dividerColor,
             margin: const EdgeInsets.symmetric(horizontal: 10),
           ),
-          _progressItem('—', 'Racha\nsemanal'),
+          _progressItem(
+            _rachaSemanal > 0 ? '$_rachaSemanal' : '—',
+            'Racha\nsemanal',
+          ),
         ],
       ),
     );

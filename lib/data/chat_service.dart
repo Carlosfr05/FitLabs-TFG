@@ -59,29 +59,30 @@ class ChatService {
   }
 
   /// Obtiene o crea un chat entre dos usuarios. Devuelve el chatId.
-  static Future<String> getOrCreateChat(
-      String userId1, String userId2) async {
+  static Future<String> getOrCreateChat(String userId1, String userId2) async {
     // Buscar chat existente
     final existing = await _db
         .from('chats')
         .select('id')
-        .or('and(id_usuario1.eq.$userId1,id_usuario2.eq.$userId2),and(id_usuario1.eq.$userId2,id_usuario2.eq.$userId1)')
+        .or(
+          'and(id_usuario1.eq.$userId1,id_usuario2.eq.$userId2),and(id_usuario1.eq.$userId2,id_usuario2.eq.$userId1)',
+        )
         .maybeSingle();
 
     if (existing != null) return existing['id'] as String;
 
     // Crear nuevo chat
-    final newChat = await _db.from('chats').insert({
-      'id_usuario1': userId1,
-      'id_usuario2': userId2,
-    }).select('id').single();
+    final newChat = await _db
+        .from('chats')
+        .insert({'id_usuario1': userId1, 'id_usuario2': userId2})
+        .select('id')
+        .single();
 
     return newChat['id'] as String;
   }
 
   /// Obtiene los mensajes de un chat, ordenados cronológicamente.
-  static Future<List<Map<String, dynamic>>> fetchMensajes(
-      String chatId) async {
+  static Future<List<Map<String, dynamic>>> fetchMensajes(String chatId) async {
     final data = await _db
         .from('mensajes')
         .select('id, id_remitente, contenido, leido, creado_en')
@@ -93,7 +94,10 @@ class ChatService {
 
   /// Envía un mensaje y actualiza el timestamp del chat.
   static Future<void> enviarMensaje(
-      String chatId, String senderId, String contenido) async {
+    String chatId,
+    String senderId,
+    String contenido,
+  ) async {
     await _db.from('mensajes').insert({
       'id_chat': chatId,
       'id_remitente': senderId,
@@ -108,7 +112,9 @@ class ChatService {
 
   /// Marca como leídos los mensajes del otro usuario en un chat.
   static Future<void> marcarComoLeido(
-      String chatId, String currentUserId) async {
+    String chatId,
+    String currentUserId,
+  ) async {
     await _db
         .from('mensajes')
         .update({'leido': true})
@@ -119,7 +125,9 @@ class ChatService {
 
   /// Suscribirse a nuevos mensajes en un chat (Realtime).
   static RealtimeChannel suscribirseAMensajes(
-      String chatId, void Function(Map<String, dynamic> mensaje) onNuevo) {
+    String chatId,
+    void Function(Map<String, dynamic> mensaje) onNuevo,
+  ) {
     return _db
         .channel('chat-$chatId')
         .onPostgresChanges(
@@ -140,7 +148,9 @@ class ChatService {
 
   /// Suscribirse a cambios en la lista de chats del usuario (para actualizar la lista).
   static RealtimeChannel suscribirseAChats(
-      String userId, void Function() onCambio) {
+    String userId,
+    void Function() onCambio,
+  ) {
     return _db
         .channel('chats-$userId')
         .onPostgresChanges(

@@ -110,26 +110,27 @@ class _ChatScreenState extends State<ChatScreen> {
               Expanded(
                 child: _cargando
                     ? const Center(
-                        child: CircularProgressIndicator(
-                            color: Colors.white70))
+                        child: CircularProgressIndicator(color: Colors.white70),
+                      )
                     : _mensajes.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'Sin mensajes aún.\n¡Envía el primero!',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: Colors.white54, fontSize: 16),
-                            ),
-                          )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
-                            itemCount: _mensajes.length,
-                            itemBuilder: (context, index) {
-                              return _buildBubble(_mensajes[index]);
-                            },
-                          ),
+                    ? const Center(
+                        child: Text(
+                          'Sin mensajes aún.\n¡Envía el primero!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white54, fontSize: 16),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        itemCount: _mensajes.length,
+                        itemBuilder: (context, index) {
+                          return _buildBubble(_mensajes[index]);
+                        },
+                      ),
               ),
               _buildInputBar(),
             ],
@@ -149,27 +150,34 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back_ios,
-                color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 10),
           CircleAvatar(
             radius: 20,
             backgroundColor: AppColors.cardBg,
-            child: Text(initial,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18)),
+            child: Text(
+              initial,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               widget.otherUserName,
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -183,8 +191,9 @@ class _ChatScreenState extends State<ChatScreen> {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -201,8 +210,9 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         child: Column(
-          crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Text(
               msg['contenido'] ?? '',
@@ -214,15 +224,12 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Text(
                   _formatHora(msg['creado_en']?.toString()),
-                  style:
-                      const TextStyle(color: Colors.white54, fontSize: 11),
+                  style: const TextStyle(color: Colors.white54, fontSize: 11),
                 ),
                 if (isMe) ...[
                   const SizedBox(width: 4),
                   Icon(
-                    msg['leido'] == true
-                        ? Icons.done_all
-                        : Icons.done,
+                    msg['leido'] == true ? Icons.done_all : Icons.done,
                     size: 14,
                     color: msg['leido'] == true
                         ? Colors.lightBlueAccent

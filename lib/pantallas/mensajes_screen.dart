@@ -130,9 +130,10 @@ class _MensajesScreenState extends State<MensajesScreen> {
               const Text(
                 'Nueva conversación',
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               ...contactos.map((c) {
@@ -142,15 +143,21 @@ class _MensajesScreenState extends State<MensajesScreen> {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor: const Color(0xFF6C639F),
-                    child: Text(initial,
-                        style: const TextStyle(color: Colors.white)),
+                    child: Text(
+                      initial,
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
-                  title: Text(c['nombre'],
-                      style: const TextStyle(color: Colors.white)),
+                  title: Text(
+                    c['nombre'],
+                    style: const TextStyle(color: Colors.white),
+                  ),
                   onTap: () async {
                     Navigator.pop(ctx);
-                    final chatId =
-                        await ChatService.getOrCreateChat(userId, c['id']);
+                    final chatId = await ChatService.getOrCreateChat(
+                      userId,
+                      c['id'],
+                    );
                     if (!mounted) return;
                     await Navigator.push(
                       context,
@@ -275,8 +282,8 @@ class _MensajesScreenState extends State<MensajesScreen> {
               Expanded(
                 child: _cargando
                     ? const Center(
-                        child:
-                            CircularProgressIndicator(color: Colors.white70))
+                        child: CircularProgressIndicator(color: Colors.white70),
+                      )
                     : RefreshIndicator(
                         onRefresh: _cargarChats,
                         child: Builder(
@@ -284,25 +291,32 @@ class _MensajesScreenState extends State<MensajesScreen> {
                             final filtered = _searchQuery.isEmpty
                                 ? _chats
                                 : _chats
-                                    .where((c) => (c['nombre'] as String)
-                                        .toLowerCase()
-                                        .contains(
-                                            _searchQuery.toLowerCase()))
-                                    .toList();
+                                      .where(
+                                        (c) => (c['nombre'] as String)
+                                            .toLowerCase()
+                                            .contains(
+                                              _searchQuery.toLowerCase(),
+                                            ),
+                                      )
+                                      .toList();
 
                             if (filtered.isEmpty) {
                               return ListView(
                                 children: const [
                                   SizedBox(height: 80),
-                                  Icon(Icons.chat_bubble_outline,
-                                      color: Colors.white24, size: 64),
+                                  Icon(
+                                    Icons.chat_bubble_outline,
+                                    color: Colors.white24,
+                                    size: 64,
+                                  ),
                                   SizedBox(height: 16),
                                   Center(
                                     child: Text(
                                       'Sin conversaciones',
                                       style: TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 16),
+                                        color: Colors.white54,
+                                        fontSize: 16,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -311,14 +325,21 @@ class _MensajesScreenState extends State<MensajesScreen> {
 
                             return ListView.separated(
                               padding: const EdgeInsets.fromLTRB(
-                                  20, 0, 20, 100),
+                                20,
+                                0,
+                                20,
+                                100,
+                              ),
                               itemCount: filtered.length,
                               separatorBuilder: (_, _) =>
                                   const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final chat = filtered[index];
                                 return _buildChatCard(
-                                    chat, cardColor, accentRed);
+                                  chat,
+                                  cardColor,
+                                  accentRed,
+                                );
                               },
                             );
                           },
@@ -363,8 +384,7 @@ class _MensajesScreenState extends State<MensajesScreen> {
     Color accentRed,
   ) {
     final nombre = chat['nombre'] as String;
-    final initial =
-        nombre.isNotEmpty ? nombre[0].toUpperCase() : '?';
+    final initial = nombre.isNotEmpty ? nombre[0].toUpperCase() : '?';
     final unread = chat['unreadCount'] as int? ?? 0;
 
     return GestureDetector(
@@ -380,11 +400,14 @@ class _MensajesScreenState extends State<MensajesScreen> {
             CircleAvatar(
               radius: 25,
               backgroundColor: const Color(0xFF6C639F),
-              child: Text(initial,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20)),
+              child: Text(
+                initial,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -395,8 +418,9 @@ class _MensajesScreenState extends State<MensajesScreen> {
                     nombre,
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight:
-                          unread > 0 ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: unread > 0
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -404,8 +428,7 @@ class _MensajesScreenState extends State<MensajesScreen> {
                   const SizedBox(height: 4),
                   Text(
                     chat['lastMessage'] ?? '',
-                    style: const TextStyle(
-                        color: Colors.white70, fontSize: 12),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -416,8 +439,7 @@ class _MensajesScreenState extends State<MensajesScreen> {
               children: [
                 Text(
                   _formatTime(chat['lastMessageTime']?.toString()),
-                  style:
-                      const TextStyle(color: Colors.white60, fontSize: 11),
+                  style: const TextStyle(color: Colors.white60, fontSize: 11),
                 ),
                 const SizedBox(height: 5),
                 if (unread > 0)

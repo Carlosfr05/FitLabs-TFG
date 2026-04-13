@@ -95,6 +95,26 @@ CREATE TABLE comentarios_rutina (
   FOREIGN KEY (id_usuario) REFERENCES perfiles(id) ON DELETE CASCADE
 );
 
+CREATE TABLE sesiones_completadas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  rutina_id UUID NOT NULL REFERENCES rutinas(id) ON DELETE CASCADE,
+  client_id UUID NOT NULL REFERENCES perfiles(id) ON DELETE CASCADE,
+  fecha DATE NOT NULL DEFAULT CURRENT_DATE,
+  notas TEXT,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ejercicios_completados (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sesion_id UUID NOT NULL REFERENCES sesiones_completadas(id) ON DELETE CASCADE,
+  id_ejercicio_rutina UUID NOT NULL REFERENCES ejercicios_rutina(id) ON DELETE CASCADE,
+  completado BOOLEAN DEFAULT FALSE,
+  peso_real DECIMAL(10, 2),
+  reps_real INT,
+  notas TEXT,
+  creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Habilitar RLS
 ALTER TABLE perfiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clientes_entrenador ENABLE ROW LEVEL SECURITY;
@@ -105,3 +125,5 @@ ALTER TABLE mensajes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE seguidores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE likes_rutina ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comentarios_rutina ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sesiones_completadas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ejercicios_completados ENABLE ROW LEVEL SECURITY;
