@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/core/shared_widgets.dart';
+import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
+import 'package:pantallas_fitlabs/data/rutina_service.dart';
 
 class ResumenDiaScreen extends StatefulWidget {
   const ResumenDiaScreen({super.key});
@@ -11,64 +14,28 @@ class ResumenDiaScreen extends StatefulWidget {
 }
 
 class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
-  // Índice 0 = Inicio (Esta pantalla)
-  int _selectedIndex = 0;
+  List<Map<String, dynamic>> _rutinasHoy = [];
+  bool _cargando = true;
 
-  // Datos de ejemplo
-  final List<Map<String, String>> upcomingWorkouts = [
-    {
-      "title": "Sesión cardio-fuerza 1:1",
-      "time": "09:30 - 10:45",
-      "subtitle": "Carlos Luis Ramos García",
-    },
-    {
-      "title": "Sesión cardio - HIIT",
-      "time": "11:00 - 11:30",
-      "subtitle": "Jaime Castanedo Mateos",
-    },
-    {
-      "title": "Sesión entrenamiento - Torso 1:2",
-      "time": "12:00 - 13:00",
-      "subtitle": "José Luis Sánchez González",
-    },
-    {
-      "title": "Sesión entrenamiento - Piernas 1:1",
-      "time": "13:10 - 14:15",
-      "subtitle": "Coraima Medina Lechuga",
-    },
-    {
-      "title": "Sesión Recuperación Hombros",
-      "time": "16:00 - 16:30",
-      "subtitle": "José Luis Reina Sánchez",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
 
-  void _onItemTapped(int index) {
-    if (index == _selectedIndex) return;
-
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    // Navegación basada en tus rutas del main.dart
-    switch (index) {
-      case 0:
-        // Ya estamos en /resumen
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/clientes');
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/calendario');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/mensajes');
-        break;
+  Future<void> _cargarDatos() async {
+    try {
+      final data = await RutinaService.fetchRutinasHoy(SessionService.userId!);
+      if (mounted) setState(() => _rutinasHoy = data);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _cargando = false);
     }
   }
 
   Future<void> _logout() async {
     await Supabase.instance.client.auth.signOut();
+    SessionService.limpiar();
     if (!mounted) return;
     Navigator.pushReplacementNamed(context, '/login');
   }
@@ -140,28 +107,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          height: 80,
-          color: const Color(0xFF413E60),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.home_filled, "Inicio"),
-              _buildNavItem(1, Icons.people_outlined, "Clientes"),
-              _buildNavItem(2, Icons.calendar_today, "Calendario"),
-              _buildNavItem(
-                3,
-                Icons.mail,
-                "Mensajes",
-                badgeCount: 2,
-                accentColor: accentRed,
-              ),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 0),
     );
   }
 
@@ -255,21 +201,26 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           const SizedBox(height: 20),
           Row(
             children: [
-              _item('3', 'Sesiones Realizadas', txt, subTxt),
+              _item(
+                '${_rutinasHoy.where((r) => r['hora_fin'] != null).length}',
+                'Sesiones Realizadas',
+                txt,
+                subTxt,
+              ),
               Container(
                 height: 40,
                 width: 1,
                 color: div,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              _item('5', 'Sesiones Restantes', txt, subTxt),
+              _item('${_rutinasHoy.length}', 'Sesiones Hoy', txt, subTxt),
               Container(
                 height: 40,
                 width: 1,
                 color: div,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              _item('2', 'Mensajes sin leer', txt, subTxt),
+              _item('0', 'Mensajes sin leer', txt, subTxt),
             ],
           ),
         ],
@@ -399,16 +350,58 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
   }
 
   Widget _buildWorkoutList(Color txt, Color subTxt) {
+    if (_cargando) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(30),
+          child: CircularProgressIndicator(color: AppColors.accentLila),
+        ),
+      );
+    }
+
+    if (_rutinasHoy.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(25),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Column(
+          children: [
+            Icon(Icons.event_available, color: Colors.white30, size: 48),
+            SizedBox(height: 12),
+            Text(
+              'No hay entrenamientos programados para hoy',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white54, fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: upcomingWorkouts.length,
+      itemCount: _rutinasHoy.length,
       separatorBuilder: (_, _) => const Padding(
         padding: EdgeInsets.symmetric(vertical: 15),
         child: DashedDivider(),
       ),
       itemBuilder: (context, index) {
-        final w = upcomingWorkouts[index];
+        final r = _rutinasHoy[index];
+        final titulo = r['title'] as String? ?? 'Sin título';
+        final horaInicio = r['hora_inicio'] as String? ?? '';
+        final horaFin = r['hora_fin'] as String? ?? '';
+        final horario = horaInicio.isNotEmpty
+            ? (horaFin.isNotEmpty ? '$horaInicio - $horaFin' : horaInicio)
+            : 'Sin hora';
+        final clienteData = r['cliente'] as Map<String, dynamic>?;
+        final clienteNombre = clienteData != null
+            ? (clienteData['nombre'] ?? clienteData['username'] ?? '') as String
+            : '';
+
         return IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -421,7 +414,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      w['title']!,
+                      titulo,
                       style: TextStyle(
                         color: txt,
                         fontSize: 16,
@@ -429,17 +422,16 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
-                      w['time']!,
-                      style: TextStyle(color: txt, fontSize: 14),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      w['subtitle']!,
-                      style: TextStyle(color: subTxt, fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    Text(horario, style: TextStyle(color: txt, fontSize: 14)),
+                    if (clienteNombre.isNotEmpty) ...[
+                      const SizedBox(height: 5),
+                      Text(
+                        clienteNombre,
+                        style: TextStyle(color: subTxt, fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -447,58 +439,6 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildNavItem(
-    int index,
-    IconData icon,
-    String label, {
-    int badgeCount = 0,
-    Color? accentColor,
-  }) {
-    bool isSelected = _selectedIndex == index;
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? Colors.white : Color(0xFFAFA8D5),
-                size: 28,
-              ),
-              if (badgeCount > 0)
-                Positioned(
-                  top: -5,
-                  right: -8,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: accentColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '$badgeCount',
-                      style: const TextStyle(fontSize: 10, color: Colors.white),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.white54,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

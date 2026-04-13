@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
+import 'package:pantallas_fitlabs/data/cliente_service.dart';
+import 'package:pantallas_fitlabs/data/rutina_service.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_config_screen.dart';
 
 class CrearRutinaScreen extends StatefulWidget {
@@ -13,17 +16,158 @@ class CrearRutinaScreen extends StatefulWidget {
 class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
   List<ConfiguredExercise> listaEjerciciosConfigurados = [];
   final TextEditingController _tituloController = TextEditingController(
-    text: "Sesión entrenamiento PUSH - hipertrofia",
+    text: "",
   );
-  // Nuevo controlador para el comentario general
   final TextEditingController _comentarioGeneralController =
       TextEditingController();
+
+  // Cliente seleccionado y lista de clientes
+  List<Map<String, dynamic>> _clientes = [];
+  String? _clienteSeleccionadoId;
+  String _clienteSeleccionadoNombre = 'Sin asignar';
+
+  // Fecha y hora
+  DateTime? _fechaSeleccionada;
+  TimeOfDay? _horaInicio;
+  TimeOfDay? _horaFin;
+
+  bool _guardando = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarClientes();
+  }
 
   @override
   void dispose() {
     _tituloController.dispose();
     _comentarioGeneralController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cargarClientes() async {
+    if (!SessionService.isEntrenador) return;
+    try {
+      final data = await ClienteService.fetchMisClientes(
+        SessionService.userId!,
+      );
+      if (mounted) setState(() => _clientes = data);
+    } catch (_) {}
+  }
+
+  Future<void> _seleccionarFecha() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaSeleccionada ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null && mounted) {
+      setState(() => _fechaSeleccionada = picked);
+    }
+  }
+
+  Future<void> _seleccionarHora({required bool esInicio}) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: esInicio
+          ? (_horaInicio ?? TimeOfDay.now())
+          : (_horaFin ?? TimeOfDay.now()),
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        if (esInicio) {
+          _horaInicio = picked;
+        } else {
+          _horaFin = picked;
+        }
+      });
+    }
+  }
+
+  Future<void> _guardarRutina() async {
+    if (_tituloController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Escribe un título para la rutina')),
+      );
+      return;
+    }
+    if (listaEjerciciosConfigurados.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Añade al menos un ejercicio')),
+      );
+      return;
+    }
+
+    setState(() => _guardando = true);
+
+    try {
+      final ejerciciosData = listaEjerciciosConfigurados.map((ce) {
+        final primerSet = ce.sets.isNotEmpty ? ce.sets.first : null;
+        return {
+          'exerciseId': ce.exercise.id,
+          'series': ce.sets.length,
+          'reps': primerSet?.reps != null
+              ? int.tryParse(primerSet!.reps!)
+              : null,
+          'weight': primerSet?.weight,
+          'duration': primerSet?.duration != null
+              ? int.tryParse(primerSet!.duration!)
+              : null,
+          'rest': primerSet?.restTime != null
+              ? int.tryParse(primerSet!.restTime!)
+              : null,
+        };
+      }).toList();
+
+      String? fechaStr;
+      if (_fechaSeleccionada != null) {
+        fechaStr = _fechaSeleccionada!.toIso8601String().split('T')[0];
+      }
+
+      String? horaInicioStr;
+      if (_horaInicio != null) {
+        horaInicioStr =
+            '${_horaInicio!.hour.toString().padLeft(2, '0')}:${_horaInicio!.minute.toString().padLeft(2, '0')}';
+      }
+
+      String? horaFinStr;
+      if (_horaFin != null) {
+        horaFinStr =
+            '${_horaFin!.hour.toString().padLeft(2, '0')}:${_horaFin!.minute.toString().padLeft(2, '0')}';
+      }
+
+      await RutinaService.guardarRutina(
+        creatorId: SessionService.userId!,
+        titulo: _tituloController.text.trim(),
+        descripcion: _comentarioGeneralController.text.trim().isNotEmpty
+            ? _comentarioGeneralController.text.trim()
+            : null,
+        clienteAsignadoId: _clienteSeleccionadoId,
+        fecha: fechaStr,
+        horaInicio: horaInicioStr,
+        horaFin: horaFinStr,
+        ejercicios: ejerciciosData,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Rutina guardada correctamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al guardar: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _guardando = false);
+    }
   }
 
   void _abrirBuscador() async {
@@ -90,6 +234,8 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
                     children: [
                       const SizedBox(height: 15),
                       _buildSelectorCliente(),
+                      const SizedBox(height: 15),
+                      _buildDateTimeRow(),
                       const SizedBox(height: 25),
                       _buildInputTitulo(),
                       const SizedBox(height: 30),
@@ -336,25 +482,107 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
   }
 
   Widget _buildSelectorCliente() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.secondarySurface,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.person_outline, color: Colors.white70, size: 20),
-          SizedBox(width: 10),
-          Text(
-            "Cliente: Alejandro Perez García",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        if (_clientes.isEmpty) return;
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: AppColors.secondarySurface,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (ctx) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Seleccionar cliente',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.close, color: Colors.white54),
+                  title: const Text(
+                    'Sin asignar',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _clienteSeleccionadoId = null;
+                      _clienteSeleccionadoNombre = 'Sin asignar';
+                    });
+                    Navigator.pop(ctx);
+                  },
+                ),
+                ..._clientes.map((rel) {
+                  final perfil = rel['client'] as Map<String, dynamic>? ?? {};
+                  final nombre =
+                      (perfil['nombre'] ?? perfil['username'] ?? 'Sin nombre')
+                          as String;
+                  final id = perfil['id'] as String;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF4B4584),
+                      child: Text(
+                        nombre[0].toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    title: Text(
+                      nombre,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    trailing: _clienteSeleccionadoId == id
+                        ? const Icon(Icons.check, color: AppColors.accentLila)
+                        : null,
+                    onTap: () {
+                      setState(() {
+                        _clienteSeleccionadoId = id;
+                        _clienteSeleccionadoNombre = nombre;
+                      });
+                      Navigator.pop(ctx);
+                    },
+                  );
+                }),
+                const SizedBox(height: 16),
+              ],
             ),
           ),
-        ],
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.secondarySurface,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.person_outline, color: Colors.white70, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Cliente: $_clienteSeleccionadoNombre',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.white54,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -373,6 +601,86 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
           borderSide: BorderSide(color: Colors.white),
         ),
       ),
+    );
+  }
+
+  Widget _buildDateTimeRow() {
+    final fechaStr = _fechaSeleccionada != null
+        ? '${_fechaSeleccionada!.day}/${_fechaSeleccionada!.month}/${_fechaSeleccionada!.year}'
+        : 'Fecha';
+    final inicioStr = _horaInicio != null
+        ? '${_horaInicio!.hour.toString().padLeft(2, '0')}:${_horaInicio!.minute.toString().padLeft(2, '0')}'
+        : 'Inicio';
+    final finStr = _horaFin != null
+        ? '${_horaFin!.hour.toString().padLeft(2, '0')}:${_horaFin!.minute.toString().padLeft(2, '0')}'
+        : 'Fin';
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: GestureDetector(
+            onTap: _seleccionarFecha,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.secondarySurface,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today,
+                    color: Colors.white54,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    fechaStr,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _seleccionarHora(esInicio: true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.secondarySurface,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                inicioStr,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _seleccionarHora(esInicio: false),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.secondarySurface,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                finStr,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -450,17 +758,23 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
             borderRadius: BorderRadius.circular(15),
           ),
         ),
-        onPressed: () {
-          // Aquí enviarías tanto listaEjerciciosConfigurados como _comentarioGeneralController.text
-          Navigator.pop(context);
-        },
-        child: const Text(
-          "GUARDAR RUTINA",
-          style: TextStyle(
-            color: AppColors.accentLila,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        onPressed: _guardando ? null : _guardarRutina,
+        child: _guardando
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.accentLila,
+                ),
+              )
+            : const Text(
+                "GUARDAR RUTINA",
+                style: TextStyle(
+                  color: AppColors.accentLila,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
       ),
     );
   }

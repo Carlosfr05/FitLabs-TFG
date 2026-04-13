@@ -2,6 +2,7 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/login.dart';
 import 'package:pantallas_fitlabs/pantallas/resumen_dia.dart';
@@ -9,9 +10,9 @@ import 'package:pantallas_fitlabs/pantallas/mis_clientes.dart';
 import 'package:pantallas_fitlabs/pantallas/calendario_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/registrarse.dart';
 import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
-import 'package:pantallas_fitlabs/pantallas/detalle_cliente.dart';
 import 'package:pantallas_fitlabs/pantallas/mensajes_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/search_exercise_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/cliente_home_screen.dart';
 
 const String supabaseUrl = 'https://dsvxjscgruadxqelwqaj.supabase.co';
 const String supabaseAnonKey =
@@ -24,11 +25,24 @@ Future<void> main() async {
     anonKey: supabaseAnonKey,
     authOptions: FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
   );
+
+  // Si hay sesión activa, cargar perfil antes de mostrar la app
+  if (Supabase.instance.client.auth.currentUser != null) {
+    await SessionService.cargarPerfil();
+  }
+
   runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
+
+  Widget _getHomeScreen() {
+    if (!SessionService.isLoggedIn) return const LoginScreen();
+    return SessionService.isEntrenador
+        ? const ResumenDiaScreen()
+        : const ClienteHomeScreen();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +56,7 @@ class MainApp extends StatelessWidget {
       ],
       supportedLocales: const [Locale('es', 'ES')],
       locale: const Locale('es', 'ES'),
-      home: Supabase.instance.client.auth.currentUser != null
-          ? const ResumenDiaScreen()
-          : const LoginScreen(),
+      home: _getHomeScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
         '/mensajes': (context) => const MensajesScreen(),
@@ -53,8 +65,8 @@ class MainApp extends StatelessWidget {
         '/calendario': (context) => const CalendarioScreen(),
         '/registrarse': (context) => const RegistrarseScreen(),
         '/crear-rutina': (context) => const CrearRutinaScreen(),
-        '/detalle-cliente': (context) => const DetalleClienteScreen(),
         '/search-ejercicio': (context) => const SearchExerciseScreen(),
+        '/cliente-home': (context) => const ClienteHomeScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/exercise-detail') {

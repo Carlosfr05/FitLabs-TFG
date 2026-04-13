@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/core/shared_widgets.dart';
+import 'package:pantallas_fitlabs/data/rutina_service.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class CalendarioScreen extends StatefulWidget {
   const CalendarioScreen({super.key});
@@ -10,10 +13,32 @@ class CalendarioScreen extends StatefulWidget {
 }
 
 class _CalendarioScreenState extends State<CalendarioScreen> {
-  int _selectedIndex = 2; // Índice 2 = Calendario
-
   DateTime _currentMonth = DateTime(DateTime.now().year, DateTime.now().month);
   DateTime _selectedDay = DateTime.now();
+
+  List<Map<String, dynamic>> _eventosDia = [];
+  bool _cargandoEventos = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarEventos();
+  }
+
+  Future<void> _cargarEventos() async {
+    setState(() => _cargandoEventos = true);
+    try {
+      final fecha = _selectedDay.toIso8601String().split('T')[0];
+      final data = await RutinaService.fetchRutinasPorFecha(
+        SessionService.userId!,
+        fecha,
+      );
+      if (mounted) setState(() => _eventosDia = data);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _cargandoEventos = false);
+    }
+  }
 
   static const List<String> _monthNames = [
     'Enero',
@@ -29,26 +54,6 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     'Noviembre',
     'Diciembre',
   ];
-
-  // --- NAVEGACIÓN ---
-  void _onItemTapped(int index) {
-    if (index == _selectedIndex) return;
-    setState(() => _selectedIndex = index);
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/resumen');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/clientes');
-        break;
-      case 2:
-        break; // Ya estamos aquí
-      case 3:
-        Navigator.pushReplacementNamed(context, '/mensajes');
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,48 +89,65 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
 
               // --- TIMELINE (Parte Inferior Scrollable) ---
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.only(top: 20, bottom: 100),
-                  children: [
-                    _buildTimeSlot("08 : 00", null),
-                    _buildTimeSlot("09 : 00", null),
-                    _buildTimeSlot(
-                      "10 : 00",
-                      _buildEventCard(
-                        "Sesión cardio-fuerza 1:1",
-                        "Carlos Luis Ramos García",
+                child: _cargandoEventos
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accentLila,
+                        ),
+                      )
+                    : _eventosDia.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.event_busy,
+                              color: Colors.white30,
+                              size: 48,
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Sin eventos para este día',
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(top: 20, bottom: 100),
+                        itemCount: _eventosDia.length,
+                        itemBuilder: (context, index) {
+                          final r = _eventosDia[index];
+                          final titulo = r['title'] as String? ?? 'Sin título';
+                          final horaInicio = r['hora_inicio'] as String? ?? '';
+                          final clienteData =
+                              r['cliente'] as Map<String, dynamic>?;
+                          final clienteNombre = clienteData != null
+                              ? (clienteData['nombre'] ??
+                                        clienteData['username'] ??
+                                        '')
+                                    as String
+                              : '';
+                          final horaLabel = horaInicio.isNotEmpty
+                              ? horaInicio
+                                    .substring(0, 5)
+                                    .replaceAll(':', ' : ')
+                              : '--:--';
+                          return _buildTimeSlot(
+                            horaLabel,
+                            _buildEventCard(titulo, clienteNombre),
+                          );
+                        },
                       ),
-                    ),
-                    _buildTimeSlot(
-                      "11 : 00",
-                      _buildEventCard(
-                        "Sesión cardio - HIIT",
-                        "Jaime Castanedo Mateos",
-                      ),
-                    ),
-                    _buildTimeSlot(
-                      "12 : 00",
-                      _buildEventCard(
-                        "Sesión entrenamiento - Torso 1:2",
-                        "José Luis Sánchez González",
-                      ),
-                    ),
-                    _buildTimeSlot(
-                      "13 : 00",
-                      _buildEventCard(
-                        "Sesión entrenamiento - Piernas 1:1",
-                        "Coraima Medina Lechuga",
-                      ),
-                    ),
-                    _buildTimeSlot("14 : 00", null),
-                  ],
-                ),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 2),
     );
   }
 
@@ -279,9 +301,12 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               return Center(
                 child: GestureDetector(
                   onTap: isCurrent
-                      ? () => setState(
-                          () => _selectedDay = dayData['date'] as DateTime,
-                        )
+                      ? () {
+                          setState(
+                            () => _selectedDay = dayData['date'] as DateTime,
+                          );
+                          _cargarEventos();
+                        }
                       : null,
                   child: _buildDayCell(
                     (dayData['date'] as DateTime).day.toString(),
@@ -420,94 +445,6 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
             style: const TextStyle(color: Colors.white70, fontSize: 11),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --------------------------------------------------------------------------
-  // NAVBAR & HELPERS
-  // --------------------------------------------------------------------------
-
-  Widget _buildBottomNavBar() {
-    return SafeArea(
-      top: false,
-      child: Container(
-        height: 80,
-        color: AppColors.navBarBg,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home_filled, "Inicio"),
-            _buildNavItem(1, Icons.people, "Clientes"),
-            _buildNavItem(2, Icons.calendar_today, "Calendario"),
-            _buildNavItem(
-              3,
-              Icons.mail,
-              "Mensajes",
-              badgeCount: 2,
-              accentColor: AppColors.accentRed,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    int index,
-    IconData icon,
-    String label, {
-    int badgeCount = 0,
-    Color? accentColor,
-  }) {
-    bool isSelected = _selectedIndex == index;
-    final color = isSelected ? Colors.white : AppColors.navIconUnselected;
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(icon, color: color, size: 28),
-              if (badgeCount > 0)
-                Positioned(
-                  top: -5,
-                  right: -8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: accentColor,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
-                    ),
-                    child: Text(
-                      '$badgeCount',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
           ),
         ],
       ),
