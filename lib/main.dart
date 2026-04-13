@@ -10,7 +10,6 @@ import 'package:pantallas_fitlabs/pantallas/mis_clientes.dart';
 import 'package:pantallas_fitlabs/pantallas/calendario_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/registrarse.dart';
 import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
-import 'package:pantallas_fitlabs/pantallas/detalle_cliente.dart';
 import 'package:pantallas_fitlabs/pantallas/mensajes_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/search_exercise_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/cliente_home_screen.dart';
@@ -66,7 +65,6 @@ class MainApp extends StatelessWidget {
         '/calendario': (context) => const CalendarioScreen(),
         '/registrarse': (context) => const RegistrarseScreen(),
         '/crear-rutina': (context) => const CrearRutinaScreen(),
-        '/detalle-cliente': (context) => const DetalleClienteScreen(),
         '/search-ejercicio': (context) => const SearchExerciseScreen(),
         '/cliente-home': (context) => const ClienteHomeScreen(),
       },

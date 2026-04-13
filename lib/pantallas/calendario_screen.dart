@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/core/shared_widgets.dart';
+import 'package:pantallas_fitlabs/data/rutina_service.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class CalendarioScreen extends StatefulWidget {
   const CalendarioScreen({super.key});
@@ -13,6 +15,30 @@ class CalendarioScreen extends StatefulWidget {
 class _CalendarioScreenState extends State<CalendarioScreen> {
   DateTime _currentMonth = DateTime(DateTime.now().year, DateTime.now().month);
   DateTime _selectedDay = DateTime.now();
+
+  List<Map<String, dynamic>> _eventosDia = [];
+  bool _cargandoEventos = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarEventos();
+  }
+
+  Future<void> _cargarEventos() async {
+    setState(() => _cargandoEventos = true);
+    try {
+      final fecha = _selectedDay.toIso8601String().split('T')[0];
+      final data = await RutinaService.fetchRutinasPorFecha(
+        SessionService.userId!,
+        fecha,
+      );
+      if (mounted) setState(() => _eventosDia = data);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _cargandoEventos = false);
+    }
+  }
 
   static const List<String> _monthNames = [
     'Enero',
@@ -63,42 +89,59 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
 
               // --- TIMELINE (Parte Inferior Scrollable) ---
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.only(top: 20, bottom: 100),
-                  children: [
-                    _buildTimeSlot("08 : 00", null),
-                    _buildTimeSlot("09 : 00", null),
-                    _buildTimeSlot(
-                      "10 : 00",
-                      _buildEventCard(
-                        "Sesión cardio-fuerza 1:1",
-                        "Carlos Luis Ramos García",
+                child: _cargandoEventos
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accentLila,
+                        ),
+                      )
+                    : _eventosDia.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.event_busy,
+                              color: Colors.white30,
+                              size: 48,
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Sin eventos para este día',
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(top: 20, bottom: 100),
+                        itemCount: _eventosDia.length,
+                        itemBuilder: (context, index) {
+                          final r = _eventosDia[index];
+                          final titulo = r['title'] as String? ?? 'Sin título';
+                          final horaInicio = r['hora_inicio'] as String? ?? '';
+                          final clienteData =
+                              r['cliente'] as Map<String, dynamic>?;
+                          final clienteNombre = clienteData != null
+                              ? (clienteData['nombre'] ??
+                                        clienteData['username'] ??
+                                        '')
+                                    as String
+                              : '';
+                          final horaLabel = horaInicio.isNotEmpty
+                              ? horaInicio
+                                    .substring(0, 5)
+                                    .replaceAll(':', ' : ')
+                              : '--:--';
+                          return _buildTimeSlot(
+                            horaLabel,
+                            _buildEventCard(titulo, clienteNombre),
+                          );
+                        },
                       ),
-                    ),
-                    _buildTimeSlot(
-                      "11 : 00",
-                      _buildEventCard(
-                        "Sesión cardio - HIIT",
-                        "Jaime Castanedo Mateos",
-                      ),
-                    ),
-                    _buildTimeSlot(
-                      "12 : 00",
-                      _buildEventCard(
-                        "Sesión entrenamiento - Torso 1:2",
-                        "José Luis Sánchez González",
-                      ),
-                    ),
-                    _buildTimeSlot(
-                      "13 : 00",
-                      _buildEventCard(
-                        "Sesión entrenamiento - Piernas 1:1",
-                        "Coraima Medina Lechuga",
-                      ),
-                    ),
-                    _buildTimeSlot("14 : 00", null),
-                  ],
-                ),
               ),
             ],
           ),
@@ -258,9 +301,12 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               return Center(
                 child: GestureDetector(
                   onTap: isCurrent
-                      ? () => setState(
-                          () => _selectedDay = dayData['date'] as DateTime,
-                        )
+                      ? () {
+                          setState(
+                            () => _selectedDay = dayData['date'] as DateTime,
+                          );
+                          _cargarEventos();
+                        }
                       : null,
                   child: _buildDayCell(
                     (dayData['date'] as DateTime).day.toString(),

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
+import 'package:pantallas_fitlabs/data/rutina_service.dart';
 
 class ClienteHomeScreen extends StatefulWidget {
   const ClienteHomeScreen({super.key});
@@ -12,6 +13,34 @@ class ClienteHomeScreen extends StatefulWidget {
 }
 
 class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
+  List<Map<String, dynamic>> _rutinasHoy = [];
+  List<Map<String, dynamic>> _todasRutinas = [];
+  bool _cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    try {
+      final hoy = await RutinaService.fetchRutinasHoy(SessionService.userId!);
+      final todas = await RutinaService.fetchRutinasCliente(
+        SessionService.userId!,
+      );
+      if (mounted) {
+        setState(() {
+          _rutinasHoy = hoy;
+          _todasRutinas = todas;
+        });
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _cargando = false);
+    }
+  }
+
   Future<void> _logout() async {
     await Supabase.instance.client.auth.signOut();
     SessionService.limpiar();
@@ -38,7 +67,8 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
+                    Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -58,6 +88,7 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
                           ),
                         ),
                       ],
+                    ),
                     ),
                     Row(
                       children: [
@@ -81,26 +112,63 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
                 ),
                 const SizedBox(height: 30),
 
-                // Rutina del día (placeholder)
+                // Rutina del día
                 _buildSectionTitle('Rutina de hoy'),
                 const SizedBox(height: 15),
-                _buildEmptyCard(
-                  icon: Icons.fitness_center,
-                  title: 'Sin rutina asignada',
-                  subtitle:
-                      'Tu entrenador aún no te ha asignado una rutina para hoy.',
-                ),
+                if (_cargando)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(
+                        color: AppColors.accentLila,
+                      ),
+                    ),
+                  )
+                else if (_rutinasHoy.isEmpty)
+                  _buildEmptyCard(
+                    icon: Icons.fitness_center,
+                    title: 'Sin rutina asignada',
+                    subtitle:
+                        'Tu entrenador aún no te ha asignado una rutina para hoy.',
+                  )
+                else
+                  ..._rutinasHoy.map((r) => _buildRutinaCard(r)),
                 const SizedBox(height: 30),
 
                 // Próximas sesiones
                 _buildSectionTitle('Próximas sesiones'),
                 const SizedBox(height: 15),
-                _buildEmptyCard(
-                  icon: Icons.calendar_today,
-                  title: 'Sin sesiones programadas',
-                  subtitle:
-                      'Cuando tu entrenador programe sesiones, aparecerán aquí.',
-                ),
+                if (_todasRutinas.where((r) {
+                  final fecha = r['fecha'] as String?;
+                  if (fecha == null) return false;
+                  return fecha.compareTo(
+                        DateTime.now().toIso8601String().split('T')[0],
+                      ) >
+                      0;
+                }).isEmpty)
+                  _buildEmptyCard(
+                    icon: Icons.calendar_today,
+                    title: 'Sin sesiones programadas',
+                    subtitle:
+                        'Cuando tu entrenador programe sesiones, aparecerán aquí.',
+                  )
+                else
+                  ..._todasRutinas
+                      .where((r) {
+                        final fecha = r['fecha'] as String?;
+                        if (fecha == null) return false;
+                        return fecha.compareTo(
+                              DateTime.now().toIso8601String().split('T')[0],
+                            ) >
+                            0;
+                      })
+                      .take(3)
+                      .map(
+                        (r) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _buildRutinaCard(r),
+                        ),
+                      ),
                 const SizedBox(height: 30),
 
                 // Mi progreso
@@ -166,6 +234,68 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
     );
   }
 
+  Widget _buildRutinaCard(Map<String, dynamic> rutina) {
+    final titulo = rutina['title'] as String? ?? 'Sin título';
+    final fecha = rutina['fecha'] as String? ?? '';
+    final horaInicio = rutina['hora_inicio'] as String? ?? '';
+    final horaFin = rutina['hora_fin'] as String? ?? '';
+    final horario = horaInicio.isNotEmpty
+        ? (horaFin.isNotEmpty ? '$horaInicio - $horaFin' : horaInicio)
+        : '';
+    final creador = rutina['creador'] as Map<String, dynamic>?;
+    final trainerName = creador != null
+        ? (creador['nombre'] ?? creador['username'] ?? '') as String
+        : '';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceColor2,
+        borderRadius: BorderRadius.circular(12),
+        border: const Border(
+          left: BorderSide(color: AppColors.accentLila, width: 4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            titulo,
+            style: const TextStyle(
+              color: AppColors.textColor,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (horario.isNotEmpty || fecha.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              [
+                if (fecha.isNotEmpty) fecha,
+                if (horario.isNotEmpty) horario,
+              ].join(' \u00b7 '),
+              style: const TextStyle(
+                color: AppColors.subTextColor,
+                fontSize: 12,
+              ),
+            ),
+          ],
+          if (trainerName.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Por: $trainerName',
+              style: const TextStyle(
+                color: AppColors.dimmedColor,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildProgressCard() {
     return Container(
       width: double.infinity,
@@ -183,7 +313,7 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
             color: AppColors.dividerColor,
             margin: const EdgeInsets.symmetric(horizontal: 10),
           ),
-          _progressItem('0', 'Rutinas\nasignadas'),
+          _progressItem('${_todasRutinas.length}', 'Rutinas\nasignadas'),
           Container(
             height: 40,
             width: 1,

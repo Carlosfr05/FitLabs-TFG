@@ -21,6 +21,9 @@ CREATE TABLE rutinas (
   assigned_client_id UUID REFERENCES perfiles(id) ON DELETE SET NULL,
   title VARCHAR(255) NOT NULL,
   description TEXT,
+  fecha DATE,
+  hora_inicio TIME,
+  hora_fin TIME,
   is_public BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
