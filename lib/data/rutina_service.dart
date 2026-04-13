@@ -17,17 +17,19 @@ class RutinaService {
     required List<Map<String, dynamic>> ejercicios,
   }) async {
     // 1. Insertar la rutina
+    final rutinaData = <String, dynamic>{
+      'creator_id': creatorId,
+      'title': titulo,
+      'description': descripcion,
+      'assigned_client_id': clienteAsignadoId,
+    };
+    if (fecha != null) rutinaData['fecha'] = fecha;
+    if (horaInicio != null) rutinaData['hora_inicio'] = horaInicio;
+    if (horaFin != null) rutinaData['hora_fin'] = horaFin;
+
     final rutinaRow = await _db
         .from('rutinas')
-        .insert({
-          'creator_id': creatorId,
-          'title': titulo,
-          'description': descripcion,
-          'assigned_client_id': clienteAsignadoId,
-          'fecha': fecha,
-          'hora_inicio': horaInicio,
-          'hora_fin': horaFin,
-        })
+        .insert(rutinaData)
         .select('id')
         .single();
 
