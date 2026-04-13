@@ -1,0 +1,40 @@
+% ============================================================
+%  CAPÍTULO 4 – Introducción
+% ============================================================
+\chapter{Introducción}
+
+\section{Motivación}
+
+La idea de FitLabs surge de una necesidad real observada en el entorno del entrenamiento personal: la ausencia de una herramienta móvil específica, accesible y completa que permita a los entrenadores gestionar su actividad profesional de forma centralizada. Actualmente, la mayoría de los entrenadores personales recurren a combinaciones de aplicaciones genéricas (hojas de cálculo para el seguimiento del progreso, aplicaciones de mensajería para la comunicación, agendas para el calendario) que generan una experiencia fragmentada, ineficiente y propensa a errores.
+
+La motivación personal detrás del proyecto radica en la posibilidad de aplicar los conocimientos adquiridos durante el ciclo de Desarrollo de Aplicaciones Multiplataforma para dar solución a un problema real, construyendo desde cero una aplicación funcional, atractiva visualmente y escalable. Adicionalmente, el proyecto supone un reto técnico relevante al incorporar tecnologías modernas ampliamente demandadas en el mercado laboral: Flutter, Supabase y el consumo de APIs REST externas.
+
+\section{Abstract}
+
+\begin{quote}
+\textit{FitLabs is a cross-platform mobile application developed with Flutter and backed by Supabase, designed to help personal trainers manage their professional activity. The application provides tools for client management, personalised workout routine creation using an external exercise API, scheduling via a built-in calendar, real-time messaging between trainers and clients, and client progress tracking. The project follows a structured development methodology, with a modular Flutter architecture, a PostgreSQL relational database secured by Row Level Security policies, and a clean, trainer-focused user interface designed in Figma. The result is a fully operational MVP that covers the core needs of a personal trainer in a single, unified platform.}
+\end{quote}
+
+\section{Objetivos}
+
+\subsection{Objetivo general}
+
+Diseñar y desarrollar una aplicación móvil multiplataforma que permita a los entrenadores personales gestionar de forma integral su actividad profesional, incluyendo la administración de clientes, la creación y asignación de rutinas de entrenamiento, el seguimiento del progreso físico, la planificación de sesiones y la comunicación directa con sus clientes.
+
+\subsection{Objetivos específicos}
+
+\begin{enumerate}
+  \item \textbf{OF-01} -- Implementar un sistema de autenticación seguro mediante Supabase Auth que soporte el registro e inicio de sesión de usuarios con rol de entrenador o cliente.
+  \item \textbf{OF-02} -- Desarrollar la pantalla de \textit{Resumen del Día}, que centralice los eventos próximos, el estado general de los clientes y las notificaciones pendientes.
+  \item \textbf{OF-03} -- Crear el módulo de \textit{Mis Clientes} con listado, búsqueda y acceso al detalle individual de cada cliente.
+  \item \textbf{OF-04} -- Diseñar e implementar el módulo de \textit{Crear Rutina}, integrando la API externa de ejercicios (ExerciseDB / API Ninjas) para la búsqueda y selección de ejercicios.
+  \item \textbf{OF-05} -- Construir el módulo de \textit{Calendario} que permita visualizar y gestionar las sesiones programadas con clientes.
+  \item \textbf{OF-06} -- Desarrollar el módulo de \textit{Mensajes} con sistema de chat 1:1 entre entrenador y cliente.
+  \item \textbf{OF-07} -- Diseñar una interfaz de usuario coherente y funcional utilizando Figma como herramienta de prototipado, con una identidad visual definida.
+  \item \textbf{OF-08} -- Garantizar la seguridad de los datos mediante la configuración de políticas Row Level Security (RLS) en Supabase.
+  \item \textbf{OF-09} -- Mantener el código organizado en un repositorio Git con ramas por desarrollador, siguiendo buenas prácticas de control de versiones.
+\end{enumerate}
+
+\section{Estructura del documento}
+
+La presente memoria se organiza siguiendo los apartados establecidos en la normativa del Proyecto Final de Ciclo DAM. Tras este capítulo introductorio, se realiza un análisis del estado del arte y se describe la metodología de trabajo adoptada. A continuación, se detallan las tecnologías utilizadas y se analiza la viabilidad del proyecto. Los capítulos centrales abordan el análisis de requisitos, el diseño de la solución y las pruebas realizadas. Por último, se incluyen las conclusiones, las vías futuras y los manuales de instalación y usuario en los anexos.

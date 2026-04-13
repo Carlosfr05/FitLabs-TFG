@@ -1,0 +1,34 @@
+% ============================================================
+%  CAPÍTULO 16 – Vías Futuras
+% ============================================================
+\chapter{Vías Futuras}
+
+FitLabs, en su versión actual, constituye un MVP sólido y funcional. Sin embargo, el potencial de crecimiento es significativo. A continuación se presentan las líneas de evolución más relevantes para una versión futura del producto:
+
+\section{Mejoras técnicas}
+
+\begin{itemize}
+  \item \textbf{Implementación de un gestor de estado}: Migrar la gestión del estado de la aplicación a Riverpod o BLoC para obtener mayor predictibilidad, testabilidad y rendimiento en pantallas con alta frecuencia de actualización.
+  \item \textbf{Pruebas unitarias y de widgets}: Incorporar una suite de tests automatizados con \texttt{flutter\_test} para los módulos críticos (autenticación, creación de rutinas).
+  \item \textbf{Modo offline}: Implementar un mecanismo de caché local (SQLite o Hive) para permitir el uso básico de la aplicación sin conexión a Internet.
+  \item \textbf{Notificaciones push}: Integrar Firebase Cloud Messaging (FCM) para notificar al entrenador sobre nuevos mensajes o próximas sesiones.
+\end{itemize}
+
+\section{Nuevas funcionalidades}
+
+\begin{itemize}
+  \item \textbf{Módulo de nutrición}: Seguimiento del plan nutricional del cliente, con registro de macros y calorías diarias.
+  \item \textbf{Integración con wearables}: Sincronización automática con Google Fit, Apple Health o dispositivos Garmin/Fitbit para importar datos de actividad del cliente.
+  \item \textbf{Videollamadas integradas}: Módulo de sesiones de entrenamiento online con videoconferencia, aprovechando APIs como Daily.co o Agora.
+  \item \textbf{Sistema de pagos}: Integración con Stripe o PayPal para la gestión de suscripciones y pagos de sesiones directamente desde la app.
+  \item \textbf{Panel web para entrenadores}: Versión web de la interfaz del entrenador (aprovechando que Flutter compila a Web) para gestión desde escritorio.
+  \item \textbf{Recomendación automática de rutinas}: Sistema de sugerencia de rutinas basado en el histórico del cliente y sus objetivos, utilizando un modelo de Machine Learning ligero o la API de OpenAI.
+\end{itemize}
+
+\section{Escalabilidad y comercialización}
+
+\begin{itemize}
+  \item Migrar de Supabase Free a Supabase Pro (o auto-alojado) para eliminar las limitaciones del plan gratuito.
+  \item Publicar la aplicación en Google Play Store y Apple App Store.
+  \item Implementar un modelo de negocio \textit{freemium}: plan gratuito limitado a 5 clientes y plan profesional con clientes ilimitados y funcionalidades avanzadas.
+\end{itemize}

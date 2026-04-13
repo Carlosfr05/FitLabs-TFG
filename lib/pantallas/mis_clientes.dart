@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/pantallas/detalle_cliente.dart';
 
 class MisClientesScreen extends StatelessWidget {
@@ -27,7 +26,15 @@ class ClientsScreen extends StatefulWidget {
 
 class _ClientsScreenState extends State<ClientsScreen> {
   // Índice 1 = Clientes
-  int _selectedIndex = 1;
+  final int _selectedIndex = 1;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   final List<Map<String, dynamic>> clients = [
     {
@@ -77,11 +84,24 @@ class _ClientsScreenState extends State<ClientsScreen> {
   @override
   Widget build(BuildContext context) {
     // Paleta de colores
+    final bgTop = const Color(0xFF352B55);
+    final bgBottom = const Color(0xFF1E1A2B);
+    final searchBarColor = const Color(0xFF4B4584);
+    final filterPillColor = const Color(0xFF413E60);
+    final navBarColor = const Color(0xFF413E60);
+    final accentRed = const Color(0xFFFF3B30);
 
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgTop, const Color(0xFF2A223E), bgBottom],
+            stops: const [0.0, 0.3, 1.0],
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.only(left: 15, right: 15),
           child: SafeArea(
@@ -106,18 +126,46 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   child: Container(
                     height: 45,
                     decoration: BoxDecoration(
-                      color: AppColors.searchBarBg,
+                      color: searchBarColor,
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        SizedBox(width: 15),
-                        Icon(Icons.search, color: Colors.white70),
-                        SizedBox(width: 10),
-                        Text(
-                          "Buscar Cliente",
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                        const SizedBox(width: 15),
+                        const Icon(Icons.search, color: Colors.white70),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Buscar Cliente',
+                              hintStyle: TextStyle(color: Colors.white70),
+                              isDense: true,
+                            ),
+                            onChanged: (value) =>
+                                setState(() => _searchQuery = value),
+                          ),
                         ),
+                        if (_searchQuery.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.only(right: 12),
+                              child: Icon(
+                                Icons.clear,
+                                color: Colors.white70,
+                                size: 18,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -145,7 +193,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.navBarBg,
+                          color: filterPillColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: Colors.white12),
                         ),
@@ -175,13 +223,26 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
                 // --- Lista de Clientes ---
                 Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
-                    itemCount: clients.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 20),
-                    itemBuilder: (context, index) {
-                      final client = clients[index];
-                      return _buildClientRow(client, AppColors.accentRed);
+                  child: Builder(
+                    builder: (context) {
+                      final filteredClients = _searchQuery.isEmpty
+                          ? clients
+                          : clients
+                                .where(
+                                  (c) => (c['name'] as String)
+                                      .toLowerCase()
+                                      .contains(_searchQuery.toLowerCase()),
+                                )
+                                .toList();
+                      return ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+                        itemCount: filteredClients.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 20),
+                        itemBuilder: (context, index) {
+                          final client = filteredClients[index];
+                          return _buildClientRow(client, accentRed);
+                        },
+                      );
                     },
                   ),
                 ),
@@ -194,39 +255,47 @@ class _ClientsScreenState extends State<ClientsScreen> {
       // --- FAB ---
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 70.0),
-        child: Container(
-          width: 55,
-          height: 55,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceColor,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.person_add_alt_1,
-            color: Colors.white,
-            size: 26,
+        child: GestureDetector(
+          onTap: () {
+            // TODO: Abrir formulario para añadir cliente
+          },
+          child: Container(
+            width: 55,
+            height: 55,
+            decoration: const BoxDecoration(
+              color: Color(0xFF776DAE),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_add_alt_1,
+              color: Colors.white,
+              size: 26,
+            ),
           ),
         ),
       ),
 
       // --- Barra de Navegación ---
-      bottomNavigationBar: Container(
-        height: 80,
-        color: AppColors.navBarBg,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home_filled, "Inicio"),
-            _buildNavItem(1, Icons.people, "Clientes"),
-            _buildNavItem(2, Icons.calendar_today, "Calendario"),
-            _buildNavItem(
-              3,
-              Icons.mail,
-              "Mensajes",
-              badgeCount: 2,
-              accentColor: AppColors.accentRed,
-            ),
-          ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: 80,
+          color: navBarColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.home_filled, "Inicio"),
+              _buildNavItem(1, Icons.people, "Clientes"),
+              _buildNavItem(2, Icons.calendar_today, "Calendario"),
+              _buildNavItem(
+                3,
+                Icons.mail,
+                "Mensajes",
+                badgeCount: 2,
+                accentColor: accentRed,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -256,19 +325,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
     // 1. Envolvemos todo en un GestureDetector para detectar el clic
     return GestureDetector(
       onTap: () {
-        // 2. Comprobamos si el nombre coincide
-        if (client['name'] == "Juan Ruíz Marín") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              // Aquí pones la pantalla a la que quieres ir
-              builder: (context) => const DetalleClienteScreen(),
-            ),
-          );
-        } else {
-          // Opcional: Lógica para los demás clientes
-          print("Se pulsó otro cliente: ${client['name']}");
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DetalleClienteScreen()),
+        );
       },
       // Para que el clic funcione en toda el área, no solo sobre el texto/iconos
       behavior: HitTestBehavior.opaque,
@@ -333,7 +393,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                           color: accentRed,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.bgBottom,
+                            color: const Color(0xFF1E1A2B),
                             width: 1.5,
                           ),
                         ),
@@ -372,7 +432,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
     Color? accentColor,
   }) {
     bool isSelected = _selectedIndex == index;
-    final color = isSelected ? Colors.white : AppColors.navIconUnselected;
+    final color = isSelected ? Colors.white : Color(0xFFAFA8D5);
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
@@ -396,7 +456,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
                     decoration: BoxDecoration(
                       color: accentColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
+                      border: Border.all(
+                        color: const Color(0xFF332D43),
+                        width: 1.5,
+                      ),
                     ),
                     child: Text(
                       badgeCount.toString(),

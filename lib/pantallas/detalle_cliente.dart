@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/shared_widgets.dart';
 
 class DetalleClienteScreen extends StatelessWidget {
   const DetalleClienteScreen({super.key});
+
+  // --- PALETA DE COLORES ---
+  final Color _bgTop = const Color(0xFF2E2648);
+  final Color _bgBottom = const Color(0xFF1A1625);
+  final Color _accentLila = const Color(0xFFAEA6E8);
+  final Color _cardSummaryBg = const Color(0xFF3E3666);
+  final Color _cardGraphBg = const Color(0xFF2B253F);
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +18,13 @@ class DetalleClienteScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_bgTop, const Color(0xFF241E32), _bgBottom],
+          ),
+        ),
         child: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -139,7 +152,7 @@ class DetalleClienteScreen extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: AppColors.accentLila.withOpacity(0.5),
+              color: _accentLila.withValues(alpha: 0.5),
               width: 2,
             ),
           ),
@@ -165,14 +178,14 @@ class DetalleClienteScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.accentLila.withOpacity(0.2),
+            color: _accentLila.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.accentLila.withOpacity(0.5)),
+            border: Border.all(color: _accentLila.withValues(alpha: 0.5)),
           ),
           child: Text(
             "Cliente Activo",
             style: TextStyle(
-              color: AppColors.accentLila,
+              color: _accentLila,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -186,7 +199,7 @@ class DetalleClienteScreen extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 40),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -222,11 +235,11 @@ class DetalleClienteScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
       decoration: BoxDecoration(
-        color: AppColors.cardSummaryBg,
+        color: _cardSummaryBg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -275,7 +288,7 @@ class DetalleClienteScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.cardGraphBg,
+        color: _cardGraphBg,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -300,7 +313,7 @@ class DetalleClienteScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
@@ -322,9 +335,7 @@ class DetalleClienteScreen extends StatelessWidget {
             child: SizedBox(
               height: 150, // Un poco más alto para que quepan los números
               child: CustomPaint(
-                painter: DetailedLineChartPainter(
-                  lineColor: AppColors.accentLila,
-                ),
+                painter: DetailedLineChartPainter(lineColor: _accentLila),
               ),
             ),
           ),
@@ -373,7 +384,7 @@ class DetalleClienteScreen extends StatelessWidget {
               Container(
                 width: 4,
                 decoration: const BoxDecoration(
-                  color: AppColors.dimmedColor,
+                  color: Color(0xFFD5D0FF),
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(10),
                     bottomRight: Radius.circular(10),
@@ -434,7 +445,7 @@ class DetalleClienteScreen extends StatelessWidget {
         if (!isLast)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            child: DashedDivider(color: AppColors.dimmedColor),
+            child: const DashedDivider(),
           ),
       ],
     );
@@ -572,31 +583,4 @@ class DetailedLineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class DashedDivider extends StatelessWidget {
-  final Color color;
-  const DashedDivider({super.key, required this.color});
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final boxWidth = constraints.constrainWidth();
-        const dashWidth = 6.0;
-        final dashCount = (boxWidth / (2 * dashWidth)).floor();
-        return Flex(
-          children: List.generate(
-            dashCount,
-            (_) => SizedBox(
-              width: dashWidth,
-              height: 1.5,
-              child: DecoratedBox(decoration: BoxDecoration(color: color)),
-            ),
-          ),
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          direction: Axis.horizontal,
-        );
-      },
-    );
-  }
 }

@@ -1,0 +1,144 @@
+% ============================================================
+%  FitLabs - TFG DAM 2025-2026
+%  Archivo principal - compilar con pdflatex o en Overleaf
+% ============================================================
+\documentclass[12pt,a4paper]{report}
+
+% --- Codificación y fuentes ----------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{helvet}          % Helvetica ≈ Arial
+\renewcommand{\familydefault}{\sfdefault}
+
+% --- Idioma --------------------------------------------------
+\usepackage[spanish]{babel}
+
+% --- Márgenes 2.5 cm ----------------------------------------
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+
+% --- Interlineado 1.5 ----------------------------------------
+\usepackage{setspace}
+\onehalfspacing
+
+% --- Encabezado y pie de página ------------------------------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize FitLabs -- TFG DAM 2025-2026}
+\fancyhead[R]{\footnotesize J.L. Sánchez González \& C. Fraidias del Valle}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- Colores y gráficos --------------------------------------
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{{./imagenes/}}
+
+% --- Tablas mejoradas ----------------------------------------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+
+% --- Código fuente -------------------------------------------
+\usepackage{listings}
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  frame=single,
+  breaklines=true,
+  numbers=left,
+  stepnumber=1,
+  numberstyle=\tiny,
+  keywordstyle=\bfseries\color{blue!70!black},
+  commentstyle=\itshape\color{gray},
+  stringstyle=\color{red!70!black},
+}
+
+% --- Hiperenlaces --------------------------------------------
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+
+% --- Listas --------------------------------------------------
+\usepackage{enumitem}
+
+% --- Citas ---------------------------------------------------
+\usepackage{csquotes}
+\usepackage[style=apa, backend=biber]{biblatex}
+\addbibresource{bibliografia.bib}
+
+% --- Diagrama de Gantt inline --------------------------------
+\usepackage{pgfgantt}
+
+% --- Colores personalizados FitLabs -------------------------
+\definecolor{fitlabsPurple}{HTML}{3D2B6B}
+\definecolor{fitlabsLight}{HTML}{9B7FD4}
+
+% ============================================================
+\begin{document}
+
+% Numeración romana para portada e índice
+\pagenumbering{roman}
+\thispagestyle{empty}
+
+% ---- PORTADA -----------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{1cm}
+  {\Huge \textbf{\textcolor{fitlabsPurple}{FitLabs}}}\\[0.3cm]
+  {\large \textit{Aplicación Móvil para la Gestión Integral de Entrenadores Personales}}\\[2cm]
+
+  \includegraphics[width=5cm]{logo_fitlabs.png}\par
+  \vspace{1.5cm}
+
+  {\large \textbf{Autores}}\\[0.2cm]
+  {\large José Luis Sánchez González \& Carlos Fraidias del Valle}\\[1cm]
+
+  {\large \textbf{Tutor}}\\[0.2cm]
+  {\large José Manuel Ruiz González}\\[1cm]
+
+  {\large \textbf{Ciclo Formativo}}\\[0.2cm]
+  {\large Desarrollo de Aplicaciones Multiplataforma (DAM)}\\[0.5cm]
+  {\large Curso 2025 -- 2026}\\[2cm]
+
+  \vfill
+  {\small Trabajo de Final de Ciclo -- 4 de mayo de 2026}
+\end{titlepage}
+
+% ---- ÍNDICE ------------------------------------------------
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ============================================================
+% CAPÍTULOS
+% ============================================================
+\input{capitulos/03_sector_productivo}
+\input{capitulos/04_introduccion}
+\input{capitulos/05_estado_del_arte}
+\input{capitulos/06_metodologia}
+\input{capitulos/07_tecnologias}
+\input{capitulos/08_viabilidad}
+\input{capitulos/09_planificacion}
+\input{capitulos/10_analisis}
+\input{capitulos/11_diseno}
+\input{capitulos/12_pruebas}
+\input{capitulos/13_plan_ejecucion}
+\input{capitulos/14_seguimiento}
+\input{capitulos/15_conclusiones}
+\input{capitulos/16_vias_futuras}
+
+% ============================================================
+% BIBLIOGRAFÍA
+% ============================================================
+\printbibliography[heading=bibintoc, title={Bibliografía y Webgrafía}]
+
+% ============================================================
+% ANEXOS
+% ============================================================
+\appendix
+\input{capitulos/anexo_instalacion}
+\input{capitulos/anexo_usuario}
+
+\end{document}

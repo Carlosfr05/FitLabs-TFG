@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/shared_widgets.dart';
 
 class ResumenDiaScreen extends StatefulWidget {
   const ResumenDiaScreen({super.key});
@@ -11,7 +13,6 @@ class ResumenDiaScreen extends StatefulWidget {
 class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
   // Índice 0 = Inicio (Esta pantalla)
   int _selectedIndex = 0;
-  double surfaceRadius = 0.0;
 
   // Datos de ejemplo
   final List<Map<String, String>> upcomingWorkouts = [
@@ -55,27 +56,47 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
         // Ya estamos en /resumen
         break;
       case 1:
-        Navigator.pushNamed(context, '/clientes');
+        Navigator.pushReplacementNamed(context, '/clientes');
         break;
       case 2:
-        Navigator.pushNamed(context, '/calendario');
+        Navigator.pushReplacementNamed(context, '/calendario');
         break;
       case 3:
-        Navigator.pushNamed(context, '/mensajes');
+        Navigator.pushReplacementNamed(context, '/mensajes');
         break;
     }
   }
 
+  Future<void> _logout() async {
+    await Supabase.instance.client.auth.signOut();
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
-    // --- COLORES Y ESTILOS AJUSTADOS ---
-    // NUEVO RADIO: Bordes más redondeados
-    final double surfaceRadius = 0;
+    // --- COLORES (via AppColors) ---
+    const Color bgTop = AppColors.bgTop;
+    const Color bgBottom = AppColors.bgBottom;
+    const Color surfaceColor = AppColors.surfaceColor;
+    const Color surfaceColor2 = AppColors.surfaceColor2;
+    const Color accentRed = AppColors.accentRed;
+    const Color textColor = AppColors.textColor;
+    const Color subTextColor = AppColors.subTextColor;
+    const Color subTextColor2 = AppColors.dimmedColor;
+    const Color dividerColor = AppColors.dividerColor;
 
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgTop, const Color(0xFF2A223E), bgBottom],
+            stops: const [0.0, 0.3, 1.0],
+          ),
+        ),
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(
@@ -84,22 +105,28 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Cabecera
-                _buildHeader(),
+                _buildHeader(accentRed),
                 const SizedBox(height: 30),
 
                 // Resumen (Con nuevos estilos)
-                _buildSummaryCard(surfaceRadius),
+                _buildSummaryCard(
+                  surfaceColor2,
+                  0,
+                  textColor,
+                  subTextColor2,
+                  dividerColor,
+                ),
                 const SizedBox(height: 30),
 
                 // Grid Botones (Con nuevos estilos y altura)
-                _buildActionButtonsGrid(surfaceRadius),
+                _buildActionButtonsGrid(surfaceColor, 0, textColor),
                 const SizedBox(height: 30),
 
                 // Título
                 Text(
                   'Entrenamientos Próximos',
                   style: TextStyle(
-                    color: AppColors.textColor,
+                    color: textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -107,29 +134,32 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                 const SizedBox(height: 20),
 
                 // Lista
-                _buildWorkoutList(),
+                _buildWorkoutList(textColor, subTextColor),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        height: 80,
-        color: AppColors.navBarBg,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home_filled, "Inicio"),
-            _buildNavItem(1, Icons.people_outlined, "Clientes"),
-            _buildNavItem(2, Icons.calendar_today, "Calendario"),
-            _buildNavItem(
-              3,
-              Icons.mail,
-              "Mensajes",
-              badgeCount: 2,
-              accentColor: AppColors.accentRed,
-            ),
-          ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: 80,
+          color: const Color(0xFF413E60),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.home_filled, "Inicio"),
+              _buildNavItem(1, Icons.people_outlined, "Clientes"),
+              _buildNavItem(2, Icons.calendar_today, "Calendario"),
+              _buildNavItem(
+                3,
+                Icons.mail,
+                "Mensajes",
+                badgeCount: 2,
+                accentColor: accentRed,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -137,7 +167,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
 
   // --- WIDGETS AUXILIARES ---
 
-  Widget _buildHeader() {
+  Widget _buildHeader(Color accentRed) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -169,7 +199,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: AppColors.accentRed,
+                      color: accentRed,
                       shape: BoxShape.circle,
                     ),
                     child: const Text(
@@ -186,18 +216,29 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
             ),
             const SizedBox(width: 15),
             const Icon(Icons.settings, color: Colors.white, size: 28),
+            const SizedBox(width: 15),
+            GestureDetector(
+              onTap: _logout,
+              child: const Icon(Icons.logout, color: Colors.white70, size: 24),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildSummaryCard(double radius) {
+  Widget _buildSummaryCard(
+    Color bg,
+    double radius,
+    Color txt,
+    Color subTxt,
+    Color div,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       // Aplicamos el nuevo color y radio
       decoration: BoxDecoration(
-        color: AppColors.surfaceColor2,
+        color: bg,
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Column(
@@ -206,7 +247,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           Text(
             'Resumen del día',
             style: TextStyle(
-              color: AppColors.textColor,
+              color: txt,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -214,21 +255,21 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           const SizedBox(height: 20),
           Row(
             children: [
-              _item('3', 'Sesiones Realizadas'),
+              _item('3', 'Sesiones Realizadas', txt, subTxt),
               Container(
                 height: 40,
                 width: 1,
-                color: AppColors.dividerColor,
+                color: div,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              _item('5', 'Sesiones Restantes'),
+              _item('5', 'Sesiones Restantes', txt, subTxt),
               Container(
                 height: 40,
                 width: 1,
-                color: AppColors.dividerColor,
+                color: div,
                 margin: const EdgeInsets.symmetric(horizontal: 10),
               ),
-              _item('2', 'Mensajes sin leer'),
+              _item('2', 'Mensajes sin leer', txt, subTxt),
             ],
           ),
         ],
@@ -236,14 +277,14 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
     );
   }
 
-  Widget _item(String val, String label) {
+  Widget _item(String val, String label, Color txt, Color subTxt) {
     return Expanded(
       child: Column(
         children: [
           Text(
             val,
             style: TextStyle(
-              color: AppColors.textColor,
+              color: txt,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -252,24 +293,35 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.dimmedColor, fontSize: 12),
+            style: TextStyle(color: subTxt, fontSize: 12),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtonsGrid(double radius) {
+  Widget _buildActionButtonsGrid(Color bg, double radius, Color textColor) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _btn('Añadir nuevo\ncliente', Icons.person_add)),
+            Expanded(
+              child: _btn(
+                'Añadir nuevo\ncliente',
+                Icons.person_add,
+                bg,
+                radius,
+                textColor,
+              ),
+            ),
             const SizedBox(width: 15),
             Expanded(
               child: _btn(
                 'Crear nueva\nrutina',
                 Icons.fitness_center,
+                bg,
+                radius,
+                textColor,
                 showPlus: true,
                 onTap: () {
                   Navigator.pushNamed(context, '/crear-rutina');
@@ -281,10 +333,24 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
         const SizedBox(height: 15),
         Row(
           children: [
-            Expanded(child: _btn('Modificar rutina\nexistente', Icons.edit)),
+            Expanded(
+              child: _btn(
+                'Modificar rutina\nexistente',
+                Icons.edit,
+                bg,
+                radius,
+                textColor,
+              ),
+            ),
             const SizedBox(width: 15),
             Expanded(
-              child: _btn('Revisar pagos\nde clientes', Icons.monetization_on),
+              child: _btn(
+                'Revisar pagos\nde clientes',
+                Icons.monetization_on,
+                bg,
+                radius,
+                textColor,
+              ),
             ),
           ],
         ),
@@ -294,19 +360,23 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
 
   Widget _btn(
     String label,
-    IconData? icon, {
+    IconData? icon,
+    Color bg,
+    double radius,
+    Color txt, {
     bool showPlus = false,
-    VoidCallback? onTap,
+    VoidCallback? onTap, // <--- Añadimos este parámetro
   }) {
     return InkWell(
+      // <--- Envolvemos todo en InkWell para el efecto visual de clic
       onTap: onTap,
-      borderRadius: BorderRadius.circular(surfaceRadius),
+      borderRadius: BorderRadius.circular(radius),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         height: 65,
         decoration: BoxDecoration(
-          color: AppColors.surfaceColor,
-          borderRadius: BorderRadius.circular(surfaceRadius),
+          color: bg,
+          borderRadius: BorderRadius.circular(radius),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -315,7 +385,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: AppColors.textColor,
+                  color: txt,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -328,12 +398,12 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
     );
   }
 
-  Widget _buildWorkoutList() {
+  Widget _buildWorkoutList(Color txt, Color subTxt) {
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: upcomingWorkouts.length,
-      separatorBuilder: (_, __) => const Padding(
+      separatorBuilder: (_, _) => const Padding(
         padding: EdgeInsets.symmetric(vertical: 15),
         child: DashedDivider(),
       ),
@@ -353,7 +423,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                     Text(
                       w['title']!,
                       style: TextStyle(
-                        color: AppColors.textColor,
+                        color: txt,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -361,18 +431,12 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                     const SizedBox(height: 5),
                     Text(
                       w['time']!,
-                      style: TextStyle(
-                        color: AppColors.textColor,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: txt, fontSize: 14),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       w['subtitle']!,
-                      style: TextStyle(
-                        color: AppColors.subTextColor,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: subTxt, fontSize: 12),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -405,9 +469,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected
-                    ? AppColors.textColor
-                    : AppColors.subTextColor,
+                color: isSelected ? Colors.white : Color(0xFFAFA8D5),
                 size: 28,
               ),
               if (badgeCount > 0)
@@ -415,22 +477,14 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
                   top: -5,
                   right: -8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       color: accentColor,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
+                      shape: BoxShape.circle,
                     ),
                     child: Text(
                       '$badgeCount',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontSize: 10, color: Colors.white),
                     ),
                   ),
                 ),
@@ -439,7 +493,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.textColor : AppColors.subTextColor,
+              color: isSelected ? Colors.white : Colors.white54,
               fontSize: 10,
             ),
           ),
@@ -449,48 +503,4 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
   }
 }
 
-// --- WIDGETS PERSONALIZADOS ---
-class CurvedSideLine extends StatelessWidget {
-  const CurvedSideLine({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 4,
-      decoration: BoxDecoration(
-        color: AppColors.dimmedColor,
-        borderRadius: const BorderRadius.all(Radius.elliptical(4, 40)),
-      ),
-    );
-  }
-}
-
-class DashedDivider extends StatelessWidget {
-  const DashedDivider({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final boxWidth = constraints.constrainWidth();
-          const dashWidth = 10.0;
-          final dashCount = (boxWidth / (2 * dashWidth)).floor();
-          return Flex(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            direction: Axis.horizontal,
-            children: List.generate(
-              dashCount,
-              (_) => SizedBox(
-                width: dashWidth,
-                height: 2,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: AppColors.dimmedColor),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
+// --- WIDGETS PERSONALIZADOS eliminados: ver lib/core/shared_widgets.dart ---

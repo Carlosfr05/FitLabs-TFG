@@ -1,0 +1,114 @@
+% ============================================================
+%  CAPÍTULO 11 – Diseño
+% ============================================================
+\chapter{Diseño}
+
+\section{Arquitectura de la aplicación Flutter}
+
+La aplicación FitLabs sigue una arquitectura orientada a pantallas (\textit{screen-based architecture}), donde cada módulo funcional corresponde a una clase \texttt{Widget} de Flutter independiente. La navegación se gestiona de forma centralizada mediante el sistema de rutas nombradas de \texttt{MaterialApp} en \texttt{main.dart}:
+
+\begin{lstlisting}[language=Java, caption={Definición de rutas en main.dart}]
+routes: {
+  '/login':          (context) => const LoginScreen(),
+  '/mensajes':       (context) => const MensajesScreen(),
+  '/resumen':        (context) => const ResumenDiaScreen(),
+  '/clientes':       (context) => const MisClientesScreen(),
+  '/calendario':     (context) => const CalendarioScreen(),
+  '/registrarse':    (context) => const RegistrarseScreen(),
+  '/crear-rutina':   (context) => const CrearRutinaScreen(),
+  '/detalle-cliente':(context) => const DetalleClienteScreen(),
+  '/search-ejercicio':(context) => const SearchExerciseScreen(),
+}
+\end{lstlisting}
+
+Esta estructura facilita la mantenibilidad y la incorporación de nuevas pantallas sin necesidad de modificar partes existentes del código.
+
+\section{Sistema de diseño visual}
+
+La identidad visual de FitLabs fue definida antes del inicio del desarrollo mediante prototipado en Figma. Los elementos principales del sistema de diseño son:
+
+\begin{itemize}
+  \item \textbf{Paleta de colores}: Fondo degradado en tonos púrpura oscuro (\texttt{\#1A0A3C} $\to$ \texttt{\#3D2B6B}), acentos en púrpura claro (\texttt{\#9B7FD4}) y blanco para texto principal.
+  \item \textbf{Tipografía}: RubikVinyl para el logotipo y títulos de alto impacto; fuente de sistema para el cuerpo del texto.
+  \item \textbf{Componentes}: Tarjetas con fondo semitransparente y bordes redondeados, botones con gradiente, campos de texto con borde sutil, iconos minimalistas.
+  \item \textbf{Barra de navegación inferior}: 4 ítems (Inicio, Clientes, Calendario, Mensajes) con iconos personalizados.
+\end{itemize}
+
+\section{Descripción de las pantallas principales}
+
+\subsection{Login y Registro}
+
+Las pantallas de autenticación presentan un diseño oscuro con el logotipo de FitLabs en la parte superior. El formulario de registro recoge nombre completo, fecha de nacimiento, email, contraseña y teléfono, con validación de campos antes de la llamada a Supabase Auth.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.30\textwidth]{pantalla_login.png}
+  \hspace{1cm}
+  \includegraphics[width=0.30\textwidth]{pantalla_registro.png}
+  \caption{Pantallas de Login (izq.) y Registro (dcha.) de FitLabs.}
+  \label{fig:login_registro}
+\end{figure}
+
+\subsection{Resumen del Día}
+
+Dashboard principal del entrenador. Muestra contadores de sesiones realizadas, pendientes y mensajes sin leer, junto con las próximas sesiones del día en tarjetas expandibles. Incluye acceso rápido a las opciones de añadir cliente, crear rutina y revisar pagos.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pantalla_resumen.png}
+  \caption{Pantalla de Resumen del Día.}
+  \label{fig:resumen}
+\end{figure}
+
+\subsection{Mis Clientes}
+
+Listado paginado de clientes del entrenador con buscador en tiempo real. Cada tarjeta de cliente muestra el avatar, el nombre, el estado de la última sesión y accesos rápidos al chat y a las rutinas asignadas.
+
+\subsection{Detalle de Cliente}
+
+Perfil completo del cliente con datos biométricos (IMC, estado de suscripción, sesiones realizadas), gráfico de progreso de peso y listado de sesiones pasadas con valoración.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pantalla_detalle_cliente.png}
+  \caption{Pantalla de Detalle de Cliente.}
+  \label{fig:detalle_cliente}
+\end{figure}
+
+\subsection{Crear Rutina}
+
+Formulario de creación de rutinas con selección de cliente objetivo y buscador de ejercicios integrado. Cada ejercicio añadido permite configurar series, repeticiones y peso directamente desde la tarjeta del ejercicio.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pantalla_crear_rutina.png}
+  \caption{Pantalla de Creación de Rutinas.}
+  \label{fig:crear_rutina}
+\end{figure}
+
+\subsection{Calendario}
+
+Vista de calendario mensual con los días que tienen sesiones programadas marcados visualmente. Al seleccionar un día, se desplazan las sesiones del día seleccionado en la parte inferior de la pantalla.
+
+\subsection{Mensajes}
+
+Listado de conversaciones activas con buscador. El contador de mensajes no leídos se muestra como insignia roja sobre el avatar del cliente.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pantalla_mensajes.png}
+  \caption{Pantalla de Mensajes.}
+  \label{fig:mensajes}
+\end{figure}
+
+\section{Decisiones de diseño destacadas}
+
+\begin{enumerate}
+  \item \textbf{Diseño oscuro como estándar}: El diseño oscuro (dark mode) fue elegido como único modo de la aplicación por su asociación con entornos deportivos profesionales y por la mejor legibilidad en exteriores bajo luz solar con dispositivos actuales.
+
+  \item \textbf{Navegación mediante barra inferior fija}: Se descartó el uso de un cajón de navegación (\textit{drawer}) en favor de una barra inferior con 4 pestañas, alineado con las directrices de Material Design 3 para apps móviles con un número reducido de secciones principales.
+
+  \item \textbf{Separación de responsabilidades por archivo}: Cada pantalla está implementada en su propio archivo \texttt{.dart}, sin mezclar lógica de negocio y presentación en el mismo fichero. Esto facilita la colaboración entre los dos desarrolladores y reduce los conflictos en el repositorio Git.
+
+  \item \textbf{Figma como fuente de verdad del diseño}: Se estableció como norma que ningún cambio de diseño se implementaría en código sin ser primero aprobado en el prototipo de Figma, garantizando coherencia visual entre módulos desarrollados por distintos miembros del equipo.
+\end{enumerate}

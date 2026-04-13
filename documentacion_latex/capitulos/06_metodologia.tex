@@ -1,0 +1,64 @@
+% ============================================================
+%  CAPÍTULO 6 – Metodología
+% ============================================================
+\chapter{Metodología}
+
+\section{Modelo de desarrollo seleccionado}
+
+Para el desarrollo de FitLabs se ha adoptado una metodología \textbf{incremental e iterativa}, inspirada en los principios ágiles de \textbf{Scrum}, adaptada a un equipo reducido de dos personas (José Luis Sánchez González y Carlos Fraidias del Valle) sin roles formales de \textit{Scrum Master} o \textit{Product Owner} diferenciados.
+
+La elección de esta metodología se justifica por los siguientes motivos:
+
+\begin{itemize}
+  \item \textbf{Requisitos variables}: A lo largo del proyecto, las prioridades y el alcance de algunas funcionalidades se ajustaron en función del tiempo disponible y de la retroalimentación recibida del tutor.
+  \item \textbf{Valor entregable temprano}: Al dividir el trabajo en incrementos, fue posible mostrar versiones funcionales de la aplicación desde las primeras semanas, lo que facilitó la validación del diseño y la arquitectura.
+  \item \textbf{Flexibilidad}: La naturaleza del ciclo formativo, con entregas parciales en el primer y segundo trimestre, se adapta perfectamente al modelo iterativo.
+  \item \textbf{Trabajo en paralelo}: Al ser dos desarrolladores, fue necesario definir bien los módulos de responsabilidad de cada uno, lo que encaja con la división de trabajo típica de sprints.
+\end{itemize}
+
+\section{Fases del ciclo de vida}
+
+El proyecto se estructuró en las siguientes fases:
+
+\subsection{Fase 1 -- Planificación (octubre 2025)}
+
+Definición del alcance del proyecto, elección de tecnologías, propuesta técnica entregada el 24 de octubre de 2025. Se fijaron los módulos principales (Autenticación, Resumen del Día, Clientes, Rutinas, Calendario, Mensajes) y se creó el repositorio en GitHub con la estructura de ramas.
+
+\subsection{Fase 2 -- Análisis de Requisitos (octubre -- noviembre 2025)}
+
+Identificación y documentación de los requisitos funcionales y no funcionales. Se elaboraron los primeros prototipos en Figma para validar la interfaz de usuario antes de comenzar el desarrollo.
+
+\subsection{Fase 3 -- Diseño (noviembre 2025)}
+
+Diseño de la arquitectura de la aplicación (estructura modular de pantallas en Flutter), diseño del esquema de base de datos en Supabase (tablas, relaciones, políticas RLS) y prototipado de alta fidelidad en Figma completado en esta fase.
+
+\subsection{Fase 4 -- Implementación (noviembre 2025 -- marzo 2026)}
+
+Desarrollo iterativo por módulos. Cada módulo fue desarrollado, integrado y probado antes de avanzar al siguiente:
+
+\begin{enumerate}
+  \item Sistema de autenticación (Login / Registro).
+  \item Pantalla de Resumen del Día.
+  \item Módulo de Mis Clientes y Detalle de Cliente.
+  \item Módulo de Crear Rutina con integración de API de ejercicios.
+  \item Módulo de Calendario.
+  \item Módulo de Mensajes.
+\end{enumerate}
+
+\subsection{Fase 5 -- Pruebas y Validación (marzo -- abril 2026)}
+
+Pruebas funcionales de cada módulo, pruebas de integración entre componentes y validación de los requisitos definidos en la Fase 2. Se utilizaron dispositivos físicos Android para las pruebas.
+
+\subsection{Fase 6 -- Documentación y Entrega (abril -- mayo 2026)}
+
+Redacción de la memoria final, ajuste del código base, preparación de la presentación y empaquetado del material para la entrega del 4 de mayo de 2026.
+
+\section{Herramientas de gestión y control}
+
+\begin{itemize}
+  \item \textbf{GitHub}: Control de versiones con ramas separadas por desarrollador (\texttt{Luis}, \texttt{Carlos}) y rama principal \texttt{main} — ramas correspondientes a José Luis Sánchez González y Carlos Fraidias del Valle respectivamente.
+  \item \textbf{Figma}: Diseño de prototipos de alta fidelidad y gestión del sistema de diseño visual.
+  \item \textbf{VS Code}: Entorno de desarrollo integrado principal para Flutter/Dart.
+  \item \textbf{Supabase Dashboard}: Gestión visual de la base de datos, políticas RLS y autenticación de usuarios.
+  \item \textbf{GitHub Copilot}: Asistencia en la redacción de código y documentación.
+\end{itemize}

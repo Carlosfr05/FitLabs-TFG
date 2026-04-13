@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
 
 class MensajesScreen extends StatelessWidget {
   const MensajesScreen({super.key});
@@ -28,6 +27,14 @@ class MessagesScreen extends StatefulWidget {
 class _MessagesScreenState extends State<MessagesScreen> {
   // Índice 3 = Mensajes
   final int _selectedIndex = 3;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   // Datos de los chats
   final List<Map<String, dynamic>> chats = [
@@ -90,10 +97,24 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bgDark = const Color(0xFF1E1A2B);
+    final bgLight = const Color(0xFF352B55);
+    final searchBarColor = const Color(0xFF463C6E);
+    final cardColor = const Color(0xFF2E2744);
+    final navBarColor = const Color(0xFF332D43);
+    final accentRed = const Color(0xFFFF3B30);
+
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgLight, const Color(0xFF2A223E), bgDark],
+            stops: const [0.0, 0.3, 1.0],
+          ),
+        ),
         child: SafeArea(
           bottom: false,
           child: Column(
@@ -104,7 +125,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textColor,
+                  color: Colors.white,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -116,18 +137,46 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 child: Container(
                   height: 45,
                   decoration: BoxDecoration(
-                    color: AppColors.searchBarBg,
+                    color: searchBarColor,
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      SizedBox(width: 15),
-                      Icon(Icons.search, color: Colors.white70),
-                      SizedBox(width: 10),
-                      Text(
-                        "Buscar Cliente",
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      const SizedBox(width: 15),
+                      const Icon(Icons.search, color: Colors.white70),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Buscar conversación',
+                            hintStyle: TextStyle(color: Colors.white70),
+                            isDense: true,
+                          ),
+                          onChanged: (value) =>
+                              setState(() => _searchQuery = value),
+                        ),
                       ),
+                      if (_searchQuery.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Icon(
+                              Icons.clear,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -137,13 +186,26 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
               // Lista de Chats
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                  itemCount: chats.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final chat = chats[index];
-                    return _buildChatCard(chat);
+                child: Builder(
+                  builder: (context) {
+                    final filteredChats = _searchQuery.isEmpty
+                        ? chats
+                        : chats
+                              .where(
+                                (c) => (c['name'] as String)
+                                    .toLowerCase()
+                                    .contains(_searchQuery.toLowerCase()),
+                              )
+                              .toList();
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                      itemCount: filteredChats.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final chat = filteredChats[index];
+                        return _buildChatCard(chat, cardColor, accentRed);
+                      },
+                    );
                   },
                 ),
               ),
@@ -155,55 +217,67 @@ class _MessagesScreenState extends State<MessagesScreen> {
       // FAB
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 70.0),
-        child: Container(
-          width: 55,
-          height: 55,
-          decoration: BoxDecoration(
-            color: AppColors.fabBg.withOpacity(0.5),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white30, width: 1),
-          ),
-          child: const Icon(
-            Icons.add_comment_rounded,
-            color: AppColors.textColor,
-            size: 28,
+        child: GestureDetector(
+          onTap: () {
+            // TODO: Abrir formulario para nuevo mensaje
+          },
+          child: Container(
+            width: 55,
+            height: 55,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6C639F).withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white30, width: 1),
+            ),
+            child: const Icon(
+              Icons.add_comment_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
         ),
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: Container(
-        height: 80,
-        color: AppColors.navBarBg,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home_filled, "Inicio"),
-            _buildNavItem(1, Icons.people, "Clientes"),
-            _buildNavItem(2, Icons.calendar_today, "Calendario"),
-            _buildNavItem(
-              3,
-              Icons.mail,
-              "Mensajes",
-              badgeCount: 2,
-              accentColor: AppColors.accentRed,
-            ),
-          ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: 80,
+          color: navBarColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.home_filled, "Inicio"),
+              _buildNavItem(1, Icons.people, "Clientes"),
+              _buildNavItem(2, Icons.calendar_today, "Calendario"),
+              _buildNavItem(
+                3,
+                Icons.mail,
+                "Mensajes",
+                badgeCount: 2,
+                accentColor: accentRed,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildChatCard(Map<String, dynamic> chat) {
+  Widget _buildChatCard(
+    Map<String, dynamic> chat,
+    Color cardColor,
+    Color accentRed,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.chatCardBg,
+        color: cardColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
-          const CircleAvatar(radius: 25, backgroundColor: AppColors.avatarBg),
+          const CircleAvatar(radius: 25, backgroundColor: Color(0xFFE0E0E0)),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
@@ -212,7 +286,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 Text(
                   chat['name'],
                   style: const TextStyle(
-                    color: AppColors.textColor,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -239,13 +313,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.accentRed,
+                    color: accentRed,
                     shape: BoxShape.circle,
                   ),
                   child: Text(
                     chat['count'].toString(),
                     style: const TextStyle(
-                      color: AppColors.textColor,
+                      color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -272,7 +346,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     Color? accentColor,
   }) {
     bool isSelected = _selectedIndex == index;
-    final color = isSelected ? AppColors.textColor : Colors.white54;
+    final color = isSelected ? Colors.white : Colors.white54;
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
@@ -296,12 +370,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     decoration: BoxDecoration(
                       color: accentColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
+                      border: Border.all(
+                        color: const Color(0xFF332D43),
+                        width: 1.5,
+                      ),
                     ),
                     child: Text(
                       badgeCount.toString(),
                       style: const TextStyle(
-                        color: AppColors.textColor,
+                        color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
