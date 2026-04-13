@@ -68,27 +68,27 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '¡Hola, $nombre!',
-                          style: const TextStyle(
-                            color: AppColors.textColor,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '¡Hola, $nombre!',
+                            style: const TextStyle(
+                              color: AppColors.textColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Aquí tienes tu plan de hoy',
-                          style: TextStyle(
-                            color: AppColors.subTextColor,
-                            fontSize: 14,
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Aquí tienes tu plan de hoy',
+                            style: TextStyle(
+                              color: AppColors.subTextColor,
+                              fontSize: 14,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                     ),
                     Row(
                       children: [

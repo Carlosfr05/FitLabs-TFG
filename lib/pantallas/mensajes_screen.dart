@@ -1,99 +1,207 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
+import 'package:pantallas_fitlabs/data/chat_service.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
+import 'package:pantallas_fitlabs/data/cliente_service.dart';
+import 'package:pantallas_fitlabs/pantallas/chat_screen.dart';
 
-class MensajesScreen extends StatelessWidget {
+class MensajesScreen extends StatefulWidget {
   const MensajesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Eliminamos MaterialApp y usamos Theme para mantener la estética
-    return Theme(
-      data: ThemeData(
-        fontFamily: 'Roboto',
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
-      child: const MessagesScreen(),
-    );
-  }
+  State<MensajesScreen> createState() => _MensajesScreenState();
 }
 
-class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key});
-
-  @override
-  State<MessagesScreen> createState() => _MessagesScreenState();
-}
-
-class _MessagesScreenState extends State<MessagesScreen> {
+class _MensajesScreenState extends State<MensajesScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  List<Map<String, dynamic>> _chats = [];
+  bool _cargando = true;
+  RealtimeChannel? _channel;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarChats();
+    _suscribirse();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    if (_channel != null) {
+      ChatService.cancelarSuscripcion(_channel!);
+    }
     super.dispose();
   }
 
-  // Datos de los chats
-  final List<Map<String, dynamic>> chats = [
-    {
-      "name": "José Luís Sánchez González",
-      "msg": "Me gustaría ver si puedes corregir...",
-      "time": "08 : 52",
-      "count": 1,
-    },
-    {
-      "name": "José Luís Reina Sanchez",
-      "msg": "Sin problema, paso tu sesión a las...",
-      "time": "08 : 34",
-      "count": 1,
-    },
-    {
-      "name": "Juan Ruíz Marín",
-      "msg": "¿Podrías revisarme estas macros?...",
-      "time": "08 : 09",
-      "count": 0,
-    },
-    {
-      "name": "Coraima Medina Lechuga",
-      "msg": "Te armo un mini-programa de...",
-      "time": "Ayer",
-      "count": 0,
-    },
-    {
-      "name": "Carlos Luis Ramos García",
-      "msg": "Entre 2 y 3 minutos de descanso...",
-      "time": "Ayer",
-      "count": 0,
-    },
-    {
-      "name": "Jaime Castanedo Mateos",
-      "msg": "Si te molesta la espalda baja, camb...",
-      "time": "Ayer",
-      "count": 0,
-    },
-  ];
+  Future<void> _cargarChats() async {
+    final userId = SessionService.userId;
+    if (userId == null) return;
+    final data = await ChatService.fetchChats(userId);
+    if (!mounted) return;
+    setState(() {
+      _chats = data;
+      _cargando = false;
+    });
+  }
+
+  void _suscribirse() {
+    final userId = SessionService.userId;
+    if (userId == null) return;
+    _channel = ChatService.suscribirseAChats(userId, () {
+      _cargarChats();
+    });
+  }
+
+  void _abrirChat(Map<String, dynamic> chat) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(
+          chatId: chat['chatId'],
+          otherUserName: chat['nombre'],
+          otherUserAvatar: chat['avatarUrl'],
+        ),
+      ),
+    );
+    // Al volver, recargar chats para actualizar contadores
+    _cargarChats();
+  }
+
+  void _mostrarNuevoChat() async {
+    final userId = SessionService.userId;
+    if (userId == null) return;
+
+    // Obtener la lista de contactos (mis clientes si soy entrenador, o mis entrenadores)
+    List<Map<String, dynamic>> contactos = [];
+    if (SessionService.isEntrenador) {
+      final clientes = await ClienteService.fetchMisClientes(userId);
+      for (final rel in clientes) {
+        final perfil = rel['perfiles'] ?? rel['client'];
+        if (perfil != null) {
+          contactos.add({
+            'id': perfil['id'],
+            'nombre': perfil['nombre'] ?? perfil['username'] ?? 'Usuario',
+          });
+        }
+      }
+    } else {
+      // Cliente: buscar mis entrenadores
+      final rels = await Supabase.instance.client
+          .from('clientes_entrenador')
+          .select('trainer_id, perfiles!trainer_id(id, username, nombre)')
+          .eq('client_id', userId)
+          .eq('status', 'aceptado');
+      for (final rel in rels) {
+        final perfil = rel['perfiles'];
+        if (perfil != null) {
+          contactos.add({
+            'id': perfil['id'],
+            'nombre': perfil['nombre'] ?? perfil['username'] ?? 'Usuario',
+          });
+        }
+      }
+    }
+
+    if (!mounted) return;
+    if (contactos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No tienes contactos disponibles')),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Nueva conversación',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...contactos.map((c) {
+                final initial = (c['nombre'] as String).isNotEmpty
+                    ? (c['nombre'] as String)[0].toUpperCase()
+                    : '?';
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: const Color(0xFF6C639F),
+                    child: Text(initial,
+                        style: const TextStyle(color: Colors.white)),
+                  ),
+                  title: Text(c['nombre'],
+                      style: const TextStyle(color: Colors.white)),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final chatId =
+                        await ChatService.getOrCreateChat(userId, c['id']);
+                    if (!mounted) return;
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          chatId: chatId,
+                          otherUserName: c['nombre'],
+                        ),
+                      ),
+                    );
+                    _cargarChats();
+                  },
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatTime(String? timestamp) {
+    if (timestamp == null) return '';
+    final dt = DateTime.tryParse(timestamp)?.toLocal();
+    if (dt == null) return '';
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inDays == 0) {
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } else if (diff.inDays == 1) {
+      return 'Ayer';
+    } else if (diff.inDays < 7) {
+      const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+      return dias[dt.weekday - 1];
+    } else {
+      return '${dt.day}/${dt.month}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final bgDark = const Color(0xFF1E1A2B);
-    final bgLight = const Color(0xFF352B55);
-    final searchBarColor = const Color(0xFF463C6E);
-    final cardColor = const Color(0xFF2E2744);
-    final accentRed = const Color(0xFFFF3B30);
+    const searchBarColor = Color(0xFF463C6E);
+    const cardColor = Color(0xFF2E2744);
+    const accentRed = Color(0xFFFF3B30);
+
+    final navIndex = SessionService.isEntrenador ? 3 : 2;
 
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [bgLight, const Color(0xFF2A223E), bgDark],
-            stops: const [0.0, 0.3, 1.0],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           bottom: false,
           child: Column(
@@ -165,41 +273,68 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
               // Lista de Chats
               Expanded(
-                child: Builder(
-                  builder: (context) {
-                    final filteredChats = _searchQuery.isEmpty
-                        ? chats
-                        : chats
-                              .where(
-                                (c) => (c['name'] as String)
-                                    .toLowerCase()
-                                    .contains(_searchQuery.toLowerCase()),
-                              )
-                              .toList();
-                    return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                      itemCount: filteredChats.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final chat = filteredChats[index];
-                        return _buildChatCard(chat, cardColor, accentRed);
-                      },
-                    );
-                  },
-                ),
+                child: _cargando
+                    ? const Center(
+                        child:
+                            CircularProgressIndicator(color: Colors.white70))
+                    : RefreshIndicator(
+                        onRefresh: _cargarChats,
+                        child: Builder(
+                          builder: (context) {
+                            final filtered = _searchQuery.isEmpty
+                                ? _chats
+                                : _chats
+                                    .where((c) => (c['nombre'] as String)
+                                        .toLowerCase()
+                                        .contains(
+                                            _searchQuery.toLowerCase()))
+                                    .toList();
+
+                            if (filtered.isEmpty) {
+                              return ListView(
+                                children: const [
+                                  SizedBox(height: 80),
+                                  Icon(Icons.chat_bubble_outline,
+                                      color: Colors.white24, size: 64),
+                                  SizedBox(height: 16),
+                                  Center(
+                                    child: Text(
+                                      'Sin conversaciones',
+                                      style: TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 16),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return ListView.separated(
+                              padding: const EdgeInsets.fromLTRB(
+                                  20, 0, 20, 100),
+                              itemCount: filtered.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final chat = filtered[index];
+                                return _buildChatCard(
+                                    chat, cardColor, accentRed);
+                              },
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),
         ),
       ),
 
-      // FAB
+      // FAB — Nuevo chat
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 70.0),
         child: GestureDetector(
-          onTap: () {
-            // TODO: Abrir formulario para nuevo mensaje
-          },
+          onTap: _mostrarNuevoChat,
           child: Container(
             width: 55,
             height: 55,
@@ -218,7 +353,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
+      bottomNavigationBar: AppBottomNavBar(currentIndex: navIndex),
     );
   }
 
@@ -227,71 +362,90 @@ class _MessagesScreenState extends State<MessagesScreen> {
     Color cardColor,
     Color accentRed,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(radius: 25, backgroundColor: Color(0xFFE0E0E0)),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final nombre = chat['nombre'] as String;
+    final initial =
+        nombre.isNotEmpty ? nombre[0].toUpperCase() : '?';
+    final unread = chat['unreadCount'] as int? ?? 0;
+
+    return GestureDetector(
+      onTap: () => _abrirChat(chat),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 25,
+              backgroundColor: const Color(0xFF6C639F),
+              child: Text(initial,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20)),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    nombre,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight:
+                          unread > 0 ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    chat['lastMessage'] ?? '',
+                    style: const TextStyle(
+                        color: Colors.white70, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  chat['name'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                  _formatTime(chat['lastMessageTime']?.toString()),
+                  style:
+                      const TextStyle(color: Colors.white60, fontSize: 11),
+                ),
+                const SizedBox(height: 5),
+                if (unread > 0)
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: accentRed,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      unread.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                else
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white60,
+                    size: 14,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  chat['msg'],
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                chat['time'],
-                style: const TextStyle(color: Colors.white60, fontSize: 11),
-              ),
-              const SizedBox(height: 5),
-              if (chat['count'] > 0)
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: accentRed,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    chat['count'].toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                )
-              else
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white60,
-                  size: 14,
-                ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
