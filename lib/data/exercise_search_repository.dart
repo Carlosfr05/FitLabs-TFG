@@ -1,28 +1,58 @@
-import 'package:http/http.dart' as http;
-import 'exercise_search_response.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart'; // <--- IMPORTANTE para rootBundle
+import 'exercise_search_response.dart';
+import 'exercise.dart'; // <--- Asegúrate de que el nombre sea correcto
 
 class ExerciseSearchRepository {
+  // Variable para guardar el JSON en memoria una vez cargado
+  List<Exercise>? _allExercises;
+
   Future<ExerciseSearchResponse?> searchExercises(
     String query,
     int page,
   ) async {
-    int offset = (page - 1) * 10;
     try {
-      final uri = Uri.https('exercisedb.dev', '/api/v1/exercises/search', {
-        'q': query,
-        'offset': offset.toString(),
-        'limit': '10',
-      });
-      final response = await http.get(uri).timeout(const Duration(seconds: 10));
-      if (response.statusCode == 200) {
-        var decodedJson = jsonDecode(response.body);
-        ExerciseSearchResponse exerciseResponse =
-            ExerciseSearchResponse.fromJson(decodedJson);
-        return exerciseResponse;
-      } else {
-        return null;
+      // 1. CARGAR EL ARCHIVO (Solo la primera vez)
+      if (_allExercises == null) {
+        final String response = await rootBundle.loadString(
+          'assets/json/exercises.json',
+        );
+        final List<dynamic> decodedJson = jsonDecode(response);
+
+        // Convertimos el JSON en nuestra lista de objetos Exercise
+        _allExercises = decodedJson.map((e) => Exercise.fromJson(e)).toList();
       }
+
+      // 2. FILTRADO (Buscamos por nombre o por músculo)
+      final String searchQuery = query.toLowerCase();
+
+      List<Exercise> filteredList = _allExercises!.where((exercise) {
+        final nameMatch = exercise.name.toLowerCase().contains(searchQuery);
+        final muscleMatch = exercise.primaryMuscles.any(
+          (m) => m.toLowerCase().contains(searchQuery),
+        );
+        return nameMatch || muscleMatch;
+      }).toList();
+
+      // 3. PAGINACIÓN MANUAL (Simulamos lo que hacía la API)
+      int limit = 10;
+      int start = (page - 1) * limit;
+      int end = start + limit;
+
+      // Control de errores en los índices
+      if (start >= filteredList.length) {
+        return ExerciseSearchResponse(exercisesList: [], totalPages: 0);
+      }
+      if (end > filteredList.length) end = filteredList.length;
+
+      // 4. DEVOLVER EL RESULTADO
+      List<Exercise> pagedList = filteredList.sublist(start, end);
+      int totalPages = (filteredList.length / limit).ceil();
+
+      return ExerciseSearchResponse(
+        exercisesList: pagedList,
+        totalPages: totalPages,
+      );
     } catch (e) {
       return null;
     }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/data/exercise.dart';
+import 'package:pantallas_fitlabs/pantallas/exercise_config_screen.dart';
 
 class CrearRutinaScreen extends StatefulWidget {
   const CrearRutinaScreen({super.key});
@@ -9,247 +11,164 @@ class CrearRutinaScreen extends StatefulWidget {
 }
 
 class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
+  List<ConfiguredExercise> listaEjerciciosConfigurados = [];
+  final TextEditingController _tituloController = TextEditingController(
+    text: "Sesión entrenamiento PUSH - hipertrofia",
+  );
+  // Nuevo controlador para el comentario general
+  final TextEditingController _comentarioGeneralController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    _tituloController.dispose();
+    _comentarioGeneralController.dispose();
+    super.dispose();
+  }
+
+  void _abrirBuscador() async {
+    final resultado = await Navigator.pushNamed(context, '/search-ejercicio');
+
+    if (resultado != null && resultado is ConfiguredExercise) {
+      setState(() {
+        listaEjerciciosConfigurados.add(resultado);
+      });
+    }
+  }
+
+  Future<bool?> _showConfirmDeleteDialog(String exerciseName) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.secondarySurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          '¿Eliminar ejercicio?',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Se eliminará "$exerciseName" de la rutina, incluyendo todas sus series y notas. Esta acción no se puede deshacer.',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ATRÁS', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'ELIMINAR',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      resizeToAvoidBottomInset:
-          false, // Evita que el teclado rompa el diseño al abrirse
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: AppColors.bgGradient
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           child: Column(
             children: [
-              // HEADER (Fijo)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          "Crear Rutina",
-                          style: TextStyle(
-                            color: AppColors.textColor,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 40), // Equilibrio visual flecha
-                  ],
-                ),
-              ),
-
-              // CONTENIDO SCROLLABLE
+              _buildHeader(),
               Expanded(
                 child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 15),
-
-                      // --- SELECTOR DE CLIENTE ---
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF5A5290),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: RichText(
-                                text: const TextSpan(
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontFamily: 'Sans',
-                                  ), // Asegura fuente base
-                                  children: [
-                                    TextSpan(
-                                      text: "Cliente seleccionado: ",
-                                      style: TextStyle(color: Colors.white70),
-                                    ),
-                                    TextSpan(
-                                      text: "Alejandro Perez García",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const Icon(
-                              Icons.more_vert,
-                              color: Colors.white70,
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ),
+                      _buildSelectorCliente(),
                       const SizedBox(height: 25),
-
-                      // --- INPUT TÍTULO (CORREGIDO) ---
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Título:",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                          TextField(
-                            controller: TextEditingController(
-                              text: "Sesión entrenamiento PUSH - hipertrofia",
-                            ),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.normal,
-                            ),
-                            cursorColor: Colors.white,
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 8,
-                              ), // Texto pegado a la línea
-                              // Línea inferior blanca (estado normal)
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFD5D0FF),
-                                  width: 1.0,
-                                ),
-                              ),
-                              // Línea inferior blanca más gruesa (foco)
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.white,
-                                  width: 2.0,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildInputTitulo(),
                       const SizedBox(height: 30),
 
                       // --- LISTA DE EJERCICIOS ---
-
-                      // Ejercicio 1
-                      _buildExerciseCard(
-                        title: "Press banca plano mancuernas",
-                        series: "3",
-                        reps: "8 - 10",
-                        kg: "25",
-                        // iconPlaceholder: Icons.fitness_center,
-                        // CAMBIA ESTO por tu imagen real cuando la tengas:
-                        imageAsset: "assets/images/bench_press.png",
-                      ),
-
-                      // Ejercicio 2
-                      _buildExerciseCard(
-                        title: "Peck deck en máquina",
-                        series: "4",
-                        reps: "10 - 12",
-                        kg: "45",
-                        imageAsset: "assets/images/peck_deck.png",
-                      ),
-
-                      // Ejercicio 3
-                      _buildExerciseCard(
-                        title: "Extensión triceps en polea",
-                        series: "3",
-                        reps: "10 - 12",
-                        kg: "35",
-                        imageAsset: "assets/images/triceps.png",
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // --- BOTÓN AGREGAR EJERCICIO ---
-                      Material(
-                        color: AppColors.accentPurple,
-                        borderRadius: BorderRadius.circular(6),
-                        child: InkWell(
-                          onTap: () {
-                            // Acción agregar
-                          },
-                          borderRadius: BorderRadius.circular(6),
-                          child: Container(
-                            width: 220,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Agregar nuevo ejercicio",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
+                      if (listaEjerciciosConfigurados.isEmpty)
+                        _buildEmptyState()
+                      else
+                        ...listaEjerciciosConfigurados.map((ejercicio) {
+                          return _buildExerciseCard(
+                            ejercicio: ejercicio,
+                            onDelete: () async {
+                              final confirm = await _showConfirmDeleteDialog(
+                                ejercicio.exercise.name,
+                              );
+                              if (confirm == true) {
+                                if (!context.mounted) return;
+                                setState(() {
+                                  listaEjerciciosConfigurados.removeWhere(
+                                    (e) => e.instanceId == ejercicio.instanceId,
+                                  );
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      "${ejercicio.exercise.name} eliminado",
+                                    ),
+                                    duration: const Duration(seconds: 2),
+                                    backgroundColor: Colors.grey[800],
+                                  ),
+                                );
+                              }
+                            },
+                            onInfo: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/exercise-detail',
+                                arguments: ejercicio.exercise,
+                              );
+                            },
+                            onEdit: () async {
+                              final resultadoEditado = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ExerciseConfigScreen(
+                                    exercise: ejercicio.exercise,
+                                    existingConfig: ejercicio,
                                   ),
                                 ),
-                                SizedBox(width: 8),
-                                Icon(Icons.add, color: Colors.white, size: 18),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                              );
 
-                      const SizedBox(height: 30),
+                              if (resultadoEditado != null &&
+                                  resultadoEditado is ConfiguredExercise) {
+                                setState(() {
+                                  int index = listaEjerciciosConfigurados
+                                      .indexWhere(
+                                        (e) =>
+                                            e.instanceId ==
+                                            ejercicio.instanceId,
+                                      );
+                                  if (index != -1) {
+                                    listaEjerciciosConfigurados[index] =
+                                        resultadoEditado;
+                                  }
+                                });
+                              }
+                            },
+                          );
+                        }),
 
-                      // --- BOTÓN CREAR SESIÓN ---
-                      Container(
-                        width: 180,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFFD5D0FF), width: 1.5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            // Acción guardar
-                            Navigator.pop(context);
-                          },
-                          child: const Text(
-                            "Crear Sesión",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+                      const SizedBox(height: 15),
+                      _buildAddButton(),
+                      const SizedBox(height: 25),
 
+                      // --- SECCIÓN DE COMENTARIO GENERAL ---
+                      _buildGeneralCommentSection(),
+
+                      const SizedBox(height: 20),
+                      _buildCreateSessionButton(),
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -262,93 +181,177 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
     );
   }
 
-  // --- WIDGET TARJETA DE EJERCICIO ---
   Widget _buildExerciseCard({
-    required String title,
-    required String series,
-    required String reps,
-    required String kg,
-    String? imageAsset, // Ruta de imagen opcional
-    IconData iconPlaceholder = Icons.image, // Icono por defecto
+    required ConfiguredExercise ejercicio,
+    required VoidCallback onDelete,
+    required VoidCallback onInfo,
+    required VoidCallback onEdit,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 1. FOTO / ICONO
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: onEdit,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.cardBg,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                ejercicio.exercise.thumbnailImageUrl,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Container(
+                  width: 60,
+                  height: 60,
+                  color: Colors.white10,
+                  child: const Icon(
+                    Icons.fitness_center,
+                    color: Colors.white24,
+                  ),
+                ),
+              ),
             ),
-            // Si tienes imágenes, usa Image.asset. Si no, usa el icono.
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: imageAsset != null
-                  // ? Image.asset(imageAsset, fit: BoxFit.cover) // DESCOMENTAR CUANDO TENGAS IMAGENES
-                  ? Icon(
-                      Icons.fitness_center,
-                      color: Colors.black87,
-                      size: 30,
-                    ) // Placeholder temporal
-                  : Icon(iconPlaceholder, color: Colors.black87, size: 30),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ejercicio.exercise.name.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    ejercicio.notes.isEmpty
+                        ? "Sin comentario agregado."
+                        : ejercicio.notes,
+                    style: const TextStyle(color: Colors.white60, fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 15),
-
-          // 2. INFO
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 16),
+            Column(
               children: [
-                // Título + Menú
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 5),
-                      child: Icon(
-                        Icons.more_vert,
-                        color: Colors.white70,
-                        size: 18,
-                      ),
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: onDelete,
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(height: 12),
-
-                // Stats (Series - Reps - Kg)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatItem("Series", series),
-                    _buildStatItem("Reps", reps),
-                    _buildStatItem("kg", kg),
-                    const SizedBox(width: 5),
-                  ],
+                GestureDetector(
+                  onTap: onInfo,
+                  child: const Icon(
+                    Icons.info_outline,
+                    color: AppColors.accentLila,
+                    size: 22,
+                  ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGeneralCommentSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "COMENTARIOS DE LA RUTINA",
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _comentarioGeneralController,
+          maxLines: 3,
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          decoration: InputDecoration(
+            hintText: 'Añade instrucciones generales para esta sesión...',
+            hintStyle: const TextStyle(color: Colors.white24),
+            filled: true,
+            fillColor: AppColors.cardBg.withValues(alpha: 0.5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(15),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 20,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const Expanded(
+            child: Center(
+              child: Text(
+                "Crear Rutina",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectorCliente() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.secondarySurface,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.person_outline, color: Colors.white70, size: 20),
+          SizedBox(width: 10),
+          Text(
+            "Cliente: Alejandro Perez García",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -356,23 +359,109 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
+  Widget _buildInputTitulo() {
+    return TextField(
+      controller: _tituloController,
+      style: const TextStyle(color: Colors.white, fontSize: 15),
+      decoration: InputDecoration(
+        labelText: "Título de la rutina",
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: AppColors.dimmedColor),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // IMAGEN PNG
+          // Asegúrate de añadir la ruta en tu pubspec.yaml
+          Image.asset(
+            'assets/images/mancuerna.png',
+            width: 180, // Ajusta el tamaño según tu imagen
+            height: 180,
+            fit: BoxFit.contain,
+            // Este opacity es opcional, por si el PNG es muy brillante
+            // y quieres que se fusione mejor con el fondo
+            opacity: const AlwaysStoppedAnimation(0.8),
+            errorBuilder: (context, error, stackTrace) {
+              // Si aún no has puesto el archivo, mostrará un icono por defecto
+              return const Icon(
+                Icons.add_card,
+                size: 80,
+                color: Colors.white10,
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+          // TEXTO
+          const Text(
+            "Tu rutina está vacía",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "Pulsa el botón de abajo para empezar\na configurar tus ejercicios.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white54, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddButton() {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.accentPurple,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      onPressed: _abrirBuscador,
+      icon: const Icon(Icons.add, color: Colors.white),
+      label: const Text(
+        "Agregar nuevo ejercicio",
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildCreateSessionButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: AppColors.accentLila),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
+        onPressed: () {
+          // Aquí enviarías tanto listaEjerciciosConfigurados como _comentarioGeneralController.text
+          Navigator.pop(context);
+        },
+        child: const Text(
+          "GUARDAR RUTINA",
+          style: TextStyle(
+            color: AppColors.accentLila,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ],
+      ),
     );
   }
 }

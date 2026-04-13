@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pantallas_fitlabs/data/exercise.dart';
+import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/login.dart';
 import 'package:pantallas_fitlabs/pantallas/resumen_dia.dart';
 import 'package:pantallas_fitlabs/pantallas/mis_clientes.dart';
@@ -9,6 +11,7 @@ import 'package:pantallas_fitlabs/pantallas/registrarse.dart';
 import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
 import 'package:pantallas_fitlabs/pantallas/detalle_cliente.dart';
 import 'package:pantallas_fitlabs/pantallas/mensajes_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/search_exercise_screen.dart';
 
 const String supabaseUrl = 'https://dsvxjscgruadxqelwqaj.supabase.co';
 const String supabaseAnonKey =
@@ -51,6 +54,16 @@ class MainApp extends StatelessWidget {
         '/registrarse': (context) => const RegistrarseScreen(),
         '/crear-rutina': (context) => const CrearRutinaScreen(),
         '/detalle-cliente': (context) => const DetalleClienteScreen(),
+        '/search-ejercicio': (context) => const SearchExerciseScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/exercise-detail') {
+          final args = settings.arguments as Exercise;
+          return MaterialPageRoute(
+            builder: (context) => ExerciseDetailScreen(exercise: args),
+          );
+        }
+        return null;
       },
     );
   }
