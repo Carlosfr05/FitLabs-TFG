@@ -1,0 +1,63 @@
+% ============================================================
+%  CAPÍTULO 8 – Viabilidad, Recursos y Presupuesto
+% ============================================================
+\chapter{Viabilidad, Recursos y Presupuesto}
+
+\section{Estudio de viabilidad técnica}
+
+FitLabs es técnicamente viable por las siguientes razones:
+
+\begin{itemize}
+  \item \textbf{Tecnologías maduras y documentadas}: Flutter, Supabase y el ecosistema de APIs REST utilizadas cuentan con documentación oficial completa, comunidades activas y ejemplos de uso en producción.
+  \item \textbf{Herramientas gratuitas}: Todas las tecnologías empleadas disponen de planes gratuitos suficientes para el desarrollo y despliegue del MVP (Flutter es open source, Supabase ofrece plan gratuito, GitHub es gratuito para proyectos académicos).
+  \item \textbf{Infraestructura cloud}: Supabase gestiona la infraestructura de base de datos y autenticación, eliminando la necesidad de configurar y mantener servidores propios.
+  \item \textbf{Escalabilidad}: La arquitectura elegida (Supabase + Flutter) es fácilmente escalable para dar cabida a un mayor número de usuarios sin cambios arquitectónicos significativos.
+\end{itemize}
+
+\section{Recursos materiales y personales}
+
+\subsection{Recursos materiales}
+
+\begin{itemize}
+  \item 2 ordenadores portátiles con Windows 10/11 para el desarrollo.
+  \item 2 smartphones Android para pruebas sobre dispositivo real.
+  \item Conexión a Internet para el acceso a Supabase (cloud), GitHub y las APIs externas.
+\end{itemize}
+
+\subsection{Recursos personales}
+
+El equipo de desarrollo está compuesto por dos alumnos del ciclo DAM:
+
+\begin{itemize}
+  \item \textbf{José Luis Sánchez González}: Responsable principal del frontend Flutter (UI, navegación, módulo de clientes, módulo de rutinas e integración de la API de ejercicios).
+  \item \textbf{Carlos Fraidias del Valle}: Responsable principal del backend Supabase (esquema de base de datos, políticas RLS, autenticación) y del módulo de calendario y mensajería.
+\end{itemize}
+
+El tutor del proyecto, \textbf{José Manuel Ruiz González}, proporcionó orientación metodológica y revisiones parciales durante las entregas del primer y segundo trimestre.
+
+\section{Presupuesto económico}
+
+Dado que el proyecto es de naturaleza académica y todas las herramientas empleadas son gratuitas o de código abierto, el coste económico real es prácticamente nulo. No obstante, a continuación se estima el coste equivalente en un contexto profesional real:
+
+\begin{longtable}{@{}p{6.5cm}p{3cm}p{4cm}@{}}
+\toprule
+\textbf{Concepto} & \textbf{Coste real (€)} & \textbf{Coste equivalente profesional (€)} \\
+\midrule
+\endhead
+Flutter SDK (open source) & 0 & 0 \\
+Supabase (plan Free) & 0 & $\approx$25/mes (plan Pro) \\
+GitHub (plan gratuito) & 0 & $\approx$4/mes (Team) \\
+Figma (plan Starter) & 0 & $\approx$15/mes (Professional) \\
+Dominio para API & 0 & $\approx$10/año \\
+Horas de desarrollo (estimado 300 h $\times$ 20 €/h) & 0 & $\approx$6.000 \\
+Ordenadores y periféricos & 0 & $\approx$1.200 (amortización) \\
+\midrule
+\textbf{Total} & \textbf{0} & \textbf{$\approx$7.600 €/año} \\
+\bottomrule
+\caption{Estimación de presupuesto del proyecto FitLabs.}
+\label{tab:presupuesto}
+\end{longtable}
+
+\section{Necesidades de financiación}
+
+Dado el contexto académico, el proyecto no requiere financiación económica. En una hipotética fase de lanzamiento comercial, el producto podría autofinanciarse a través de un modelo \textit{freemium}: plan gratuito para entrenadores con hasta 5 clientes y plan de pago mensual para volúmenes mayores.

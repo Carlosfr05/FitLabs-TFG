@@ -1,0 +1,85 @@
+% ============================================================
+%  CAPÍTULO 12 – Pruebas y Validación
+% ============================================================
+\chapter{Pruebas y Validación}
+
+\section{Entorno de pruebas}
+
+Las pruebas de FitLabs se realizaron en el siguiente entorno:
+
+\begin{itemize}
+  \item \textbf{Dispositivo físico Android}: Smartphone con Android 12 (API Level 31), utilizado para pruebas de rendimiento y usabilidad real.
+  \item \textbf{Emulador Android}: Android Studio Emulator con imagen de Pixel 6 (Android 13) para pruebas de regresión rápida durante el desarrollo.
+  \item \textbf{Backend}: Proyecto Supabase en plan Free, base de datos poblada con datos de prueba (usuarios, rutinas, ejercicios, mensajes).
+  \item \textbf{Red}: Pruebas realizadas tanto en WiFi (latencia baja) como en datos móviles 4G (latencia variable) para evaluar la resiliencia de las llamadas HTTP.
+\end{itemize}
+
+\section{Plan de pruebas}
+
+\subsection{Módulo de Autenticación}
+
+\begin{longtable}{@{}p{1cm}p{5cm}p{5cm}p{2.5cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Caso de prueba} & \textbf{Resultado esperado} & \textbf{Resultado} \\
+\midrule
+\endhead
+PT-01 & Registro con datos válidos & Usuario creado en Supabase Auth y perfil en tabla \texttt{perfiles} & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-02 & Registro con email ya existente & Mensaje de error informativo mostrado al usuario & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-03 & Login con credenciales correctas & Redirección a \texttt{/resumen} & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-04 & Login con contraseña incorrecta & Mensaje de error sin revelar si el email existe & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-05 & Cierre de sesión & Token invalidado, redirección al login & \textcolor{green!60!black}{\textbf{OK}} \\
+\bottomrule
+\end{longtable}
+
+\subsection{Módulo de Clientes}
+
+\begin{longtable}{@{}p{1cm}p{5cm}p{5cm}p{2.5cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Caso de prueba} & \textbf{Resultado esperado} & \textbf{Resultado} \\
+\midrule
+\endhead
+PT-06 & Listar clientes del entrenador & Solo se muestran los clientes asociados a ese entrenador (RLS) & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-07 & Buscar cliente por nombre & Lista filtrada en tiempo real & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-08 & Acceder al detalle de un cliente & Pantalla con datos del cliente correcto & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-09 & Ver sesiones pasadas del cliente & Lista de sesiones ordenada por fecha & \textcolor{green!60!black}{\textbf{OK}} \\
+\bottomrule
+\end{longtable}
+
+\subsection{Módulo de Rutinas}
+
+\begin{longtable}{@{}p{1cm}p{5cm}p{5cm}p{2.5cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Caso de prueba} & \textbf{Resultado esperado} & \textbf{Resultado} \\
+\midrule
+\endhead
+PT-10 & Buscar ejercicio en la API & Lista de ejercicios con nombre, grupo muscular e imagen & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-11 & Añadir ejercicio a la rutina & Ejercicio aparece en la lista de la rutina con parámetros & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-12 & Guardar rutina en Supabase & Rutina guardada y ejercicios vinculados en la BD & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-13 & Crear rutina sin título & Validación impide el envío, muestra aviso & \textcolor{green!60!black}{\textbf{OK}} \\
+\bottomrule
+\end{longtable}
+
+\subsection{Módulo de Mensajes}
+
+\begin{longtable}{@{}p{1cm}p{5cm}p{5cm}p{2.5cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Caso de prueba} & \textbf{Resultado esperado} & \textbf{Resultado} \\
+\midrule
+\endhead
+PT-14 & Listar conversaciones & Solo chats donde participa el usuario actual & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-15 & Enviar mensaje de texto & Mensaje aparece en la pantalla del remitente & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-16 & Recibir mensaje en tiempo real & El receptor ve el mensaje sin refrescar la pantalla & \textcolor{green!60!black}{\textbf{OK}} \\
+PT-17 & Marcar mensajes como leídos & El contador de no leídos se actualiza correctamente & \textcolor{green!60!black}{\textbf{OK}} \\
+\bottomrule
+\end{longtable}
+
+\section{Resultados y conclusiones de las pruebas}
+
+Todos los casos de prueba definidos en el plan resultaron satisfactorios. Los puntos más críticos, como el aislamiento de datos mediante RLS y la actualización en tiempo real del módulo de mensajes, funcionaron correctamente tanto en emulador como en dispositivo físico con conectividad 4G.
+
+Durante las pruebas se detectaron y corrigieron los siguientes incidentes menores:
+
+\begin{itemize}
+  \item \textbf{Incidencia 1}: En el módulo de Mis Clientes, el buscador no filtraba correctamente nombres con tildes. Solución: normalización del texto de búsqueda antes de la comparación.
+  \item \textbf{Incidencia 2}: La pantalla de Crear Rutina no limpiaba correctamente el estado al navegar hacia atrás y volver a abrirla. Solución: uso de \texttt{initState} para reiniciar la lista de ejercicios.
+\end{itemize}

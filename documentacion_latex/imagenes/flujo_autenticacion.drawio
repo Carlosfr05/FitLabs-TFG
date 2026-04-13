@@ -1,0 +1,94 @@
+<mxfile><diagram name="Flujo Autenticacion FitLabs">
+  <mxGraphModel dx="1000" dy="700" grid="1" gridSize="10">
+    <root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+
+      <!-- INICIO -->
+      <mxCell id="2" value="INICIO" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxGeometry x="430" y="30" width="120" height="50" as="geometry"/>
+      </mxCell>
+
+      <!-- ¿Tiene cuenta? -->
+      <mxCell id="3" value="¿Tiene cuenta?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+        <mxGeometry x="410" y="130" width="160" height="70" as="geometry"/>
+      </mxCell>
+
+      <!-- Pantalla Login -->
+      <mxCell id="4" value="Pantalla Login&#xa;(email + contraseña)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+        <mxGeometry x="590" y="260" width="180" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- Pantalla Registro -->
+      <mxCell id="5" value="Pantalla Registro&#xa;(nombre, email, pass, teléfono)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+        <mxGeometry x="210" y="260" width="200" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- Llamada Supabase Auth Login -->
+      <mxCell id="6" value="Supabase Auth&#xa;signInWithPassword()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="590" y="380" width="180" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- Llamada Supabase Auth Registro -->
+      <mxCell id="7" value="Supabase Auth&#xa;signUp() + INSERT perfiles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="210" y="380" width="200" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- ¿Éxito login? -->
+      <mxCell id="8" value="¿Éxito?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+        <mxGeometry x="605" y="500" width="140" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- ¿Éxito registro? -->
+      <mxCell id="9" value="¿Éxito?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+        <mxGeometry x="220" y="500" width="140" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- Error login -->
+      <mxCell id="10" value="Mostrar error&#xa;(credenciales incorrectas)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="780" y="500" width="170" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- Error registro -->
+      <mxCell id="11" value="Mostrar error&#xa;(email ya registrado)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="30" y="500" width="170" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- Pantalla Resumen -->
+      <mxCell id="12" value="Pantalla Resumen del Día&#xa;(/resumen)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+        <mxGeometry x="395" y="630" width="200" height="60" as="geometry"/>
+      </mxCell>
+
+      <!-- Flechas -->
+      <mxCell id="20" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="21" value="Sí" style="edgeLabel;fontSize=11;" vertex="1" connectable="0" parent="20"><mxGeometry relative="0.5" as="geometry"/></mxCell>
+
+      <mxCell id="22" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="23" value="Sí" style="edgeLabel;fontSize=11;" vertex="1" connectable="0" parent="22"><mxGeometry relative="0.5" as="geometry"/></mxCell>
+
+      <mxCell id="24" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="25" value="No" style="edgeLabel;fontSize=11;" vertex="1" connectable="0" parent="24"><mxGeometry relative="0.5" as="geometry"/></mxCell>
+
+      <mxCell id="26" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="27" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="5" target="7" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="28" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="8" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="29" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="7" target="9" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+      <mxCell id="30" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="8" target="10" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="31" value="No" style="edgeLabel;fontSize=11;" vertex="1" connectable="0" parent="30"><mxGeometry relative="0.5" as="geometry"/></mxCell>
+
+      <mxCell id="32" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="9" target="11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="33" value="No" style="edgeLabel;fontSize=11;" vertex="1" connectable="0" parent="32"><mxGeometry relative="0.5" as="geometry"/></mxCell>
+
+      <mxCell id="34" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="8" target="12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="35" value="Sí" style="edgeLabel;fontSize=11;" vertex="1" connectable="0" parent="34"><mxGeometry relative="0.5" as="geometry"/></mxCell>
+
+      <mxCell id="36" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="9" target="12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="37" value="Sí" style="edgeLabel;fontSize=11;" vertex="1" connectable="0" parent="36"><mxGeometry relative="0.5" as="geometry"/></mxCell>
+
+      <!-- Flechas error -> volver -->
+      <mxCell id="38" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="10" target="4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="39" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="11" target="5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    </root>
+  </mxGraphModel>
+</diagram></mxfile>

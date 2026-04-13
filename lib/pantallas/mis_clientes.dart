@@ -26,7 +26,15 @@ class ClientsScreen extends StatefulWidget {
 
 class _ClientsScreenState extends State<ClientsScreen> {
   // Índice 1 = Clientes
-  int _selectedIndex = 1;
+  final int _selectedIndex = 1;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   final List<Map<String, dynamic>> clients = [
     {
@@ -121,15 +129,43 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       color: searchBarColor,
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        SizedBox(width: 15),
-                        Icon(Icons.search, color: Colors.white70),
-                        SizedBox(width: 10),
-                        Text(
-                          "Buscar Cliente",
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                        const SizedBox(width: 15),
+                        const Icon(Icons.search, color: Colors.white70),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Buscar Cliente',
+                              hintStyle: TextStyle(color: Colors.white70),
+                              isDense: true,
+                            ),
+                            onChanged: (value) =>
+                                setState(() => _searchQuery = value),
+                          ),
                         ),
+                        if (_searchQuery.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.only(right: 12),
+                              child: Icon(
+                                Icons.clear,
+                                color: Colors.white70,
+                                size: 18,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -187,13 +223,26 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
                 // --- Lista de Clientes ---
                 Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
-                    itemCount: clients.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 20),
-                    itemBuilder: (context, index) {
-                      final client = clients[index];
-                      return _buildClientRow(client, accentRed);
+                  child: Builder(
+                    builder: (context) {
+                      final filteredClients = _searchQuery.isEmpty
+                          ? clients
+                          : clients
+                                .where(
+                                  (c) => (c['name'] as String)
+                                      .toLowerCase()
+                                      .contains(_searchQuery.toLowerCase()),
+                                )
+                                .toList();
+                      return ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+                        itemCount: filteredClients.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 20),
+                        itemBuilder: (context, index) {
+                          final client = filteredClients[index];
+                          return _buildClientRow(client, accentRed);
+                        },
+                      );
                     },
                   ),
                 ),
@@ -206,39 +255,47 @@ class _ClientsScreenState extends State<ClientsScreen> {
       // --- FAB ---
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 70.0),
-        child: Container(
-          width: 55,
-          height: 55,
-          decoration: BoxDecoration(
-            color: const Color(0xFF776DAE),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.person_add_alt_1,
-            color: Colors.white,
-            size: 26,
+        child: GestureDetector(
+          onTap: () {
+            // TODO: Abrir formulario para añadir cliente
+          },
+          child: Container(
+            width: 55,
+            height: 55,
+            decoration: const BoxDecoration(
+              color: Color(0xFF776DAE),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_add_alt_1,
+              color: Colors.white,
+              size: 26,
+            ),
           ),
         ),
       ),
 
       // --- Barra de Navegación ---
-      bottomNavigationBar: Container(
-        height: 80,
-        color: navBarColor,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home_filled, "Inicio"),
-            _buildNavItem(1, Icons.people, "Clientes"),
-            _buildNavItem(2, Icons.calendar_today, "Calendario"),
-            _buildNavItem(
-              3,
-              Icons.mail,
-              "Mensajes",
-              badgeCount: 2,
-              accentColor: accentRed,
-            ),
-          ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: 80,
+          color: navBarColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.home_filled, "Inicio"),
+              _buildNavItem(1, Icons.people, "Clientes"),
+              _buildNavItem(2, Icons.calendar_today, "Calendario"),
+              _buildNavItem(
+                3,
+                Icons.mail,
+                "Mensajes",
+                badgeCount: 2,
+                accentColor: accentRed,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -268,19 +325,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
     // 1. Envolvemos todo en un GestureDetector para detectar el clic
     return GestureDetector(
       onTap: () {
-        // 2. Comprobamos si el nombre coincide
-        if (client['name'] == "Juan Ruíz Marín") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              // Aquí pones la pantalla a la que quieres ir
-              builder: (context) => const DetalleClienteScreen(),
-            ),
-          );
-        } else {
-          // Opcional: Lógica para los demás clientes
-          print("Se pulsó otro cliente: ${client['name']}");
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DetalleClienteScreen()),
+        );
       },
       // Para que el clic funcione en toda el área, no solo sobre el texto/iconos
       behavior: HitTestBehavior.opaque,

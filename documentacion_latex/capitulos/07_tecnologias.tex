@@ -1,0 +1,120 @@
+% ============================================================
+%  CAPÍTULO 7 – Tecnologías y Herramientas
+% ============================================================
+\chapter{Tecnologías y Herramientas}
+
+\section{Stack tecnológico final}
+
+En esta sección se describen las tecnologías y herramientas utilizadas en el desarrollo de FitLabs, justificando la elección de cada una frente a las alternativas disponibles.
+
+\subsection{Flutter y Dart}
+
+\textbf{Flutter} es el framework de Google para el desarrollo de aplicaciones nativas multiplataforma a partir de una única base de código. Está basado en el lenguaje de programación \textbf{Dart}, compilado a código nativo ARM mediante compilación \textit{ahead-of-time} (AOT), lo que garantiza un rendimiento equivalente al de aplicaciones nativas.
+
+\begin{itemize}
+  \item \textbf{Versión utilizada}: Flutter SDK \^{}3 / Dart SDK \^{}3.10.1.
+  \item \textbf{Motor gráfico}: Impeller (Android/iOS), que renderiza cada widget directamente en lienzo, sin depender de componentes nativos de la plataforma.
+  \item \textbf{Ventajas en FitLabs}: Permite implementar la interfaz visual de alta fidelidad diseñada en Figma (fondos degradados, tipografías personalizadas, tarjetas con animaciones) de forma consistente en Android e iOS con el mismo código.
+\end{itemize}
+
+\subsection{Supabase}
+
+\textbf{Supabase} es una plataforma BaaS (\textit{Backend as a Service}) de código abierto construida sobre PostgreSQL. Proporciona los siguientes servicios utilizados en FitLabs:
+
+\begin{itemize}
+  \item \textbf{Supabase Auth}: Autenticación de usuarios con email/contraseña, gestión de sesiones y tokens JWT.
+  \item \textbf{Supabase Database}: Base de datos PostgreSQL con soporte completo para relaciones, índices y funciones SQL. Las tablas y relaciones del esquema se detallan en la sección de Análisis (Capítulo~\ref{ch:analisis}).
+  \item \textbf{Row Level Security (RLS)}: Capa de seguridad a nivel de fila que garantiza que cada usuario solo accede a sus propios datos.
+  \item \textbf{Supabase Realtime}: Suscripciones en tiempo real sobre cambios en la base de datos, utilizado en el módulo de mensajes.
+\end{itemize}
+
+\subsection{API de ejercicios}
+
+Para el módulo de búsqueda y selección de ejercicios al crear rutinas, FitLabs consume una API REST externa que proporciona un catálogo extenso de ejercicios con información detallada (nombre, grupo muscular, equipamiento necesario, imagen demostrativa).
+
+La integración se realiza mediante el paquete \texttt{http} de Flutter, con peticiones GET autenticadas mediante \textit{API Key} en los headers de la solicitud.
+
+\subsection{Figma}
+
+\textbf{Figma} fue utilizado como herramienta principal de diseño UI/UX. El proceso de diseño incluyó:
+
+\begin{itemize}
+  \item Prototipado de baja fidelidad (wireframes) de todas las pantallas.
+  \item Prototipado de alta fidelidad con interacciones y transiciones entre pantallas.
+  \item Definición del sistema de diseño: paleta de colores, tipografías, componentes reutilizables (tarjetas, botones, formularios).
+\end{itemize}
+
+La identidad visual de FitLabs se basa en una paleta en tonos púrpura oscuro (\texttt{\#3D2B6B} como color primario), que transmite profesionalidad y dinamismo.
+
+\subsection{Otras herramientas}
+
+\begin{itemize}
+  \item \textbf{Git / GitHub}: Control de versiones y colaboración asíncrona entre los dos desarrolladores.
+  \item \textbf{VS Code}: IDE principal con las extensiones Flutter, Dart y GitHub Copilot.
+  \item \textbf{Android Studio / Android SDK}: Emulador y herramientas de compilación para Android.
+  \item \textbf{flutter\_launcher\_icons}: Generación automática de iconos de la aplicación para Android.
+\end{itemize}
+
+% ============================================================
+\section{Evolución tecnológica: Propuesta inicial vs. solución final}
+\label{sec:evolucion_tecnologica}
+% ============================================================
+
+Uno de los aspectos más enriquecedores del presente proyecto fue la evolución desde la propuesta tecnológica inicial hasta la solución definitivamente adoptada. Esta sección recoge, de forma honesta y analítica, los cambios más relevantes que experimentó el planteamiento del proyecto.
+
+\subsection{Propuesta tecnológica inicial}
+
+En las fases tempranas del proyecto, el equipo exploraba distintos enfoques posibles para construir la plataforma. Las ideas iniciales incluían:
+
+% TODO: Completa esta sub-sección con los detalles reales de vuestra propuesta inicial. Por ejemplo:
+% - ¿Teníais pensado usar un framework diferente (e.g. React Native)?
+% - ¿Considerabais usar Firebase en lugar de Supabase?
+% - ¿El scope inicial era diferente? (¿Más o menos funcionalidades?)
+% - ¿El modelo de base de datos era distinto?
+% A continuación se incluyen ejemplos generales que deberías reemplazar por los reales:
+
+\begin{itemize}
+  \item Utilizar \textbf{React Native} como framework de desarrollo, dado el mayor volumen de recursos y tutoriales disponibles en el momento de la investigación inicial.
+  \item Emplear \textbf{Firebase} como backend, especialmente Firebase Firestore (NoSQL) para el almacenamiento de datos, junto con Firebase Authentication.
+  \item Un alcance funcional más limitado, centrado exclusivamente en la creación de rutinas y el seguimiento de peso, sin incluir el módulo de mensajería ni el calendario.
+  \item Una interfaz de usuario más simple, sin un sistema de diseño definido ni prototipado previo en Figma.
+\end{itemize}
+
+\subsection{Motivos del cambio}
+
+Los principales motivos que llevaron a replantear las decisiones tecnológicas iniciales fueron:
+
+\begin{enumerate}
+  \item \textbf{Flutter sobre React Native}: Tras comparar el rendimiento y la consistencia visual entre ambos frameworks, se comprobó que Flutter ofrecía mayor control sobre la interfaz gráfica y un rendimiento más predecible. El motor gráfico propio de Flutter (sin depender de componentes nativos de la plataforma) facilitó la implementación del diseño elaborado en Figma.
+
+  \item \textbf{Supabase sobre Firebase}: El modelo relacional de Supabase (PostgreSQL) resultó ser más adecuado para los datos estructurados de FitLabs (usuarios, clientes, rutinas, ejercicios, mensajes), donde las relaciones entre entidades son complejas y las consultas relacionales frecuentes. Además, el sistema de Row Level Security nativo de PostgreSQL ofrece un control de acceso más granular que las reglas de seguridad de Firestore. El hecho de que Supabase sea open source y tenga un plan gratuito generoso también influyó en la decisión.
+
+  \item \textbf{Ampliación del alcance}: A medida que el equipo ganó confianza en las tecnologías adoptadas, se decidió ampliar el alcance original para incluir el módulo de mensajería (que aprovecha Supabase Realtime) y el calendario de sesiones, añadiendo un valor diferencial significativo al producto final.
+
+  \item \textbf{Diseño con Figma}: La incorporación de Figma como herramienta de prototipado, no contemplada en el plan inicial, demostró ser fundamental para alinear la visión del equipo, reducir las iteraciones de rediseño durante la implementación y obtener un resultado visualmente más profesional.
+\end{enumerate}
+
+\subsection{Tabla comparativa: Propuesta inicial vs. Solución final}
+
+\begin{longtable}{@{}p{5cm}p{4.5cm}p{4.5cm}@{}}
+\toprule
+\textbf{Aspecto} & \textbf{Propuesta inicial} & \textbf{Solución final} \\
+\midrule
+\endhead
+Framework de desarrollo & React Native & Flutter (Dart) \\
+Backend / BaaS & Firebase (NoSQL) & Supabase (PostgreSQL) \\
+Autenticación & Firebase Auth & Supabase Auth \\
+Modelo de datos & NoSQL (documentos) & Relacional (SQL) \\
+Seguridad de datos & Reglas de Firebase & Row Level Security (RLS) \\
+Módulo de mensajería & No contemplado & Chat 1:1 en tiempo real \\
+Módulo de calendario & No contemplado & Calendario de sesiones \\
+Prototipado UI & Esbozos informales & Figma (alta fidelidad) \\
+Sistema de diseño & No definido & Paleta y componentes FitLabs \\
+Número de pantallas & $\approx$4 & 9 pantallas funcionales \\
+API de ejercicios & No contemplada & API REST externa integrada \\
+\bottomrule
+\caption{Comparativa entre la propuesta inicial y la solución final de FitLabs.}
+\label{tab:evolucion_tecnologica}
+\end{longtable}
+
+Esta evolución refleja la madurez técnica adquirida por el equipo a lo largo del ciclo formativo y la capacidad para investigar, evaluar y adoptar tecnologías más adecuadas al problema real que se pretende resolver.

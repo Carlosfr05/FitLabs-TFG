@@ -1,0 +1,36 @@
+% ============================================================
+%  CAPÍTULO 15 – Conclusiones
+% ============================================================
+\chapter{Conclusiones}
+
+\section{Valoración global del proyecto}
+
+El desarrollo de FitLabs ha supuesto una experiencia completa y enriquecedora que ha permitido aplicar, en un contexto real y con una envergadura significativa, los conocimientos adquiridos a lo largo del ciclo de Desarrollo de Aplicaciones Multiplataforma.
+
+El producto resultante es una aplicación móvil funcional y con una interfaz visual cuidada, que cubre las necesidades principales de un entrenador personal en su día a día: gestión de clientes, creación de rutinas personalizadas, organización del calendario de sesiones y comunicación directa con los clientes.
+
+\section{Grado de cumplimiento de los objetivos}
+
+\begin{itemize}
+  \item \textbf{OF-01 a OF-09}: Todos los objetivos específicos definidos en la introducción se alcanzaron en su totalidad en la versión final entregada.
+  \item La integración de la API de ejercicios (OF-04) presentó la mayor dificultad técnica, especialmente en la gestión del estado de la búsqueda y la sincronización con la lista de ejercicios de la rutina en construcción.
+  \item El módulo de mensajería en tiempo real (OF-06) fue el más complejo en términos de arquitectura, al requerir la comprensión del sistema de suscripciones de Supabase Realtime.
+\end{itemize}
+
+\section{Dificultades encontradas}
+
+\begin{itemize}
+  \item \textbf{Gestión del estado en Flutter}: La ausencia de un gestor de estado formal (Provider, Riverpod, BLoC) fue suficiente para el MVP, pero requirió una coordinación cuidadosa entre los widgets padre e hijo para evitar reconstrucciones innecesarias.
+  \item \textbf{Políticas RLS en Supabase}: La configuración inicial de las políticas de Row Level Security requirió varios ciclos de prueba y error para obtener el comportamiento deseado sin bloquear operaciones legítimas.
+  \item \textbf{Coordinación del equipo}: Trabajar en paralelo con dos ramas de Git y sincronizar los cambios de manera regular sin romper la rama principal supuso un aprendizaje práctico valioso sobre el trabajo colaborativo con control de versiones.
+\end{itemize}
+
+\section{Aprendizajes obtenidos}
+
+\begin{itemize}
+  \item Dominio práctico del framework Flutter y el lenguaje Dart en un proyecto de escala real.
+  \item Experiencia con el ecosistema Supabase y el diseño de bases de datos relacionales seguras.
+  \item Comprensión profunda del ciclo de vida completo de una aplicación móvil: del análisis al despliegue.
+  \item Capacidad para diseñar interfaces de usuario profesionales utilizando Figma como herramienta de prototipado.
+  \item Valoración de la importancia de la planificación y el control de versiones en un proyecto de desarrollo colaborativo.
+\end{itemize}

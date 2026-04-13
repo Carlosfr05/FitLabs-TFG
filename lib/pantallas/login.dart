@@ -1,31 +1,110 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/pantallas/resumen_dia.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:pantallas_fitlabs/core/app_colors.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
-  // --- PALETA DE COLORES (Consistente con las otras pantallas) ---
-  final Color _accentLila = const Color(0xFFD5D0FF); // El lila claro del borde
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _emailFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signIn() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Por favor rellena todos los campos.');
+      return;
+    }
+    if (!email.contains('@')) {
+      setState(() => _errorMessage = 'Introduce un email válido.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      // Crear perfil si no existe (por ejemplo tras confirmar email)
+      if (response.user != null) {
+        final perfil = await Supabase.instance.client
+            .from('perfiles')
+            .select('id')
+            .eq('id', response.user!.id)
+            .maybeSingle();
+        if (perfil == null) {
+          await Supabase.instance.client.from('perfiles').insert({
+            'id': response.user!.id,
+            'username':
+                response.user!.userMetadata?['nombre'] ?? email.split('@')[0],
+            'nombre':
+                response.user!.userMetadata?['nombre'] ?? email.split('@')[0],
+            'email': email,
+            'telefono': response.user!.userMetadata?['telefono'] ?? '',
+            'rol': 'entrenador',
+            'role': 'entrenador',
+          });
+        }
+      }
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/resumen');
+      }
+    } on AuthException catch (e) {
+      final msg = e.message.toLowerCase();
+      if (msg.contains('invalid login') ||
+          msg.contains('invalid credentials')) {
+        setState(() => _errorMessage = 'Email o contraseña incorrectos.');
+      } else if (msg.contains('email not confirmed')) {
+        setState(
+          () => _errorMessage = 'Confirma tu email antes de iniciar sesión.',
+        );
+      } else {
+        setState(() => _errorMessage = e.message);
+      }
+    } catch (e) {
+      setState(() => _errorMessage = 'Error: ${e.toString()}');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Usamos MediaQuery para que sea responsivo
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Color(0xFF3E2B68), Color(0xFF2B2042), Color(0xFF241D35)],
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppColors.loginGradient),
         child: SingleChildScrollView(
           child: SizedBox(
-            height: size.height, // Asegura que ocupe toda la pantalla
+            height: size.height,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 70),
               child: Column(
@@ -34,7 +113,7 @@ class LoginScreen extends StatelessWidget {
                   const Spacer(flex: 1),
 
                   // 1. LOGO CIRCULAR
-                  Image(
+                  const Image(
                     image: AssetImage('assets/images/logoFitlabs.png'),
                     width: 240,
                     height: 240,
@@ -43,13 +122,11 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 30),
 
                   // 2. TEXTO "FitLabs"
-                  // Nota: La fuente de la imagen es custom. Aquí uso una estándar estilizada.
                   const Text(
                     "FitLabs",
                     style: TextStyle(
-                      color: Color(0xFFD5D0FF),
+                      color: AppColors.dimmedColor,
                       fontSize: 56,
-
                       letterSpacing: 1.5,
                       fontFamily: 'RubikVinyl',
                     ),
@@ -58,64 +135,108 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 30),
 
                   // 3. INPUT EMAIL
-                  _buildMinimalInput(label: "Email"),
+                  _buildMinimalInput(
+                    label: "Email",
+                    controller: _emailController,
+                    focusNode: _emailFocus,
+                    nextFocus: _passwordFocus,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
 
                   const SizedBox(height: 30),
 
                   // 4. INPUT CONTRASEÑA
-                  _buildMinimalInput(label: "Contraseña", isPassword: true),
+                  _buildMinimalInput(
+                    label: "Contraseña",
+                    controller: _passwordController,
+                    focusNode: _passwordFocus,
+                    isPassword: true,
+                    onSubmit: _signIn,
+                  ),
+
+                  // 5. MENSAJE DE ERROR
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF6B6B).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: const Color(0xFFFF6B6B).withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Text(
+                        _errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Color(0xFFFF6B6B),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
 
                   const Spacer(flex: 1),
 
-                  // 5. BOTÓN "Iniciar Sesión"
+                  // 6. BOTÓN "Iniciar Sesión"
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ResumenDiaScreen(),
-                          ),
-                        );
-                      },
+                      onPressed: _isLoading ? null : _signIn,
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: _accentLila, width: 2),
+                        side: BorderSide(
+                          color: AppColors.dimmedColor,
+                          width: 2,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        foregroundColor: Colors.white, // Efecto al pulsar
+                        foregroundColor: AppColors.textColor,
                       ),
-                      child: const Text(
-                        "Iniciar Sesión",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.dimmedColor,
+                              ),
+                            )
+                          : const Text(
+                              "Iniciar Sesión",
+                              style: TextStyle(
+                                color: AppColors.textColor,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
 
                   const SizedBox(height: 30),
 
-                  // 6. TEXTO REGISTRO
+                  // 7. TEXTO REGISTRO
                   GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/registrarse');
-                    },
+                    onTap: () => Navigator.pushNamed(context, '/registrarse'),
                     child: RichText(
                       text: const TextSpan(
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(
+                          color: AppColors.textColor,
+                          fontSize: 14,
+                        ),
                         children: [
                           TextSpan(text: "¿No tienes cuenta? "),
                           TextSpan(
                             text: "Regístrate",
                             style: TextStyle(
-                              color: Color(0xFFD5D0FF),
+                              color: AppColors.dimmedColor,
                               fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline, // Subrayado
+                              decoration: TextDecoration.underline,
                             ),
                           ),
                         ],
@@ -133,34 +254,57 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Widget auxiliar para los campos de texto minimalistas
-  Widget _buildMinimalInput({required String label, bool isPassword = false}) {
-    return Column(
-      children: [
-        TextFormField(
-          obscureText: isPassword,
-          textAlign: TextAlign.center, // Texto centrado como en la imagen
-          style: const TextStyle(color: Colors.white, fontSize: 16),
-          cursorColor: _accentLila,
-          decoration: InputDecoration(
-            hintText: label,
-            hintStyle: const TextStyle(
-              color: Color.fromARGB(153, 255, 255, 255),
-            ),
-            // Quitamos bordes laterales y superior, dejamos solo la línea abajo
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFD5D0FF), width: 2),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Color.fromARGB(255, 107, 96, 214),
-                width: 2,
-              ),
-            ),
-            contentPadding: const EdgeInsets.only(bottom: 10),
-          ),
+  Widget _buildMinimalInput({
+    required String label,
+    required TextEditingController controller,
+    FocusNode? focusNode,
+    FocusNode? nextFocus,
+    bool isPassword = false,
+    TextInputType keyboardType = TextInputType.text,
+    VoidCallback? onSubmit,
+  }) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      obscureText: isPassword ? _obscurePassword : false,
+      keyboardType: keyboardType,
+      textAlign: TextAlign.center,
+      textInputAction: nextFocus != null
+          ? TextInputAction.next
+          : TextInputAction.done,
+      onSubmitted: (_) {
+        if (nextFocus != null) {
+          FocusScope.of(context).requestFocus(nextFocus);
+        } else {
+          onSubmit?.call();
+        }
+      },
+      style: const TextStyle(color: AppColors.textColor, fontSize: 16),
+      cursorColor: AppColors.accentLila,
+      decoration: InputDecoration(
+        hintText: label,
+        hintStyle: const TextStyle(color: AppColors.hintText),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.white38,
+                  size: 20,
+                ),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+              )
+            : null,
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: AppColors.dimmedColor, width: 2),
         ),
-      ],
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: AppColors.dimmedColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.only(bottom: 10),
+      ),
     );
   }
 }

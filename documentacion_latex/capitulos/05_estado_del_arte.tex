@@ -1,0 +1,93 @@
+% ============================================================
+%  CAPÍTULO 5 – Estado del Arte
+% ============================================================
+\chapter{Estado del Arte}
+
+\section{El mercado de aplicaciones de fitness y entrenamiento personal}
+
+El mercado global de aplicaciones de salud y fitness experimentó un crecimiento explosivo en los últimos años, alcanzando una valoración de aproximadamente \$15.000 millones en 2023 y con una tasa de crecimiento anual compuesto (CAGR) proyectada del 17\,\% hasta 2028 (Statista, 2024). Este auge está impulsado por el aumento de la concienciación sobre la salud, la penetración masiva de smartphones y la tendencia hacia el entrenamiento personalizado y flexible.
+
+En España, el sector del fitness ha experimentado una notable recuperación y transformación digital tras la pandemia. Los gimnasios y entrenadores personales han adoptado progresivamente herramientas digitales para complementar o sustituir la actividad presencial.
+
+% TODO: Ampliar con datos estadísticos actualizados sobre el número de usuarios de apps de fitness en España y Europa. Fuentes: Statista, Federación Nacional de Empresarios de Instalaciones Deportivas (FNEID), Digital Health 2024 Report.
+
+\section{Aplicaciones similares existentes}
+
+A continuación se analizan las principales soluciones existentes en el mercado, evaluando sus fortalezas y limitaciones en comparación con FitLabs:
+
+\subsection{Trainerize}
+
+Trainerize es una plataforma líder a nivel mundial orientada al entrenamiento personal online. Ofrece herramientas de creación de programas, seguimiento del progreso, mensajería con clientes y facturación integrada.
+
+\textbf{Fortalezas:} Amplio catálogo de ejercicios con vídeos demostrativos, integración con wearables, sistema de pagos.\\
+\textbf{Limitaciones para nuestro contexto:} Modelo de suscripción de pago (\$29/mes en adelante), interfaz en inglés, curva de aprendizaje elevada para usuarios no técnicos, ausencia de personalización profunda de la UI.
+
+\subsection{MyFitnessPal}
+
+Orientada principalmente al seguimiento nutricional y calórico. Incluye funciones de registro de ejercicio pero carece de herramientas específicas para la relación entrenador-cliente.
+
+\subsection{Mindbody}
+
+Plataforma integral para negocios del bienestar (yoga, pilates, spas). Más adecuada para centros deportivos que para entrenadores personales individuales. Precio de entrada alto y orientado a gestión de negocio completo.
+
+\subsection{TrueCoach}
+
+Solución similar a Trainerize, enfocada en la comunicación entrenador-atleta y el seguimiento de la carga de entrenamiento. Interfaz limpia, pero sin versión gratuita funcional.
+
+\subsection{Comparativa resumida}
+
+\begin{longtable}{@{}p{3.8cm}p{2.6cm}p{2.6cm}p{2.6cm}p{2.6cm}@{}}
+\toprule
+\textbf{Característica} & \textbf{Trainerize} & \textbf{Mindbody} & \textbf{TrueCoach} & \textbf{FitLabs} \\
+\midrule
+\endhead
+Gratuito / Open Source & No & No & No & Sí (MVP) \\
+Gestión de clientes & \checkmark & \checkmark & \checkmark & \checkmark \\
+Creación de rutinas & \checkmark & Parcial & \checkmark & \checkmark \\
+Chat integrado & \checkmark & No & \checkmark & \checkmark \\
+Calendario de sesiones & \checkmark & \checkmark & Parcial & \checkmark \\
+Interfaz en español & No & No & No & Sí \\
+Multiplataforma nativo & iOS/Android & iOS/Android & iOS/Android & iOS/Android \\
+Personalizado por cliente & \checkmark & No & \checkmark & \checkmark \\
+Seguimiento de progreso & \checkmark & Parcial & \checkmark & \checkmark \\
+\bottomrule
+\caption{Comparativa de aplicaciones de fitness similares a FitLabs.}
+\label{tab:comparativa}
+\end{longtable}
+
+\section{Tecnologías de desarrollo móvil multiplataforma}
+
+En el ámbito del desarrollo multiplataforma, las principales alternativas vigentes son:
+
+\begin{itemize}
+  \item \textbf{Flutter} (Google, Dart): Alto rendimiento, compilación nativa, UI consistente en todas las plataformas. Adoptado por grandes empresas como BMW, Google Pay y Alibaba.
+  \item \textbf{React Native} (Meta, JavaScript): Gran comunidad, fácil adopción para desarrolladores web. Mayor dependencia del puente nativo, rendimiento inferior a Flutter en escenarios complejos.
+  \item \textbf{Ionic} (Drifty Co., JavaScript/HTML): Basado en WebView, menor rendimiento percibido. Orientado a aplicaciones no demandantes de gráficos o animaciones.
+  \item \textbf{Xamarin / .NET MAUI} (Microsoft, C\#): Integración excelente con el ecosistema .NET. Comunidad más reducida que Flutter o React Native.
+\end{itemize}
+
+La elección de Flutter para FitLabs se justifica por su rendimiento nativo, la capacidad para crear interfaces de usuario ricas y animadas como las diseñadas en Figma, y su creciente adopción en proyectos profesionales.
+
+\section{Soluciones de backend como servicio (BaaS)}
+
+El concepto de \textit{Backend as a Service} (BaaS) ha revolutionado el desarrollo de aplicaciones al abstraer la complejidad de gestión de infraestructura. Las opciones evaluadas para FitLabs fueron:
+
+\begin{itemize}
+  \item \textbf{Firebase} (Google): El estándar de facto para BaaS móvil. Modelo NoSQL (Firestore), excelente SDK de Flutter. Limitaciones: modelo de datos menos flexible para relaciones complejas, coste en producción a escala.
+  \item \textbf{Supabase} (Open Source, PostgreSQL): BaaS open source basado en PostgreSQL. Ofrece autenticación, base de datos relacional, almacenamiento y suscripciones en tiempo real. SDK oficial para Flutter.
+  \item \textbf{AppWrite}: Alternativa open source, auto-alojable. Comunidad más pequeña.
+\end{itemize}
+
+La elección final de Supabase se justifica en detalle en el capítulo de Tecnologías (Sección~\ref{sec:evolucion_tecnologica}).
+
+\section{APIs de ejercicios}
+
+Para el módulo de creación de rutinas, FitLabs integra una API externa de ejercicios. Las principales opciones evaluadas fueron:
+
+\begin{itemize}
+  \item \textbf{ExerciseDB} (RapidAPI): Amplio catálogo con imágenes GIF animadas de demostración. Modelo freemium con límite de peticiones en el plan gratuito.
+  \item \textbf{API Ninjas Exercises API}: Catálogo extenso, peticiones REST simples, plan gratuito con límite razonable.
+  \item \textbf{wger Workout Manager API}: Open source, auto-alojable, interfaz REST estándar.
+\end{itemize}
+
+% TODO: Indicar cuál fue la API finalmente seleccionada y los criterios concretos de elección (límites de peticiones, coste, riqueza de datos).

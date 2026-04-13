@@ -1,0 +1,203 @@
+% ============================================================
+%  CAPÍTULO 10 – Análisis
+% ============================================================
+\chapter{Análisis}
+\label{ch:analisis}
+
+\section{Requisitos Funcionales (RF)}
+
+Los requisitos funcionales describen las capacidades que el sistema debe proporcionar a sus usuarios:
+
+\begin{longtable}{@{}p{1.5cm}p{4cm}p{8.5cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Módulo} & \textbf{Descripción} \\
+\midrule
+\endhead
+RF-01 & Autenticación & El sistema permitirá el registro de nuevos usuarios mediante email, contraseña, nombre completo, fecha de nacimiento y teléfono. \\
+RF-02 & Autenticación & El sistema permitirá el inicio de sesión mediante email y contraseña. \\
+RF-03 & Autenticación & El sistema distinguirá entre usuarios con rol de \textit{entrenador} y rol de \textit{cliente}. \\
+RF-04 & Resumen del Día & La aplicación mostrará al entrenador un resumen diario con el número de sesiones realizadas, pendientes y mensajes no leídos. \\
+RF-05 & Resumen del Día & Se mostrarán los próximos entrenamentos del día con el cliente asignado. \\
+RF-06 & Mis Clientes & El entrenador podrá consultar la lista de sus clientes con acceso a búsqueda por nombre. \\
+RF-07 & Mis Clientes & El entrenador podrá acceder al perfil detallado de cada cliente (IMC, estado, sesiones realizadas, progreso de peso). \\
+RF-08 & Mis Clientes & Se mostrarán las sesiones pasadas del cliente con valoración (sistema de estrellas). \\
+RF-09 & Crear Rutina & El entrenador podrá crear una rutina asignada a un cliente, con título y ejercicios configurables. \\
+RF-10 & Crear Rutina & El sistema permitirá buscar ejercicios en una API externa por nombre o grupo muscular. \\
+RF-11 & Crear Rutina & Cada ejercicio añadido a la rutina tendrá series, repeticiones y peso configurables. \\
+RF-12 & Calendario & El entrenador podrá visualizar las sesiones programadas en un calendario mensual. \\
+RF-13 & Calendario & Las sesiones se mostrarán con el nombre del cliente y el tipo de sesión. \\
+RF-14 & Mensajes & El entrenador podrá consultar la lista de conversaciones con sus clientes. \\
+RF-15 & Mensajes & El sistema permitirá enviar y recibir mensajes de texto en tiempo real. \\
+RF-16 & Mensajes & Los mensajes no leídos se resaltarán con una notificación numérica. \\
+\bottomrule
+\caption{Requisitos funcionales de FitLabs.}
+\label{tab:rf}
+\end{longtable}
+
+\section{Requisitos No Funcionales (RNF)}
+
+\begin{longtable}{@{}p{1.5cm}p{3cm}p{9cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Categoría} & \textbf{Descripción} \\
+\midrule
+\endhead
+RNF-01 & Rendimiento & La aplicación debe responder a las interacciones del usuario en menos de 300 ms en condiciones de red normal. \\
+RNF-02 & Seguridad & Todos los datos en tránsito deben transmitirse cifrados mediante TLS 1.2 o superior. \\
+RNF-03 & Seguridad & Las políticas RLS de Supabase deben garantizar el aislamiento total de datos entre usuarios distintos. \\
+RNF-04 & Disponibilidad & El backend en Supabase (plan Free) ofrece una disponibilidad del 99\,\% según SLA del proveedor. \\
+RNF-05 & Usabilidad & La interfaz debe ser intuitiva, con una curva de aprendizaje asumible sin manual para un usuario con formación básica en smartphones. \\
+RNF-06 & Escalabilidad & La arquitectura debe permitir incorporar nuevos módulos sin refactorización mayor del código existente. \\
+RNF-07 & Compatibilidad & La aplicación debe ser compatible con Android 5.0 (API Level 21) o superior. \\
+RNF-08 & Mantenibilidad & El código debe organizarse en módulos (pantallas) independientes, con navegación centralizada en \texttt{main.dart}. \\
+\bottomrule
+\caption{Requisitos no funcionales de FitLabs.}
+\label{tab:rnf}
+\end{longtable}
+
+\section{Arquitectura del sistema}
+
+FitLabs sigue una arquitectura cliente-servidor \textbf{en tres capas}:
+
+\begin{enumerate}
+  \item \textbf{Capa de presentación} (cliente): Aplicación Flutter en el dispositivo del usuario. Gestiona la UI y la lógica de navegación.
+  \item \textbf{Capa de negocio / API}: Supabase actúa como capa intermedia proporcionando la API PostgREST (generada automáticamente sobre el esquema PostgreSQL) y la API de autenticación.
+  \item \textbf{Capa de datos}: Base de datos PostgreSQL alojada en la infraestructura cloud de Supabase, con políticas RLS aplicadas.
+\end{enumerate}
+
+Adicionalmente, la aplicación se comunica con una \textbf{API REST externa} (catálogo de ejercicios) mediante peticiones HTTP directas desde el cliente Flutter.
+
+\begin{figure}[H]
+  \centering
+  % Sustituir por un diagrama real exportado como imagen
+  \includegraphics[width=0.85\textwidth]{diagrama_arquitectura.png}
+  \caption{Diagrama de arquitectura del sistema FitLabs.}
+  \label{fig:arquitectura}
+\end{figure}
+
+% TODO: Exportar el diagrama de arquitectura desde draw.io o Figma y guardarlo como imagenes/diagrama_arquitectura.png
+
+\section{Esquema de la base de datos}
+
+La base de datos de FitLabs está implementada en PostgreSQL a través de Supabase. A continuación se describe cada tabla del esquema:
+
+\subsection{Tabla \texttt{perfiles}}
+
+Almacena los perfiles de todos los usuarios (entrenadores y clientes).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{PK/FK} & \textbf{Descripción} \\
+\midrule
+id & UUID & PK & Referencia al usuario de Supabase Auth \\
+role & VARCHAR(50) & -- & Rol del usuario: \textit{trainer} o \textit{client} \\
+username & VARCHAR(255) & UNIQUE & Nombre de usuario visible en la app \\
+avatar\_url & TEXT & -- & URL del avatar almacenado en Supabase Storage \\
+bio & TEXT & -- & Descripción breve del perfil \\
+created\_at & TIMESTAMPTZ & -- & Fecha de creación del perfil \\
+\bottomrule
+\end{tabular}
+\caption{Estructura de la tabla \texttt{perfiles}.}
+\end{table}
+
+\subsection{Tabla \texttt{clientes\_entrenador}}
+
+Relación muchos-a-muchos entre entrenadores y clientes.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{PK/FK} & \textbf{Descripción} \\
+\midrule
+id & UUID & PK & Identificador único \\
+trainer\_id & UUID & FK $\to$ perfiles & Perfil del entrenador \\
+client\_id & UUID & FK $\to$ perfiles & Perfil del cliente \\
+status & VARCHAR(50) & -- & Estado: \textit{active}, \textit{pending} \\
+created\_at & TIMESTAMPTZ & -- & Fecha de creación de la relación \\
+\bottomrule
+\end{tabular}
+\caption{Estructura de la tabla \texttt{clientes\_entrenador}.}
+\end{table}
+
+\subsection{Tabla \texttt{rutinas}}
+
+Almacena las rutinas creadas por los entrenadores.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{PK/FK} & \textbf{Descripción} \\
+\midrule
+id & UUID & PK & Identificador único de la rutina \\
+creator\_id & UUID & FK $\to$ perfiles & Entrenador creador \\
+assigned\_client\_id & UUID & FK $\to$ perfiles & Cliente asignado (puede ser nulo) \\
+title & VARCHAR(255) & -- & Nombre de la rutina \\
+description & TEXT & -- & Descripción de la rutina \\
+is\_public & BOOLEAN & -- & Si la rutina es visible para otros \\
+created\_at & TIMESTAMPTZ & -- & Fecha de creación \\
+\bottomrule
+\end{tabular}
+\caption{Estructura de la tabla \texttt{rutinas}.}
+\end{table}
+
+\subsection{Tabla \texttt{ejercicios\_rutina}}
+
+Almacena los ejercicios incluidos en cada rutina con sus parámetros de carga.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{Descripción} \\
+\midrule
+id & UUID & Identificador único \\
+id\_rutina & UUID & FK $\to$ rutinas \\
+id\_ejercicio\_externo & TEXT & ID del ejercicio en la API externa \\
+serie & INT & Número de series \\
+repeticiones & INT & Repeticiones por serie \\
+peso & DECIMAL(10,2) & Peso en kilogramos \\
+duracion & INT & Duración en segundos (ejercicios de tiempo) \\
+descanso & INT & Tiempo de descanso en segundos \\
+orden & INT & Posición del ejercicio en la rutina \\
+\bottomrule
+\end{tabular}
+\caption{Estructura de la tabla \texttt{ejercicios\_rutina}.}
+\end{table}
+
+\subsection{Tablas de comunicación: \texttt{chats} y \texttt{mensajes}}
+
+La tabla \texttt{chats} representa un canal de comunicación entre dos usuarios. La tabla \texttt{mensajes} almacena cada mensaje enviado en un chat.
+
+Las columnas clave de \texttt{chats} son: \texttt{id\_usuario1} y \texttt{id\_usuario2} (FK $\to$ perfiles).\\
+Las columnas clave de \texttt{mensajes} son: \texttt{id\_chat} (FK $\to$ chats), \texttt{id\_remitente} (FK $\to$ perfiles), \texttt{contenido} (TEXT) y \texttt{leido} (BOOLEAN).
+
+\subsection{Tablas de comunidad: \texttt{seguidores}, \texttt{likes\_rutina} y \texttt{comentarios\_rutina}}
+
+Estas tablas replican funcionalidades de red social básicas sobre rutinas compartidas públicamente: seguidores entre usuarios, reacciones y comentarios en rutinas.
+
+\section{Diagrama Entidad-Relación}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{diagrama_er.png}
+  \caption{Diagrama Entidad-Relación del esquema de base de datos de FitLabs.}
+  \label{fig:diagrama_er}
+\end{figure}
+
+\section{Diagrama de flujo -- Proceso de autenticación}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{flujo_autenticacion.png}
+  \caption{Diagrama de flujo del proceso de registro e inicio de sesión en FitLabs.}
+  \label{fig:flujo_auth}
+\end{figure}
+
+% TODO: Crear flujo_autenticacion.png usando draw.io o similar con:
+%  1. Usuario introduce email+contraseña
+%  2. Llamada a Supabase Auth
+%  3. Si éxito -> Crear perfil en tabla perfiles -> Redirigir a /resumen
+%  4. Si error -> Mostrar mensaje de error

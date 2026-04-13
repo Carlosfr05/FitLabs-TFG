@@ -1,0 +1,65 @@
+% ============================================================
+%  CAPÍTULO 14 – Procedimientos de Seguimiento, Control y Calidad
+% ============================================================
+\chapter{Procedimientos de Seguimiento, Control y Calidad}
+
+\section{Procedimiento de evaluación del proyecto}
+
+La evaluación del progreso del proyecto se realizó en tres momentos clave:
+
+\begin{enumerate}
+  \item \textbf{Entrega del 1er trimestre (diciembre 2025)}: Se entregó la primera versión de la memoria con los apartados de análisis, diseño de la base de datos y los primeros módulos implementados (autenticación y resumen del día). El tutor revisó la documentación y proporcionó retroalimentación sobre la estructura y el alcance.
+  \item \textbf{Entrega del 2º trimestre (febrero 2026)}: Se presentó una versión funcional intermedia de la aplicación con los módulos de clientes, rutinas y calendario operativos.
+  \item \textbf{Entrega final (4 de mayo de 2026)}: Versión completa del proyecto con todos los módulos implementados, pruebas realizadas y memoria finalizada.
+\end{enumerate}
+
+\section{Indicadores de calidad}
+
+Los siguientes indicadores se establecieron para medir la calidad de la solución:
+
+\begin{itemize}
+  \item \textbf{Cobertura funcional}: Porcentaje de requisitos funcionales implementados respecto a los definidos en el análisis. \textbf{Meta}: 100\,\%.
+  \item \textbf{Tiempo de carga de pantallas}: Las pantallas con carga de datos remotos deben mostrar los resultados en menos de 2 segundos en condiciones normales de red.
+  \item \textbf{Tasa de fallos en pruebas}: Número de casos de prueba fallidos / total. \textbf{Meta}: 0 fallos en pruebas al momento de la entrega.
+  \item \textbf{Ausencia de credenciales expuestas}: Verificación de que ninguna clave de API ni credencial de Supabase está incluida en el repositorio público.
+\end{itemize}
+
+\section{Procedimiento de gestión de incidencias}
+
+Durante el desarrollo, las incidencias se gestionaron de la siguiente forma:
+
+\begin{enumerate}
+  \item \textbf{Detección}: El desarrollador que detecta un error lo documenta en la descripción del commit o en un comentario en el código (\texttt{// TODO: fix}).
+  \item \textbf{Registro}: Se crea una anotación en el chat del equipo o una \textit{issue} en GitHub con la descripción del problema, el módulo afectado y los pasos de reproducción.
+  \item \textbf{Resolución}: El responsable del módulo afectado asume la corrección en la siguiente sesión de trabajo.
+  \item \textbf{Validación}: Se vuelve a ejecutar el caso de prueba correspondiente para confirmar la corrección.
+\end{enumerate}
+
+\section{Procedimiento de gestión de cambios}
+
+Los cambios en el alcance del proyecto (añadir o eliminar funcionalidades) debían acordarse entre ambos desarrolladores y comunicarse al tutor en la siguiente revisión. Los cambios menores (ajustes de UI, optimizaciones) no requerían aprobación formal.
+
+\section{Participación de usuarios en la evaluación}
+
+El prototipo de Figma fue mostrado a dos personas externas al equipo de desarrollo (potenciales usuarios del perfil de entrenador personal) antes del inicio de la implementación. Sus comentarios influyeron en la simplificación del flujo de creación de rutinas y en la priorización del módulo de mensajería.
+
+\section{Cumplimiento del pliego de condiciones}
+
+La siguiente tabla resume el grado de cumplimiento de los requisitos funcionales:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Requisito} & \textbf{Implementado} & \textbf{Notas} \\
+\midrule
+Autenticación (RF-01 a RF-03) & Sí & Completo \\
+Resumen del Día (RF-04, RF-05) & Sí & Completo \\
+Mis Clientes (RF-06 a RF-08) & Sí & Completo \\
+Crear Rutina + API (RF-09 a RF-11) & Sí & Completo \\
+Calendario (RF-12, RF-13) & Sí & Completo \\
+Mensajes en tiempo real (RF-14 a RF-16) & Sí & Completo \\
+\bottomrule
+\end{tabular}
+\caption{Grado de cumplimiento de requisitos funcionales.}
+\end{table}

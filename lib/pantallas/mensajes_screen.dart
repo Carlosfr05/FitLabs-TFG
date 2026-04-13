@@ -27,6 +27,14 @@ class MessagesScreen extends StatefulWidget {
 class _MessagesScreenState extends State<MessagesScreen> {
   // Índice 3 = Mensajes
   final int _selectedIndex = 3;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   // Datos de los chats
   final List<Map<String, dynamic>> chats = [
@@ -122,7 +130,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Barra de Búsqueda
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -132,15 +140,43 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     color: searchBarColor,
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      SizedBox(width: 15),
-                      Icon(Icons.search, color: Colors.white70),
-                      SizedBox(width: 10),
-                      Text(
-                        "Buscar Cliente",
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      const SizedBox(width: 15),
+                      const Icon(Icons.search, color: Colors.white70),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Buscar conversación',
+                            hintStyle: TextStyle(color: Colors.white70),
+                            isDense: true,
+                          ),
+                          onChanged: (value) =>
+                              setState(() => _searchQuery = value),
+                        ),
                       ),
+                      if (_searchQuery.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Icon(
+                              Icons.clear,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -150,13 +186,26 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
               // Lista de Chats
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                  itemCount: chats.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final chat = chats[index];
-                    return _buildChatCard(chat, cardColor, accentRed);
+                child: Builder(
+                  builder: (context) {
+                    final filteredChats = _searchQuery.isEmpty
+                        ? chats
+                        : chats
+                              .where(
+                                (c) => (c['name'] as String)
+                                    .toLowerCase()
+                                    .contains(_searchQuery.toLowerCase()),
+                              )
+                              .toList();
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                      itemCount: filteredChats.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final chat = filteredChats[index];
+                        return _buildChatCard(chat, cardColor, accentRed);
+                      },
+                    );
                   },
                 ),
               ),
@@ -168,36 +217,58 @@ class _MessagesScreenState extends State<MessagesScreen> {
       // FAB
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 70.0),
-        child: Container(
-          width: 55,
-          height: 55,
-          decoration: BoxDecoration(
-            color: const Color(0xFF6C639F).withOpacity(0.5),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white30, width: 1),
+        child: GestureDetector(
+          onTap: () {
+            // TODO: Abrir formulario para nuevo mensaje
+          },
+          child: Container(
+            width: 55,
+            height: 55,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6C639F).withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white30, width: 1),
+            ),
+            child: const Icon(
+              Icons.add_comment_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
-          child: const Icon(Icons.add_comment_rounded, color: Colors.white, size: 28),
         ),
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: Container(
-        height: 80,
-        color: navBarColor,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home_filled, "Inicio"),
-            _buildNavItem(1, Icons.people, "Clientes"),
-            _buildNavItem(2, Icons.calendar_today, "Calendario"),
-            _buildNavItem(3, Icons.mail, "Mensajes", badgeCount: 2, accentColor: accentRed),
-          ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: 80,
+          color: navBarColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.home_filled, "Inicio"),
+              _buildNavItem(1, Icons.people, "Clientes"),
+              _buildNavItem(2, Icons.calendar_today, "Calendario"),
+              _buildNavItem(
+                3,
+                Icons.mail,
+                "Mensajes",
+                badgeCount: 2,
+                accentColor: accentRed,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildChatCard(Map<String, dynamic> chat, Color cardColor, Color accentRed) {
+  Widget _buildChatCard(
+    Map<String, dynamic> chat,
+    Color cardColor,
+    Color accentRed,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -206,10 +277,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 25,
-            backgroundColor: Color(0xFFE0E0E0),
-          ),
+          const CircleAvatar(radius: 25, backgroundColor: Color(0xFFE0E0E0)),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
@@ -217,7 +285,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
               children: [
                 Text(
                   chat['name'],
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
@@ -232,19 +304,33 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(chat['time'], style: const TextStyle(color: Colors.white60, fontSize: 11)),
+              Text(
+                chat['time'],
+                style: const TextStyle(color: Colors.white60, fontSize: 11),
+              ),
               const SizedBox(height: 5),
               if (chat['count'] > 0)
                 Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: accentRed, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: accentRed,
+                    shape: BoxShape.circle,
+                  ),
                   child: Text(
                     chat['count'].toString(),
-                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 )
               else
-                const Icon(Icons.arrow_forward_ios, color: Colors.white60, size: 14),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white60,
+                  size: 14,
+                ),
             ],
           ),
         ],
@@ -252,7 +338,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, String label, {int badgeCount = 0, Color? accentColor}) {
+  Widget _buildNavItem(
+    int index,
+    IconData icon,
+    String label, {
+    int badgeCount = 0,
+    Color? accentColor,
+  }) {
     bool isSelected = _selectedIndex == index;
     final color = isSelected ? Colors.white : Colors.white54;
 
@@ -271,15 +363,25 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   top: -5,
                   right: -8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: accentColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF332D43), width: 1.5),
+                      border: Border.all(
+                        color: const Color(0xFF332D43),
+                        width: 1.5,
+                      ),
                     ),
                     child: Text(
                       badgeCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

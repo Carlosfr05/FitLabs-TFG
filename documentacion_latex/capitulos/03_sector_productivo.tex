@@ -1,0 +1,71 @@
+% ============================================================
+%  CAPÍTULO 3 – Análisis del Sector Productivo y Contexto Profesional
+% ============================================================
+\chapter{Análisis del Sector Productivo y Contexto Profesional}
+
+\section{Descripción general del sector TIC}
+
+El sector de las Tecnologías de la Información y la Comunicación (TIC) constituye actualmente uno de los motores económicos más dinámicos a escala mundial. Según datos recientes del INE, el número de empresas tecnológicas activas en España supera las 45\,000, con un crecimiento sostenido del empleo especializado superior al 6\,\% anual. El desarrollo de aplicaciones móviles ocupa un papel protagonista dentro de este ecosistema, impulsado por la masificación del uso de smartphones y la digitalización de sectores tan variados como la salud, el deporte o la educación.
+
+En este contexto, las aplicaciones \textit{multiplataforma} han ganado una relevancia especial, ya que permiten llegar simultáneamente a dispositivos Android e iOS con una única base de código, reduciendo costes y acortando los tiempos de salida al mercado.
+
+% TODO: Ampliar con estadísticas adicionales del sector fitness-tech (mercado global, facturación, tendencias de crecimiento). Fuentes recomendadas: Statista, Grand View Research.
+
+\section{Tipos de empresas y áreas de actividad}
+
+FitLabs encaja en la categoría de \textbf{aplicaciones de salud y bienestar personal} (Health \& Fitness Apps), un segmento que combina empresas de desarrollo de software con estudios de diseño UX/UI, empresas de servicios deportivos y startups tecnológicas especializadas. En un entorno comercial real, un producto como FitLabs podría ser desarrollado por:
+
+\begin{itemize}
+  \item Una startup de fitness-tech de tamaño reducido (3--10 personas).
+  \item El departamento TI interno de una cadena de gimnasios.
+  \item Una empresa de software a medida contratada por un colectivo de entrenadores personales.
+\end{itemize}
+
+Las áreas de actividad principales que intervienen en el ciclo de vida de la aplicación son: análisis de requisitos, diseño UI/UX, desarrollo frontend (Flutter), diseño de base de datos (Supabase/PostgreSQL), integración de APIs externas y garantía de calidad (QA).
+
+\section{Necesidades actuales del mercado}
+
+Los entrenadores personales operan habitualmente con herramientas genéricas (hojas de cálculo, WhatsApp, aplicaciones de notas) que resultan ineficientes para la gestión profesional de múltiples clientes. El mercado demanda soluciones que centralicen:
+
+\begin{enumerate}
+  \item La comunicación en tiempo real con los clientes.
+  \item La creación y asignación de rutinas de entrenamiento personalizadas.
+  \item El seguimiento del progreso físico de cada cliente.
+  \item La organización del calendario de sesiones.
+\end{enumerate}
+
+FitLabs responde directamente a estas necesidades mediante una interfaz unificada y accesible desde cualquier dispositivo móvil.
+
+\section{Oportunidades profesionales y de negocio}
+
+La tendencia hacia un estilo de vida más activo y consciente de la salud, reforzada tras la pandemia de COVID-19, ha disparado la demanda de entrenadores personales y, por extensión, de herramientas digitales que les ayuden a gestionar sus servicios. Las tendencias más relevantes para el posicionamiento de FitLabs son:
+
+\begin{itemize}
+  \item \textbf{Entrenamiento online}: La modalidad de entrenamiento remoto ha consolidado la necesidad de plataformas digitales de gestión.
+  \item \textbf{Wearables e IoT}: Integración futura con dispositivos de monitorización de la actividad física.
+  \item \textbf{Personalización mediante IA}: Recomendación automática de rutinas basadas en el historial del cliente.
+\end{itemize}
+
+% TODO: Incluir datos de crecimiento del mercado fitness-tech en España y Europa para los años 2024-2026.
+
+\section{Aspectos legales y de seguridad}
+
+El proyecto maneja datos personales sensibles (datos de salud, actividad física, comunicaciones privadas), por lo que debe cumplir con la normativa vigente:
+
+\begin{itemize}
+  \item \textbf{RGPD} (Reglamento General de Protección de Datos, UE 2016/679): Los datos de los usuarios se almacenan en Supabase con cifrado en tránsito (TLS/SSL) y en reposo. La política de privacidad debe informar al usuario sobre el tratamiento de sus datos.
+  \item \textbf{LOPDGDD} (Ley Orgánica 3/2018): Marco legal español complementario al RGPD.
+  \item \textbf{Row Level Security (RLS)} en Supabase: Garantiza que cada usuario únicamente puede acceder a sus propios datos, añadiendo una capa de aislamiento a nivel de base de datos.
+\end{itemize}
+
+Desde el punto de vista de la seguridad en el entorno de trabajo, el desarrollo se realiza en equipos locales con acceso controlado al repositorio en GitHub, uso de ramas diferenciadas por desarrollador y commits firmados.
+
+\section{Recursos y programas de apoyo}
+
+Entre los recursos e iniciativas que amparan e impulsan proyectos como FitLabs destacan:
+
+\begin{itemize}
+  \item \textbf{Plan de Digitalización de Pymes 2021-2025} del Gobierno de España.
+  \item \textbf{Google for Startups} y el ecosistema de Flutter/Dart promovido por Google.
+  \item \textbf{Supabase Open Source}: La naturaleza de código abierto del backend facilita la adopción sin costes de licencia.
+\end{itemize}

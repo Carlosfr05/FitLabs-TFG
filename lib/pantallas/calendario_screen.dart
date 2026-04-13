@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/shared_widgets.dart';
 
 class CalendarioScreen extends StatefulWidget {
   const CalendarioScreen({super.key});
@@ -11,6 +12,24 @@ class CalendarioScreen extends StatefulWidget {
 class _CalendarioScreenState extends State<CalendarioScreen> {
   int _selectedIndex = 2; // Índice 2 = Calendario
 
+  DateTime _currentMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  DateTime _selectedDay = DateTime.now();
+
+  static const List<String> _monthNames = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
+
   // --- NAVEGACIÓN ---
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
@@ -18,15 +37,15 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
 
     switch (index) {
       case 0:
-        Navigator.pushNamed(context, '/resumen'); // Ajusta a tu ruta 'home'
+        Navigator.pushReplacementNamed(context, '/resumen');
         break;
       case 1:
-        Navigator.pushNamed(context, '/clientes');
+        Navigator.pushReplacementNamed(context, '/clientes');
         break;
       case 2:
         break; // Ya estamos aquí
       case 3:
-        Navigator.pushNamed(context, '/mensajes');
+        Navigator.pushReplacementNamed(context, '/mensajes');
         break;
     }
   }
@@ -36,9 +55,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     return Scaffold(
       extendBody: true,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.bgGradient
-        ),
+        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           bottom: false,
           child: Column(
@@ -61,9 +78,8 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               SizedBox(height: 20),
 
               // Divisor
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: DashedDivider(),
+              const DashedDivider(
+                padding: EdgeInsets.only(left: 40, right: 40, bottom: 20),
               ),
 
               // --- TIMELINE (Parte Inferior Scrollable) ---
@@ -118,7 +134,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
   // --------------------------------------------------------------------------
 
   Widget _buildCalendarWidget() {
-    final List<String> weekDays = [
+    const List<String> weekDays = [
       "lun",
       "mar",
       "mie",
@@ -128,48 +144,53 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
       "dom",
     ];
 
-    // Datos simulados para Diciembre 2025 (Empieza en Lunes 1)
-    final List<Map<String, dynamic>> days = [
-      // Semana 1
-      {"day": "1", "current": true},
-      {"day": "2", "current": true},
-      {"day": "3", "current": true},
-      {"day": "4", "current": true},
-      {"day": "5", "current": true},
-      {"day": "6", "current": true},
-      {"day": "7", "current": true},
-      // Semana 2
-      {"day": "8", "current": true}, {"day": "9", "current": true},
-      {"day": "10", "current": true, "selected": true}, // Círculo lila
-      {"day": "11", "current": true},
-      {"day": "12", "current": true},
-      {"day": "13", "current": true},
-      {"day": "14", "current": true},
-      // Semana 3
-      {"day": "15", "current": true},
-      {"day": "16", "current": true},
-      {"day": "17", "current": true},
-      {"day": "18", "current": true},
-      {"day": "19", "current": true},
-      {"day": "20", "current": true},
-      {"day": "21", "current": true},
-      // Semana 4
-      {"day": "22", "current": true},
-      {"day": "23", "current": true},
-      {"day": "24", "current": true},
-      {"day": "25", "current": true},
-      {"day": "26", "current": true},
-      {"day": "27", "current": true},
-      {"day": "28", "current": true},
-      // Semana 5 (Final mes + Inicio siguiente gris)
-      {"day": "29", "current": true},
-      {"day": "30", "current": true},
-      {"day": "31", "current": true},
-      {"day": "1", "current": false},
-      {"day": "2", "current": false},
-      {"day": "3", "current": false},
-      {"day": "4", "current": false},
-    ];
+    final firstDay = DateTime(_currentMonth.year, _currentMonth.month, 1);
+    final daysInMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month + 1,
+      0,
+    ).day;
+    final startOffset = firstDay.weekday - 1; // 0=lun, 6=dom
+    final today = DateTime.now();
+
+    final List<Map<String, dynamic>> days = [];
+
+    // Días del mes anterior para rellenar la primera fila
+    for (int i = startOffset; i > 0; i--) {
+      final d = firstDay.subtract(Duration(days: i));
+      days.add({'date': d, 'current': false});
+    }
+
+    // Días del mes actual
+    for (int d = 1; d <= daysInMonth; d++) {
+      final date = DateTime(_currentMonth.year, _currentMonth.month, d);
+      final isSelected =
+          date.year == _selectedDay.year &&
+          date.month == _selectedDay.month &&
+          date.day == _selectedDay.day;
+      final isToday =
+          date.year == today.year &&
+          date.month == today.month &&
+          date.day == today.day;
+      days.add({
+        'date': date,
+        'current': true,
+        'selected': isSelected,
+        'today': isToday,
+      });
+    }
+
+    // Días del mes siguiente para completar la última fila
+    final trailing = days.length % 7 == 0 ? 0 : 7 - (days.length % 7);
+    for (int i = 1; i <= trailing; i++) {
+      days.add({
+        'date': DateTime(_currentMonth.year, _currentMonth.month + 1, i),
+        'current': false,
+      });
+    }
+
+    final monthLabel =
+        '${_monthNames[_currentMonth.month - 1]} ${_currentMonth.year}';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -179,18 +200,42 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.arrow_back_ios, color: AppColors.dimmedColor, size: 14),
+              GestureDetector(
+                onTap: () => setState(() {
+                  _currentMonth = DateTime(
+                    _currentMonth.year,
+                    _currentMonth.month - 1,
+                  );
+                }),
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  color: AppColors.dimmedColor,
+                  size: 14,
+                ),
+              ),
               const SizedBox(width: 15),
-              const Text(
-                "Diciembre 2025",
-                style: TextStyle(
+              Text(
+                monthLabel,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(width: 15),
-              Icon(Icons.arrow_forward_ios, color: AppColors.dimmedColor, size: 14),
+              GestureDetector(
+                onTap: () => setState(() {
+                  _currentMonth = DateTime(
+                    _currentMonth.year,
+                    _currentMonth.month + 1,
+                  );
+                }),
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppColors.dimmedColor,
+                  size: 14,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -216,25 +261,34 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
           ),
           const SizedBox(height: 10),
 
-          // Grilla días (Fix: GridView con 7 columnas exactas)
+          // Grilla de días
           GridView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: days.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7, // <--- CLAVE: 7 días por semana
+              crossAxisCount: 7,
               mainAxisSpacing: 5,
               crossAxisSpacing: 0,
               childAspectRatio: 1.7,
             ),
             itemBuilder: (context, index) {
               final dayData = days[index];
+              final isCurrent = dayData['current'] as bool;
               return Center(
-                child: _buildDayCell(
-                  dayData["day"],
-                  isCurrentMonth: dayData["current"],
-                  isSelected: dayData["selected"] ?? false,
+                child: GestureDetector(
+                  onTap: isCurrent
+                      ? () => setState(
+                          () => _selectedDay = dayData['date'] as DateTime,
+                        )
+                      : null,
+                  child: _buildDayCell(
+                    (dayData['date'] as DateTime).day.toString(),
+                    isCurrentMonth: isCurrent,
+                    isSelected: dayData['selected'] ?? false,
+                    isToday: dayData['today'] ?? false,
+                  ),
                 ),
               );
             },
@@ -248,16 +302,20 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     String day, {
     bool isCurrentMonth = true,
     bool isSelected = false,
+    bool isToday = false,
   }) {
-    double size = 35;
+    const double size = 35;
+    Color? bgColor;
+    if (isSelected) {
+      bgColor = AppColors.accentLila.withValues(alpha: 0.8);
+    } else if (isToday) {
+      bgColor = Colors.white.withValues(alpha: 0.15);
+    }
     return Container(
       width: size,
       height: size,
-      decoration: isSelected
-          ? BoxDecoration(
-              color: AppColors.accentLila.withOpacity(0.8),
-              shape: BoxShape.circle,
-            )
+      decoration: bgColor != null
+          ? BoxDecoration(color: bgColor, shape: BoxShape.circle)
           : null,
       alignment: Alignment.center,
       child: Text(
@@ -267,7 +325,9 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
               ? Colors.white
               : (isCurrentMonth ? Colors.white : AppColors.dimmedColor),
           fontSize: 13,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontWeight: (isSelected || isToday)
+              ? FontWeight.bold
+              : FontWeight.normal,
         ),
       ),
     );
@@ -289,7 +349,10 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(time, style: TextStyle(color: AppColors.textColor, fontSize: 12)),
+                Text(
+                  time,
+                  style: TextStyle(color: AppColors.textColor, fontSize: 12),
+                ),
                 const SizedBox(height: 5),
                 Container(width: 15, height: 1, color: AppColors.dimmedColor),
               ],
@@ -303,7 +366,9 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                 // Línea discontinua detrás
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: TimeDivider(color: AppColors.dividerColor.withOpacity(0.5)),
+                  child: TimeDivider(
+                    color: AppColors.dividerColor.withValues(alpha: 0.5),
+                  ),
                 ),
 
                 // Tarjeta
@@ -332,7 +397,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
         border: Border(left: BorderSide(color: AppColors.cardBorder, width: 4)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -366,23 +431,26 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
   // --------------------------------------------------------------------------
 
   Widget _buildBottomNavBar() {
-    return Container(
-      height: 80,
-      color: const Color(0xFF413E60),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(0, Icons.home_filled, "Inicio"),
-          _buildNavItem(1, Icons.people, "Clientes"),
-          _buildNavItem(2, Icons.calendar_today, "Calendario"),
-          _buildNavItem(
-            3,
-            Icons.mail,
-            "Mensajes",
-            badgeCount: 2,
-            accentColor: const Color(0xFFFF3B30),
-          ),
-        ],
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: 80,
+        color: AppColors.navBarBg,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(0, Icons.home_filled, "Inicio"),
+            _buildNavItem(1, Icons.people, "Clientes"),
+            _buildNavItem(2, Icons.calendar_today, "Calendario"),
+            _buildNavItem(
+              3,
+              Icons.mail,
+              "Mensajes",
+              badgeCount: 2,
+              accentColor: AppColors.accentRed,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -395,7 +463,7 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     Color? accentColor,
   }) {
     bool isSelected = _selectedIndex == index;
-    final color = isSelected ? Colors.white : Color(0xFFAFA8D5);
+    final color = isSelected ? Colors.white : AppColors.navIconUnselected;
     return GestureDetector(
       onTap: () => _onItemTapped(index),
       behavior: HitTestBehavior.opaque,
@@ -411,10 +479,14 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
                   top: -5,
                   right: -8,
                   child: Container(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 238, 34, 34),
-                      shape: BoxShape.circle,
+                      color: accentColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.navBarBg, width: 1.5),
                     ),
                     child: Text(
                       '$badgeCount',
@@ -439,66 +511,6 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
           ),
         ],
       ),
-    );
-  }
-}
-
-// --- WIDGET DIVISOR DISCONTINUO ---
-class DashedDivider extends StatelessWidget {
-  final Color color;
-  const DashedDivider({super.key, this.color = Colors.white24});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 35, right: 35, bottom: 20),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final boxWidth = constraints.constrainWidth();
-          const dashWidth = 5.0;
-          final dashCount = (boxWidth / (2 * dashWidth)).floor();
-          return Flex(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            direction: Axis.horizontal,
-              children: List.generate(
-              dashCount,
-              (_) => SizedBox(
-                width: dashWidth,
-                height: 2,
-                child: DecoratedBox(decoration: BoxDecoration(color: Color(0xFFD5D0FF))),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class TimeDivider extends StatelessWidget {
-  final Color color;
-  const TimeDivider({super.key, this.color = Colors.white24});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final boxWidth = constraints.constrainWidth();
-        const dashWidth = 5.0;
-        final dashCount = (boxWidth / (2 * dashWidth)).floor();
-        return Flex(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          direction: Axis.horizontal,
-            children: List.generate(
-            dashCount,
-            (_) => SizedBox(
-              width: dashWidth,
-              height: 1,
-              child: DecoratedBox(decoration: BoxDecoration(color: Color(0xFF655EA4))),
-            ),
-          ),
-        );
-      },
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/shared_widgets.dart';
 
 class DetalleClienteScreen extends StatelessWidget {
   const DetalleClienteScreen({super.key});
@@ -150,10 +151,12 @@ class DetalleClienteScreen extends StatelessWidget {
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: _accentLila.withOpacity(0.5), width: 2),
+            border: Border.all(
+              color: _accentLila.withValues(alpha: 0.5),
+              width: 2,
+            ),
           ),
-          child: 
-          const Image(
+          child: const Image(
             image: AssetImage('assets/images/imagenPerfil.png'),
             width: 100,
             height: 100,
@@ -175,9 +178,9 @@ class DetalleClienteScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: _accentLila.withOpacity(0.2),
+            color: _accentLila.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: _accentLila.withOpacity(0.5)),
+            border: Border.all(color: _accentLila.withValues(alpha: 0.5)),
           ),
           child: Text(
             "Cliente Activo",
@@ -196,7 +199,7 @@ class DetalleClienteScreen extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 40),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -236,7 +239,7 @@ class DetalleClienteScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -310,7 +313,7 @@ class DetalleClienteScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
@@ -381,7 +384,7 @@ class DetalleClienteScreen extends StatelessWidget {
               Container(
                 width: 4,
                 decoration: const BoxDecoration(
-                  color: const Color(0xFFD5D0FF),
+                  color: Color(0xFFD5D0FF),
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(10),
                     bottomRight: Radius.circular(10),
@@ -442,7 +445,7 @@ class DetalleClienteScreen extends StatelessWidget {
         if (!isLast)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            child: DashedDivider(color: const Color(0xFFD5D0FF)),
+            child: const DashedDivider(),
           ),
       ],
     );
@@ -580,31 +583,4 @@ class DetailedLineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class DashedDivider extends StatelessWidget {
-  final Color color;
-  const DashedDivider({super.key, required this.color});
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final boxWidth = constraints.constrainWidth();
-        const dashWidth = 6.0;
-        final dashCount = (boxWidth / (2 * dashWidth)).floor();
-        return Flex(
-          children: List.generate(
-            dashCount,
-            (_) => SizedBox(
-              width: dashWidth,
-              height: 1.5,
-              child: DecoratedBox(decoration: BoxDecoration(color: color)),
-            ),
-          ),
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          direction: Axis.horizontal,
-        );
-      },
-    );
-  }
 }

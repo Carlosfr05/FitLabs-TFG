@@ -1,0 +1,50 @@
+% ============================================================
+%  CAPÍTULO 13 – Plan de Ejecución del Proyecto
+% ============================================================
+\chapter{Plan de Ejecución del Proyecto}
+
+\section{Permisos y autorizaciones}
+
+Para el desarrollo de FitLabs, los permisos necesarios son los siguientes:
+
+\begin{itemize}
+  \item \textbf{Permisos en Android}: La aplicación requiere acceso a Internet (\texttt{INTERNET}) declarado en el \texttt{AndroidManifest.xml}, necesario para la comunicación con Supabase y la API de ejercicios.
+  \item \textbf{Acceso a Supabase}: Las credenciales de acceso al proyecto Supabase (URL y \texttt{anon key}) se gestionan de forma segura y no se incluyen en el repositorio público de GitHub.
+  \item \textbf{Claves de API externas}: La API key de acceso al catálogo de ejercicios se almacena como constante en el código fuente, protegida mediante el plan de acceso del repositorio privado.
+\end{itemize}
+
+\section{Procedimientos de ejecución}
+
+\subsection{Flujo de trabajo con Git}
+
+El equipo siguió el siguiente flujo de trabajo:
+
+\begin{enumerate}
+  \item Cada desarrollador trabajó en su rama personal (\texttt{Luis} -- José Luis Sánchez González -- y \texttt{Carlos} -- Carlos Fraidias del Valle --).
+  \item Al completar una funcionalidad, se realizaba un \textit{commit} descriptivo con el prefijo del módulo (e.g., \texttt{feat(clientes): añadir buscador por nombre}).
+  \item Se revisaba el código antes de integrar los cambios a \texttt{main} mediante \textit{merge} manual.
+\end{enumerate}
+
+\subsection{Proceso de despliegue en Android}
+
+\begin{enumerate}
+  \item Compilar el APK en modo \textit{release}: \texttt{flutter build apk}.
+  \item Firmar el APK con un \textit{keystore} para distribución.
+  \item Instalar en el dispositivo de prueba mediante \texttt{adb install} o transferencia directa.
+\end{enumerate}
+
+\section{Identificación de riesgos y medidas preventivas}
+
+\begin{longtable}{@{}p{5cm}p{3cm}p{6cm}@{}}
+\toprule
+\textbf{Riesgo} & \textbf{Probabilidad} & \textbf{Medida preventiva} \\
+\midrule
+\endhead
+Cambio en la API de ejercicios (fin de servicio o cambio de términos) & Media & Abstraer las llamadas en un repositorio (\texttt{ExerciseRepository}) para facilitar el cambio de proveedor \\
+Pérdida de código (fallo de disco, accidente) & Baja & Repositorio en GitHub con \textit{push} frecuente; copia de seguridad del proyecto en Google Drive \\
+Superación del límite del plan Free de Supabase & Baja & Monitorización de uso en el dashboard; posibilidad de migrar a plan Pro \\
+Incompatibilidades entre versiones de Flutter & Baja & Fijar la versión del SDK en \texttt{pubspec.yaml} \\
+Falta de tiempo para completar todos los módulos & Media & Priorización de módulos por valor funcional; módulos secundarios postergados a Vías Futuras \\
+\bottomrule
+\caption{Tabla de riesgos identificados y medidas preventivas.}
+\end{longtable}

@@ -1,0 +1,53 @@
+% ============================================================
+%  ANEXO A – Manual de Instalación
+% ============================================================
+\chapter{Manual de Instalación}
+\label{anexo:instalacion}
+
+Este manual describe los pasos necesarios para configurar el entorno de desarrollo y ejecutar FitLabs en un equipo local.
+
+\section{Requisitos previos}
+
+\begin{itemize}
+  \item Sistema operativo: Windows 10/11, macOS 12+ o Ubuntu 20.04+.
+  \item Flutter SDK \^{}3.10.1 o superior. Descarga: \url{https://flutter.dev/docs/get-started/install}
+  \item Android Studio (para el emulador Android) o un dispositivo físico Android con Depuración USB activada.
+  \item Cuenta en Supabase: \url{https://supabase.com}
+  \item VS Code con las extensiones \textit{Flutter} y \textit{Dart} instaladas.
+\end{itemize}
+
+\section{Configuración del backend -- Supabase}
+
+\begin{enumerate}
+  \item Crear un nuevo proyecto en el dashboard de Supabase.
+  \item En la sección \textbf{SQL Editor}, ejecutar el script completo ubicado en \texttt{documentacion/base\_de\_datos/tablas\_supabase.sql} para crear todas las tablas.
+  \item Habilitar Row Level Security (RLS) en todas las tablas y configurar las políticas de acceso según el rol del usuario.
+  \item En \textbf{Project Settings > API}, copiar la \texttt{Project URL} y la \texttt{anon public key}.
+\end{enumerate}
+
+\section{Configuración del proyecto Flutter}
+
+\begin{enumerate}
+  \item Clonar el repositorio:
+\begin{lstlisting}[language=bash]
+git clone https://github.com/Carlosfr05/FitLabs-TFG.git
+cd FitLabs-TFG
+\end{lstlisting}
+  \item Crear el archivo de configuración de Supabase. En el archivo donde se inicializa el cliente de Supabase, sustituir los valores \texttt{SUPABASE\_URL} y \texttt{SUPABASE\_ANON\_KEY} con los obtenidos en el paso anterior.
+  \item Instalar las dependencias del proyecto:
+\begin{lstlisting}[language=bash]
+flutter pub get
+\end{lstlisting}
+  \item Ejecutar la aplicación en el emulador o dispositivo conectado:
+\begin{lstlisting}[language=bash]
+flutter run
+\end{lstlisting}
+\end{enumerate}
+
+\section{Compilación del APK para Android}
+
+\begin{lstlisting}[language=bash]
+flutter build apk --release
+\end{lstlisting}
+
+El APK resultante se encontrará en \texttt{build/app/outputs/flutter-apk/app-release.apk}.
