@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/core/shared_widgets.dart';
+import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class ResumenDiaScreen extends StatefulWidget {
   const ResumenDiaScreen({super.key});
@@ -11,9 +13,6 @@ class ResumenDiaScreen extends StatefulWidget {
 }
 
 class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
-  // Índice 0 = Inicio (Esta pantalla)
-  int _selectedIndex = 0;
-
   // Datos de ejemplo
   final List<Map<String, String>> upcomingWorkouts = [
     {
@@ -43,32 +42,9 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
     },
   ];
 
-  void _onItemTapped(int index) {
-    if (index == _selectedIndex) return;
-
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    // Navegación basada en tus rutas del main.dart
-    switch (index) {
-      case 0:
-        // Ya estamos en /resumen
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/clientes');
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/calendario');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/mensajes');
-        break;
-    }
-  }
-
   Future<void> _logout() async {
     await Supabase.instance.client.auth.signOut();
+    SessionService.limpiar();
     if (!mounted) return;
     Navigator.pushReplacementNamed(context, '/login');
   }
@@ -140,28 +116,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          height: 80,
-          color: const Color(0xFF413E60),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.home_filled, "Inicio"),
-              _buildNavItem(1, Icons.people_outlined, "Clientes"),
-              _buildNavItem(2, Icons.calendar_today, "Calendario"),
-              _buildNavItem(
-                3,
-                Icons.mail,
-                "Mensajes",
-                badgeCount: 2,
-                accentColor: accentRed,
-              ),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 0),
     );
   }
 
@@ -447,58 +402,6 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildNavItem(
-    int index,
-    IconData icon,
-    String label, {
-    int badgeCount = 0,
-    Color? accentColor,
-  }) {
-    bool isSelected = _selectedIndex == index;
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? Colors.white : Color(0xFFAFA8D5),
-                size: 28,
-              ),
-              if (badgeCount > 0)
-                Positioned(
-                  top: -5,
-                  right: -8,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: accentColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '$badgeCount',
-                      style: const TextStyle(fontSize: 10, color: Colors.white),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.white54,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

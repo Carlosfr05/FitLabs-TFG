@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -66,13 +67,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 response.user!.userMetadata?['nombre'] ?? email.split('@')[0],
             'email': email,
             'telefono': response.user!.userMetadata?['telefono'] ?? '',
-            'rol': 'entrenador',
             'role': 'entrenador',
           });
         }
+        await SessionService.cargarPerfil();
       }
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/resumen');
+        Navigator.pushReplacementNamed(
+          context,
+          SessionService.isEntrenador ? '/resumen' : '/cliente-home',
+        );
       }
     } on AuthException catch (e) {
       final msg = e.message.toLowerCase();

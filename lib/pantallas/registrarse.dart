@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class RegistrarseScreen extends StatelessWidget {
   const RegistrarseScreen({super.key});
@@ -46,6 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _errorMessage;
   DateTime? _birthDate;
   bool _emailSent = false;
+  String _selectedRole = 'entrenador';
 
   @override
   void dispose() {
@@ -135,7 +137,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         setState(() => _emailSent = true);
       } else if (response.user != null && response.session != null) {
         await _crearPerfil(response.user!.id, name, email, phone);
-        if (mounted) Navigator.pushReplacementNamed(context, '/resumen');
+        await SessionService.cargarPerfil();
+        if (mounted) {
+          Navigator.pushReplacementNamed(
+            context,
+            SessionService.isEntrenador ? '/resumen' : '/cliente-home',
+          );
+        }
       }
     } on AuthException catch (e) {
       setState(() => _errorMessage = e.message);
@@ -164,8 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'nombre': nombre,
         'email': email,
         'telefono': telefono,
-        'rol': 'entrenador',
-        'role': 'entrenador',
+        'role': _selectedRole,
         if (_birthDate != null)
           'fecha_nacimiento': _birthDate!.toIso8601String().split('T')[0],
       });
@@ -341,6 +348,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               // Fecha de nacimiento
               _buildDatePicker(),
+              const SizedBox(height: 25),
+
+              // Selector de rol
+              _buildRoleSelector(),
 
               if (_errorMessage != null) ...[
                 const SizedBox(height: 16),
@@ -503,6 +514,85 @@ class _RegisterScreenState extends State<RegisterScreen> {
           borderSide: BorderSide(color: AppColors.textColor, width: 2),
         ),
         contentPadding: const EdgeInsets.only(bottom: 10),
+      ),
+    );
+  }
+
+  Widget _buildRoleSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '¿Cómo usarás FitLabs?',
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _roleOption(
+                label: 'Soy Entrenador',
+                icon: Icons.fitness_center,
+                value: 'entrenador',
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _roleOption(
+                label: 'Soy Cliente',
+                icon: Icons.person_outline,
+                value: 'cliente',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _roleOption({
+    required String label,
+    required IconData icon,
+    required String value,
+  }) {
+    final isSelected = _selectedRole == value;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedRole = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.accentLila.withValues(alpha: 0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.accentLila : AppColors.dimmedColor,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.accentLila : Colors.white38,
+              size: 28,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? AppColors.accentLila : Colors.white54,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

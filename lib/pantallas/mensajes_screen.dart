@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 
 class MensajesScreen extends StatelessWidget {
   const MensajesScreen({super.key});
@@ -25,8 +26,6 @@ class MessagesScreen extends StatefulWidget {
 }
 
 class _MessagesScreenState extends State<MessagesScreen> {
-  // Índice 3 = Mensajes
-  final int _selectedIndex = 3;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -76,32 +75,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
     },
   ];
 
-  void _onItemTapped(int index) {
-    if (index == _selectedIndex) return;
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/resumen');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/clientes');
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/calendario');
-        break;
-      case 3:
-        // Ya estamos aquí
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final bgDark = const Color(0xFF1E1A2B);
     final bgLight = const Color(0xFF352B55);
     final searchBarColor = const Color(0xFF463C6E);
     final cardColor = const Color(0xFF2E2744);
-    final navBarColor = const Color(0xFF332D43);
     final accentRed = const Color(0xFFFF3B30);
 
     return Scaffold(
@@ -239,28 +218,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          height: 80,
-          color: navBarColor,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.home_filled, "Inicio"),
-              _buildNavItem(1, Icons.people, "Clientes"),
-              _buildNavItem(2, Icons.calendar_today, "Calendario"),
-              _buildNavItem(
-                3,
-                Icons.mail,
-                "Mensajes",
-                badgeCount: 2,
-                accentColor: accentRed,
-              ),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: const AppBottomNavBar(currentIndex: 3),
     );
   }
 
@@ -332,69 +290,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   size: 14,
                 ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    int index,
-    IconData icon,
-    String label, {
-    int badgeCount = 0,
-    Color? accentColor,
-  }) {
-    bool isSelected = _selectedIndex == index;
-    final color = isSelected ? Colors.white : Colors.white54;
-
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(icon, color: color, size: 28),
-              if (badgeCount > 0)
-                Positioned(
-                  top: -5,
-                  right: -8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: accentColor,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFF332D43),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Text(
-                      badgeCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
           ),
         ],
       ),
