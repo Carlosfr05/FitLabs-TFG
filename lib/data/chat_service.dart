@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatService {
@@ -29,7 +30,7 @@ class ChatService {
       // Último mensaje
       final lastMsg = await _db
           .from('mensajes')
-          .select('contenido, creado_en, id_remitente, leido')
+          .select('contenido, creado_en, id_remitente, leido, tipo_contenido')
           .eq('id_chat', chat['id'])
           .order('creado_en', ascending: false)
           .limit(1)
@@ -43,12 +44,18 @@ class ChatService {
           .neq('id_remitente', userId)
           .eq('leido', false);
 
+      String lastMessagePreview = lastMsg?['contenido'] ?? '';
+      final lastTipo = lastMsg?['tipo_contenido']?.toString() ?? 'texto';
+      if (lastTipo == 'imagen') lastMessagePreview = '📷 Foto';
+      if (lastTipo == 'video') lastMessagePreview = '🎥 Vídeo';
+      if (lastTipo == 'audio') lastMessagePreview = '🎙️ Audio';
+
       result.add({
         'chatId': chat['id'],
         'otherUserId': otherUserId,
         'nombre': perfil?['nombre'] ?? perfil?['username'] ?? 'Usuario',
         'avatarUrl': perfil?['avatar_url'],
-        'lastMessage': lastMsg?['contenido'] ?? '',
+        'lastMessage': lastMessagePreview,
         'lastMessageTime': lastMsg?['creado_en'],
         'lastSenderId': lastMsg?['id_remitente'],
         'unreadCount': (unread as List).length,
@@ -85,7 +92,7 @@ class ChatService {
   static Future<List<Map<String, dynamic>>> fetchMensajes(String chatId) async {
     final data = await _db
         .from('mensajes')
-        .select('id, id_remitente, contenido, leido, creado_en')
+        .select('id, id_remitente, contenido, leido, creado_en, tipo_contenido, media_url')
         .eq('id_chat', chatId)
         .order('creado_en', ascending: true);
 
@@ -102,8 +109,40 @@ class ChatService {
       'id_chat': chatId,
       'id_remitente': senderId,
       'contenido': contenido,
+      'tipo_contenido': 'texto',
     });
 
+    await _db
+        .from('chats')
+        .update({'actualizado_en': DateTime.now().toIso8601String()})
+        .eq('id', chatId);
+  }
+
+  /// Sube un archivo a Supabase Storage y devuelve la URL pública.
+  static Future<String> subirArchivo(String chatId, File file, String extension) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final path = '$chatId/$timestamp.$extension';
+    await _db.storage.from('chat-media').upload(path, file);
+    return _db.storage.from('chat-media').getPublicUrl(path);
+  }
+
+  /// Envía un mensaje multimedia (foto, video, audio).
+  static Future<void> enviarMensajeMultimedia({
+    required String chatId,
+    required String senderId,
+    required String tipoContenido,
+    required File archivo,
+    required String extension,
+    String? textoOpcional,
+  }) async {
+    final url = await subirArchivo(chatId, archivo, extension);
+    await _db.from('mensajes').insert({
+      'id_chat': chatId,
+      'id_remitente': senderId,
+      'contenido': textoOpcional,
+      'tipo_contenido': tipoContenido,
+      'media_url': url,
+    });
     await _db
         .from('chats')
         .update({'actualizado_en': DateTime.now().toIso8601String()})
