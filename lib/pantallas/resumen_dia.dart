@@ -52,25 +52,27 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
       duration: const Duration(milliseconds: 600),
     );
 
-    // 5 sections: header, summary, activity, clients, actions+workouts
-    _fadeAnims = List.generate(5, (i) {
-      final start = (i * 0.12).clamp(0.0, 1.0);
+    // 6 sections: header, summary, activity, clients, actions, workouts
+    _fadeAnims = List.generate(6, (i) {
+      final start = (i * 0.10).clamp(0.0, 1.0);
       final end = (start + 0.5).clamp(0.0, 1.0);
       return CurvedAnimation(
         parent: _staggerController,
         curve: Interval(start, end, curve: Curves.easeOut),
       );
     });
-    _slideAnims = List.generate(5, (i) {
-      final start = (i * 0.12).clamp(0.0, 1.0);
+    _slideAnims = List.generate(6, (i) {
+      final start = (i * 0.10).clamp(0.0, 1.0);
       final end = (start + 0.5).clamp(0.0, 1.0);
       return Tween<Offset>(
         begin: const Offset(0, 0.15),
         end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _staggerController,
-        curve: Interval(start, end, curve: Curves.easeOutCubic),
-      ));
+      ).animate(
+        CurvedAnimation(
+          parent: _staggerController,
+          curve: Interval(start, end, curve: Curves.easeOutCubic),
+        ),
+      );
     });
 
     _staggerController.forward();
@@ -86,7 +88,10 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
   }
 
   Future<void> _cargarDatos() async {
-    setState(() { _cargando = true; _datosListos = false; });
+    setState(() {
+      _cargando = true;
+      _datosListos = false;
+    });
     try {
       final uid = SessionService.userId!;
       final results = await Future.wait([
@@ -96,12 +101,12 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
       ]);
       if (!mounted) return;
 
-      final chats = results[1] as List<Map<String, dynamic>>;
+      final chats = results[1];
       int unread = 0;
       for (final c in chats) {
         unread += (c['unread'] as int? ?? 0);
       }
-      final clientes = results[2] as List<Map<String, dynamic>>;
+      final clientes = results[2];
 
       // Cargar actividad semanal de todos los clientes en paralelo
       Map<int, int> weekAct = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
@@ -128,7 +133,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
 
       if (mounted) {
         setState(() {
-          _rutinasHoy = results[0] as List<Map<String, dynamic>>;
+          _rutinasHoy = results[0];
           _mensajesSinLeer = unread;
           _clientes = clientes;
           _totalClientes = clientes.length;
@@ -141,6 +146,16 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
         }
       }
     } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Error al cargar datos. Desliza para reintentar.'),
+            backgroundColor: AppColors.accentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _cargando = false);
     }
@@ -149,12 +164,27 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
   String _formatFechaHoy() {
     final now = DateTime.now();
     const dias = [
-      'Lunes', 'Martes', 'Miércoles', 'Jueves',
-      'Viernes', 'Sábado', 'Domingo',
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo',
     ];
     const meses = [
-      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
     ];
     return '${dias[now.weekday - 1]}, ${now.day} de ${meses[now.month - 1]}';
   }
@@ -183,7 +213,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -195,25 +225,36 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                   const SizedBox(height: 28),
                   _staggerWrap(3, _buildClientCards()),
                   const SizedBox(height: 28),
-                  _staggerWrap(4, Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildActionButtonsGrid(
-                          AppColors.surfaceColor, 0, AppColors.textColor),
-                      const SizedBox(height: 28),
-                      const Text(
-                        'Entrenamientos Próximos',
-                        style: TextStyle(
-                          color: AppColors.textColor,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                  _staggerWrap(
+                    4,
+                    _buildActionButtonsGrid(
+                      AppColors.surfaceColor,
+                      0,
+                      AppColors.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                  _staggerWrap(
+                    5,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Entrenamientos Próximos',
+                          style: TextStyle(
+                            color: AppColors.textColor,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildWorkoutList(
-                          AppColors.textColor, AppColors.subTextColor),
-                    ],
-                  )),
+                        const SizedBox(height: 16),
+                        _buildWorkoutList(
+                          AppColors.textColor,
+                          AppColors.subTextColor,
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -227,10 +268,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
   Widget _staggerWrap(int index, Widget child) {
     return SlideTransition(
       position: _slideAnims[index],
-      child: FadeTransition(
-        opacity: _fadeAnims[index],
-        child: child,
-      ),
+      child: FadeTransition(opacity: _fadeAnims[index], child: child),
     );
   }
 
@@ -471,10 +509,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.dimmedColor,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: AppColors.dimmedColor, fontSize: 12),
           ),
         ],
       ),
@@ -602,7 +637,10 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
       );
     }
 
-    final maxVal = _actividadSemanal.values.fold<int>(0, (a, b) => a > b ? a : b);
+    final maxVal = _actividadSemanal.values.fold<int>(
+      0,
+      (a, b) => a > b ? a : b,
+    );
     final maxHeight = 80.0;
 
     return Container(
@@ -646,9 +684,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
               final weekday = i + 1; // 1=Mon, 7=Sun
               final count = _actividadSemanal[weekday] ?? 0;
               final isToday = weekday == today;
-              final barHeight = maxVal > 0
-                  ? (count / maxVal) * maxHeight
-                  : 0.0;
+              final barHeight = maxVal > 0 ? (count / maxVal) * maxHeight : 0.0;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -738,13 +774,68 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
     }
 
     if (_clientes.isEmpty) {
-      return const SizedBox.shrink();
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceColor2,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.accentLila.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.accentLila.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(Icons.people_outline_rounded, color: AppColors.accentLila, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('Sin clientes aún', style: TextStyle(color: AppColors.textColor, fontSize: 15, fontWeight: FontWeight.w600)),
+                  SizedBox(height: 4),
+                  Text('Añade tu primer cliente para empezar', style: TextStyle(color: AppColors.dimmedColor, fontSize: 13)),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/clientes'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [AppColors.accentPurple, AppColors.accentLila]),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text('Añadir', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     final displayClientes = _clientes.take(5).toList();
     final remaining = _clientes.length - displayClientes.length;
 
-    return Column(
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceColor2,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.accentLila.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -761,7 +852,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
             if (_clientes.length > 1)
               GestureDetector(
                 onTap: () =>
-                    Navigator.pushReplacementNamed(context, '/clientes'),
+                    Navigator.pushNamed(context, '/clientes'),
                 child: const Text(
                   'Ver todos',
                   style: TextStyle(
@@ -789,7 +880,9 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.pushReplacementNamed(
-                            context, '/clientes'),
+                          context,
+                          '/clientes',
+                        ),
                         child: Container(
                           width: 52,
                           height: 52,
@@ -840,10 +933,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                   onTap: () {
                     final clientId = perfil?['id'] as String?;
                     if (clientId != null) {
-                      Navigator.pushNamed(
-                        context,
-                        '/clientes',
-                      );
+                      Navigator.pushNamed(context, '/clientes');
                     }
                   },
                   child: Column(
@@ -875,7 +965,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        (nombre as String).split(' ').first,
+                        (nombre).split(' ').first,
                         style: const TextStyle(
                           color: AppColors.dimmedColor,
                           fontSize: 11,
@@ -892,6 +982,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
           ),
         ),
       ],
+    ),
     );
   }
 
@@ -905,7 +996,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                 label: 'Añadir\ncliente',
                 icon: Icons.person_add_rounded,
                 onTap: () =>
-                    Navigator.pushReplacementNamed(context, '/clientes'),
+                    Navigator.pushNamed(context, '/clientes'),
               ),
             ),
             const SizedBox(width: 14),
@@ -926,7 +1017,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                 label: 'Ver\ncalendario',
                 icon: Icons.calendar_month_rounded,
                 onTap: () =>
-                    Navigator.pushReplacementNamed(context, '/calendario'),
+                    Navigator.pushNamed(context, '/calendario'),
               ),
             ),
             const SizedBox(width: 14),
@@ -935,7 +1026,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                 label: 'Enviar\nmensaje',
                 icon: Icons.chat_bubble_outline_rounded,
                 onTap: () =>
-                    Navigator.pushReplacementNamed(context, '/mensajes'),
+                    Navigator.pushNamed(context, '/mensajes'),
               ),
             ),
           ],
@@ -1070,10 +1161,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
             const Text(
               'Pulsa "Crear rutina" para programar un entrenamiento',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.dimmedColor,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: AppColors.dimmedColor, fontSize: 13),
             ),
           ],
         ),
@@ -1084,7 +1172,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: _rutinasHoy.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final r = _rutinasHoy[index];
         final titulo = r['title'] as String? ?? 'Sin título';
@@ -1092,8 +1180,8 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
         final horaFin = r['hora_fin'] as String? ?? '';
         final horario = horaInicio.isNotEmpty
             ? (horaFin.isNotEmpty
-                ? '${horaInicio.substring(0, 5)} - ${horaFin.substring(0, 5)}'
-                : horaInicio.substring(0, 5))
+                  ? '${horaInicio.substring(0, 5)} - ${horaFin.substring(0, 5)}'
+                  : horaInicio.substring(0, 5))
             : 'Sin hora';
         final clienteData = r['cliente'] as Map<String, dynamic>?;
         final clienteNombre = clienteData != null
@@ -1106,10 +1194,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
             color: AppColors.surfaceColor2,
             borderRadius: BorderRadius.circular(16),
             border: Border(
-              left: BorderSide(
-                color: AppColors.accentLila,
-                width: 4,
-              ),
+              left: BorderSide(color: AppColors.accentLila, width: 4),
             ),
           ),
           child: Row(
@@ -1206,9 +1291,10 @@ class _ScaleTapWidgetState extends State<_ScaleTapWidget>
       vsync: this,
       duration: const Duration(milliseconds: 100),
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _scaleAnim = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -1226,10 +1312,7 @@ class _ScaleTapWidgetState extends State<_ScaleTapWidget>
         widget.onTap?.call();
       },
       onTapCancel: () => _ctrl.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnim,
-        child: widget.child,
-      ),
+      child: ScaleTransition(scale: _scaleAnim, child: widget.child),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
@@ -20,16 +21,22 @@ class _MensajesScreenState extends State<MensajesScreen> {
   List<Map<String, dynamic>> _chats = [];
   bool _cargando = true;
   RealtimeChannel? _channel;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
     _cargarChats();
     _suscribirse();
+    // Polling cada 5s como fallback
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _cargarChats();
+    });
   }
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
     _searchController.dispose();
     if (_channel != null) {
       ChatService.cancelarSuscripcion(_channel!);
@@ -353,7 +360,7 @@ class _MensajesScreenState extends State<MensajesScreen> {
 
       // FAB — Nuevo chat
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 70.0),
+        padding: const EdgeInsets.only(bottom: 10.0),
         child: GestureDetector(
           onTap: _mostrarNuevoChat,
           child: Container(
