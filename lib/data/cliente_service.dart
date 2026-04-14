@@ -30,7 +30,45 @@ class ClienteService {
         .from('perfiles')
         .select('id, username, nombre, email, avatar_url, role')
         .eq('email', email)
+        .eq('role', 'cliente')
         .maybeSingle();
+    return row;
+  }
+
+  /// Busca usuarios cliente por nombre o username (estilo buscador).
+  static Future<List<Map<String, dynamic>>> buscarClientesPorNombre(
+    String query, {
+    String? excludeUserId,
+    int limit = 30,
+  }) async {
+    final baseQuery = _db
+        .from('perfiles')
+        .select('id, username, nombre, email, avatar_url, role')
+        .eq('role', 'cliente')
+        .or('nombre.ilike.%$query%,username.ilike.%$query%');
+
+    final rows = excludeUserId != null && excludeUserId.isNotEmpty
+        ? await baseQuery.neq('id', excludeUserId).limit(limit)
+        : await baseQuery.limit(limit);
+
+    return List<Map<String, dynamic>>.from(rows);
+  }
+
+  /// Busca un único usuario cliente por email exacto.
+  static Future<Map<String, dynamic>?> buscarClientePorEmail(
+    String email, {
+    String? excludeUserId,
+  }) async {
+    final baseQuery = _db
+        .from('perfiles')
+        .select('id, username, nombre, email, avatar_url, role')
+        .eq('role', 'cliente')
+        .eq('email', email);
+
+    final row = excludeUserId != null && excludeUserId.isNotEmpty
+        ? await baseQuery.neq('id', excludeUserId).maybeSingle()
+        : await baseQuery.maybeSingle();
+
     return row;
   }
 

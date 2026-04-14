@@ -415,8 +415,13 @@ class _PerfilScreenState extends State<PerfilScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: AppBackground(
-        child: _loading
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) {
+          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
+        },
+        child: AppBackground(
+          child: _loading
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.accentLila),
               )
@@ -444,6 +449,7 @@ class _PerfilScreenState extends State<PerfilScreen>
                   ),
                 ),
               ),
+      ),
       ),
       bottomNavigationBar: AppBottomNavBar(currentIndex: navIndex),
     );

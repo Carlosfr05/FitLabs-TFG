@@ -203,61 +203,69 @@ class _CalendarioScreenState extends State<CalendarioScreen>
 
   @override
   Widget build(BuildContext context) {
+    final navIndex = SessionService.isEntrenador ? 2 : 1;
+
     return Scaffold(
       extendBody: true,
-      body: AppBackground(
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 300),
-            child: Column(
-              children: [
-                _staggerWrap(0, _buildHeader()),
-                const SizedBox(height: 12),
-                _staggerWrap(1, _buildCalendar()),
-                _staggerWrap(2, Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 30),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 0.5,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.transparent,
-                                AppColors.accentLila.withValues(alpha: 0.4),
-                              ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) {
+          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
+        },
+        child: AppBackground(
+          child: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 300),
+              child: Column(
+                children: [
+                  _staggerWrap(0, _buildHeader()),
+                  const SizedBox(height: 12),
+                  _staggerWrap(1, _buildCalendar()),
+                  _staggerWrap(2, Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 30),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 0.5,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  AppColors.accentLila.withValues(alpha: 0.4),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Icon(
-                          Icons.fitness_center_rounded,
-                          color: AppColors.accentLila.withValues(alpha: 0.3),
-                          size: 16,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Icon(
+                            Icons.fitness_center_rounded,
+                            color: AppColors.accentLila.withValues(alpha: 0.3),
+                            size: 16,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 0.5,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.accentLila.withValues(alpha: 0.4),
-                                Colors.transparent,
-                              ],
+                        Expanded(
+                          child: Container(
+                            height: 0.5,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.accentLila.withValues(alpha: 0.4),
+                                  Colors.transparent,
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                )),
-                _staggerWrap(3, _buildEventSection()),
-              ],
+                      ],
+                    ),
+                  )),
+                  _staggerWrap(3, _buildEventSection()),
+                ],
+              ),
             ),
           ),
         ),
@@ -284,7 +292,7 @@ class _CalendarioScreenState extends State<CalendarioScreen>
             )
           : null,
 
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: 2),
+      bottomNavigationBar: AppBottomNavBar(currentIndex: navIndex),
     );
   }
 
