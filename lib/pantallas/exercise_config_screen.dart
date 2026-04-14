@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
 
 class ExerciseConfigScreen extends StatefulWidget {
@@ -185,8 +185,7 @@ class _ExerciseConfigScreenState extends State<ExerciseConfigScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+      body: AppBackground(
         child: Column(
           children: [
             // Cabecera

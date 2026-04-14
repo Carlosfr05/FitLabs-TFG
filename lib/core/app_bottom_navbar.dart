@@ -24,6 +24,7 @@ class AppBottomNavBar extends StatelessWidget {
           route: '/calendario',
         ),
         _NavItem(icon: Icons.mail, label: 'Mensajes', route: '/mensajes'),
+        _NavItem(icon: Icons.person_outline, label: 'Perfil', route: '/perfil'),
       ];
     } else {
       return [

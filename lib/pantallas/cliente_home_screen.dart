@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
@@ -74,8 +74,7 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
 
     return Scaffold(
       extendBody: true,
-      body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+      body: AppBackground(
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(

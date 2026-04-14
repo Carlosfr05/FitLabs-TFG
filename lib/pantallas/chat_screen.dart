@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart' show getTemporaryDirectory;
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/data/chat_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 
@@ -302,8 +302,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+      body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [

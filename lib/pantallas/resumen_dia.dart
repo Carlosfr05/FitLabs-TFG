@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/core/shared_widgets.dart';
 import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
@@ -149,10 +149,14 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Error al cargar datos. Desliza para reintentar.'),
+            content: const Text(
+              'Error al cargar datos. Desliza para reintentar.',
+            ),
             backgroundColor: AppColors.accentRed,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -200,8 +204,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+      body: AppBackground(
         child: SafeArea(
           bottom: false,
           child: RefreshIndicator(
@@ -390,9 +393,9 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
           ),
         ),
         const SizedBox(width: 10),
-        // Logout
+        // Perfil
         GestureDetector(
-          onTap: _logout,
+          onTap: () => Navigator.pushNamed(context, '/perfil'),
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -400,7 +403,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              Icons.logout_rounded,
+              Icons.person_outline,
               color: Colors.white70,
               size: 22,
             ),
@@ -793,28 +796,57 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
                 color: AppColors.accentLila.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.people_outline_rounded, color: AppColors.accentLila, size: 24),
+              child: const Icon(
+                Icons.people_outline_rounded,
+                color: AppColors.accentLila,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  Text('Sin clientes aún', style: TextStyle(color: AppColors.textColor, fontSize: 15, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Sin clientes aún',
+                    style: TextStyle(
+                      color: AppColors.textColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   SizedBox(height: 4),
-                  Text('Añade tu primer cliente para empezar', style: TextStyle(color: AppColors.dimmedColor, fontSize: 13)),
+                  Text(
+                    'Añade tu primer cliente para empezar',
+                    style: TextStyle(
+                      color: AppColors.dimmedColor,
+                      fontSize: 13,
+                    ),
+                  ),
                 ],
               ),
             ),
             GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/clientes'),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppColors.accentPurple, AppColors.accentLila]),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accentPurple, AppColors.accentLila],
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text('Añadir', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                child: const Text(
+                  'Añadir',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
@@ -836,153 +868,152 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
         ),
       ),
       child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Tus clientes',
-              style: TextStyle(
-                color: AppColors.textColor,
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            if (_clientes.length > 1)
-              GestureDetector(
-                onTap: () =>
-                    Navigator.pushNamed(context, '/clientes'),
-                child: const Text(
-                  'Ver todos',
-                  style: TextStyle(
-                    color: AppColors.accentLila,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Tus clientes',
+                style: TextStyle(
+                  color: AppColors.textColor,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: displayClientes.length + (remaining > 0 ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == displayClientes.length) {
-                // Card "+N más"
+              if (_clientes.length > 1)
+                GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, '/clientes'),
+                  child: const Text(
+                    'Ver todos',
+                    style: TextStyle(
+                      color: AppColors.accentLila,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 100,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: displayClientes.length + (remaining > 0 ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == displayClientes.length) {
+                  // Card "+N más"
+                  return Container(
+                    width: 72,
+                    margin: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pushReplacementNamed(
+                            context,
+                            '/clientes',
+                          ),
+                          child: Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.08),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '+$remaining',
+                                style: const TextStyle(
+                                  color: AppColors.accentLila,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Ver más',
+                          style: TextStyle(
+                            color: AppColors.dimmedColor,
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final cliente = displayClientes[index];
+                final perfil = cliente['client'] as Map<String, dynamic>?;
+                final nombre =
+                    perfil?['nombre'] ?? perfil?['username'] ?? 'Cliente';
+                final inicial = (nombre as String).isNotEmpty
+                    ? nombre[0].toUpperCase()
+                    : 'C';
+
                 return Container(
                   width: 72,
                   margin: const EdgeInsets.only(right: 12),
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pushReplacementNamed(
-                          context,
-                          '/clientes',
-                        ),
-                        child: Container(
+                  child: GestureDetector(
+                    onTap: () {
+                      final clientId = perfil?['id'] as String?;
+                      if (clientId != null) {
+                        Navigator.pushNamed(context, '/clientes');
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        Container(
                           width: 52,
                           height: 52,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.08),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.accentPurple.withOpacity(0.6),
+                                AppColors.accentLila.withOpacity(0.6),
+                              ],
+                            ),
                           ),
                           child: Center(
                             child: Text(
-                              '+$remaining',
+                              inicial,
                               style: const TextStyle(
-                                color: AppColors.accentLila,
-                                fontSize: 14,
+                                color: Colors.white,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Ver más',
-                        style: TextStyle(
-                          color: AppColors.dimmedColor,
-                          fontSize: 11,
+                        const SizedBox(height: 8),
+                        Text(
+                          (nombre).split(' ').first,
+                          style: const TextStyle(
+                            color: AppColors.dimmedColor,
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
-              }
-
-              final cliente = displayClientes[index];
-              final perfil = cliente['client'] as Map<String, dynamic>?;
-              final nombre =
-                  perfil?['nombre'] ?? perfil?['username'] ?? 'Cliente';
-              final inicial = (nombre as String).isNotEmpty
-                  ? nombre[0].toUpperCase()
-                  : 'C';
-
-              return Container(
-                width: 72,
-                margin: const EdgeInsets.only(right: 12),
-                child: GestureDetector(
-                  onTap: () {
-                    final clientId = perfil?['id'] as String?;
-                    if (clientId != null) {
-                      Navigator.pushNamed(context, '/clientes');
-                    }
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.accentPurple.withOpacity(0.6),
-                              AppColors.accentLila.withOpacity(0.6),
-                            ],
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            inicial,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        (nombre).split(' ').first,
-                        style: const TextStyle(
-                          color: AppColors.dimmedColor,
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+              },
+            ),
           ),
-        ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 
@@ -995,8 +1026,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
               child: _actionButton(
                 label: 'Añadir\ncliente',
                 icon: Icons.person_add_rounded,
-                onTap: () =>
-                    Navigator.pushNamed(context, '/clientes'),
+                onTap: () => Navigator.pushNamed(context, '/clientes'),
               ),
             ),
             const SizedBox(width: 14),
@@ -1016,8 +1046,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
               child: _actionButton(
                 label: 'Ver\ncalendario',
                 icon: Icons.calendar_month_rounded,
-                onTap: () =>
-                    Navigator.pushNamed(context, '/calendario'),
+                onTap: () => Navigator.pushNamed(context, '/calendario'),
               ),
             ),
             const SizedBox(width: 14),
@@ -1025,8 +1054,7 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
               child: _actionButton(
                 label: 'Enviar\nmensaje',
                 icon: Icons.chat_bubble_outline_rounded,
-                onTap: () =>
-                    Navigator.pushNamed(context, '/mensajes'),
+                onTap: () => Navigator.pushNamed(context, '/mensajes'),
               ),
             ),
           ],

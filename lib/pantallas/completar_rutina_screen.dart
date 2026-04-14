@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
 import 'package:pantallas_fitlabs/data/progreso_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
@@ -109,8 +109,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+      body: AppBackground(
         child: SafeArea(
           child: Column(
             children: [

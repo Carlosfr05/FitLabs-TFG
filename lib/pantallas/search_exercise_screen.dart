@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
 import 'package:pantallas_fitlabs/data/exercise_search_repository.dart';
 import 'dart:async';
@@ -51,8 +51,7 @@ class _SearchExerciseScreenState extends State<SearchExerciseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
+      body: AppBackground(
         width: double.infinity,
         height: double.infinity,
         child: Column(

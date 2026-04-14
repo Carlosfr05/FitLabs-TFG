@@ -139,4 +139,24 @@ class RutinaService {
   static Future<void> eliminarRutina(String rutinaId) async {
     await _db.from('rutinas').delete().eq('id', rutinaId);
   }
+
+  /// Obtiene todas las rutinas de un mes completo (para indicadores del calendario).
+  static Future<List<Map<String, dynamic>>> fetchRutinasPorMes(
+    String userId,
+    DateTime month,
+  ) async {
+    final inicio = '${month.year}-${month.month.toString().padLeft(2, '0')}-01';
+    final lastDay = DateTime(month.year, month.month + 1, 0).day;
+    final fin =
+        '${month.year}-${month.month.toString().padLeft(2, '0')}-$lastDay';
+
+    final rows = await _db
+        .from('rutinas')
+        .select('id, fecha, assigned_client_id')
+        .or('creator_id.eq.$userId,assigned_client_id.eq.$userId')
+        .gte('fecha', inicio)
+        .lte('fecha', fin);
+
+    return List<Map<String, dynamic>>.from(rows);
+  }
 }

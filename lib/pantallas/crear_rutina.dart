@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_colors.dart';
+import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
 import 'package:pantallas_fitlabs/data/cliente_service.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
@@ -7,7 +7,8 @@ import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_config_screen.dart';
 
 class CrearRutinaScreen extends StatefulWidget {
-  const CrearRutinaScreen({super.key});
+  final DateTime? initialDate;
+  const CrearRutinaScreen({super.key, this.initialDate});
 
   @override
   State<CrearRutinaScreen> createState() => _CrearRutinaScreenState();
@@ -36,6 +37,7 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
   @override
   void initState() {
     super.initState();
+    _fechaSeleccionada = widget.initialDate;
     _cargarClientes();
   }
 
@@ -218,10 +220,9 @@ class _CrearRutinaScreenState extends State<CrearRutinaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: Container(
+      body: AppBackground(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
         child: SafeArea(
           child: Column(
             children: [
