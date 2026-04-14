@@ -13,6 +13,7 @@ import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
 import 'package:pantallas_fitlabs/pantallas/mensajes_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/search_exercise_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/cliente_home_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/perfil_screen.dart';
 
 const String supabaseUrl = 'https://dsvxjscgruadxqelwqaj.supabase.co';
 const String supabaseAnonKey =
@@ -67,6 +68,7 @@ class MainApp extends StatelessWidget {
         '/crear-rutina': (context) => const CrearRutinaScreen(),
         '/search-ejercicio': (context) => const SearchExerciseScreen(),
         '/cliente-home': (context) => const ClienteHomeScreen(),
+        '/perfil': (context) => const PerfilScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/exercise-detail') {

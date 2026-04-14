@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
+import 'package:pantallas_fitlabs/pantallas/calendario_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/cliente_home_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/mensajes_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/mis_clientes.dart';
+import 'package:pantallas_fitlabs/pantallas/perfil_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/resumen_dia.dart';
 
 /// Navbar inferior compartido por todas las pantallas.
 /// Muestra items diferentes según el rol del usuario.
@@ -43,6 +49,87 @@ class AppBottomNavBar extends StatelessWidget {
     }
   }
 
+  static void navigateToIndex(
+    BuildContext context,
+    int currentIndex,
+    int targetIndex,
+  ) {
+    final items = _itemsForRole();
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    if (targetIndex == currentIndex) return;
+
+    final target = items[targetIndex];
+    Navigator.of(
+      context,
+    ).pushReplacement(_buildTabRoute(target.route, currentIndex, targetIndex));
+  }
+
+  static void handleHorizontalSwipe(
+    BuildContext context,
+    int currentIndex,
+    DragEndDetails details,
+  ) {
+    final velocity = details.primaryVelocity ?? 0;
+    const minSwipeVelocity = 250.0;
+
+    if (velocity <= -minSwipeVelocity) {
+      navigateToIndex(context, currentIndex, currentIndex + 1);
+    } else if (velocity >= minSwipeVelocity) {
+      navigateToIndex(context, currentIndex, currentIndex - 1);
+    }
+  }
+
+  static PageRouteBuilder<void> _buildTabRoute(
+    String route,
+    int currentIndex,
+    int targetIndex,
+  ) {
+    final beginOffset = targetIndex > currentIndex
+        ? const Offset(1, 0)
+        : const Offset(-1, 0);
+
+    return PageRouteBuilder<void>(
+      transitionDuration: const Duration(milliseconds: 220),
+      reverseTransitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          _screenForRoute(route),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+        final slide = Tween<Offset>(
+          begin: beginOffset,
+          end: Offset.zero,
+        ).animate(curved);
+        final fade = Tween<double>(begin: 0.94, end: 1).animate(curved);
+        return SlideTransition(
+          position: slide,
+          child: FadeTransition(opacity: fade, child: child),
+        );
+      },
+    );
+  }
+
+  static Widget _screenForRoute(String route) {
+    switch (route) {
+      case '/resumen':
+        return const ResumenDiaScreen();
+      case '/clientes':
+        return const MisClientesScreen();
+      case '/calendario':
+        return const CalendarioScreen();
+      case '/mensajes':
+        return const MensajesScreen();
+      case '/cliente-home':
+        return const ClienteHomeScreen();
+      case '/perfil':
+        return const PerfilScreen();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = _itemsForRole();
@@ -51,7 +138,7 @@ class AppBottomNavBar extends StatelessWidget {
       top: false,
       child: Container(
         height: 80,
-        color: AppColors.navBarBg,
+        color: const Color.fromARGB(255, 72, 68, 114),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(items.length, (index) {
@@ -59,8 +146,7 @@ class AppBottomNavBar extends StatelessWidget {
             final isSelected = currentIndex == index;
             return GestureDetector(
               onTap: () {
-                if (index == currentIndex) return;
-                Navigator.pushReplacementNamed(context, item.route);
+                navigateToIndex(context, currentIndex, index);
               },
               behavior: HitTestBehavior.opaque,
               child: Column(

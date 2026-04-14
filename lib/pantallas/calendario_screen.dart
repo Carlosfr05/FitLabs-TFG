@@ -57,97 +57,105 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final navIndex = SessionService.isEntrenador ? 2 : 1;
+
     return Scaffold(
-      extendBody: true,
-      body: Container(
-        decoration: BoxDecoration(gradient: AppColors.bgGradient),
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              // Título
-              Text(
-                'Calendario',
-                style: TextStyle(
-                  color: AppColors.textColor,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) {
+          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
+        },
+        child: Container(
+          decoration: BoxDecoration(gradient: AppColors.bgGradient),
+          child: SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                // Título
+                Text(
+                  'Calendario',
+                  style: TextStyle(
+                    color: AppColors.textColor,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // --- CALENDARIO (Parte Superior Fija) ---
-              _buildCalendarWidget(),
+                // --- CALENDARIO (Parte Superior Fija) ---
+                _buildCalendarWidget(),
 
-              SizedBox(height: 20),
+                SizedBox(height: 20),
 
-              // Divisor
-              const DashedDivider(
-                padding: EdgeInsets.only(left: 40, right: 40, bottom: 20),
-              ),
+                // Divisor
+                const DashedDivider(
+                  padding: EdgeInsets.only(left: 40, right: 40, bottom: 20),
+                ),
 
-              // --- TIMELINE (Parte Inferior Scrollable) ---
-              Expanded(
-                child: _cargandoEventos
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.accentLila,
-                        ),
-                      )
-                    : _eventosDia.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.event_busy,
-                              color: Colors.white30,
-                              size: 48,
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Sin eventos para este día',
-                              style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 14,
+                // --- TIMELINE (Parte Inferior Scrollable) ---
+                Expanded(
+                  child: _cargandoEventos
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.accentLila,
+                          ),
+                        )
+                      : _eventosDia.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.event_busy,
+                                color: Colors.white30,
+                                size: 48,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Sin eventos para este día',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.only(top: 20, bottom: 20),
+                          itemCount: _eventosDia.length,
+                          itemBuilder: (context, index) {
+                            final r = _eventosDia[index];
+                            final titulo =
+                                r['title'] as String? ?? 'Sin título';
+                            final horaInicio =
+                                r['hora_inicio'] as String? ?? '';
+                            final clienteData =
+                                r['cliente'] as Map<String, dynamic>?;
+                            final clienteNombre = clienteData != null
+                                ? (clienteData['nombre'] ??
+                                          clienteData['username'] ??
+                                          '')
+                                      as String
+                                : '';
+                            final horaLabel = horaInicio.isNotEmpty
+                                ? horaInicio
+                                      .substring(0, 5)
+                                      .replaceAll(':', ' : ')
+                                : '--:--';
+                            return _buildTimeSlot(
+                              horaLabel,
+                              _buildEventCard(titulo, clienteNombre),
+                            );
+                          },
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.only(top: 20, bottom: 100),
-                        itemCount: _eventosDia.length,
-                        itemBuilder: (context, index) {
-                          final r = _eventosDia[index];
-                          final titulo = r['title'] as String? ?? 'Sin título';
-                          final horaInicio = r['hora_inicio'] as String? ?? '';
-                          final clienteData =
-                              r['cliente'] as Map<String, dynamic>?;
-                          final clienteNombre = clienteData != null
-                              ? (clienteData['nombre'] ??
-                                        clienteData['username'] ??
-                                        '')
-                                    as String
-                              : '';
-                          final horaLabel = horaInicio.isNotEmpty
-                              ? horaInicio
-                                    .substring(0, 5)
-                                    .replaceAll(':', ' : ')
-                              : '--:--';
-                          return _buildTimeSlot(
-                            horaLabel,
-                            _buildEventCard(titulo, clienteNombre),
-                          );
-                        },
-                      ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: 2),
+      bottomNavigationBar: AppBottomNavBar(currentIndex: navIndex),
     );
   }
 
