@@ -137,6 +137,12 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
                   ),
                   const SizedBox(height: 30),
 
+                  // Mi progreso
+                  _buildSectionTitle('Mi progreso'),
+                  const SizedBox(height: 15),
+                  _buildProgressCard(),
+                  const SizedBox(height: 30),
+
                   // Rutina del día
                   _buildSectionTitle('Rutina de hoy'),
                   const SizedBox(height: 15),
@@ -196,12 +202,6 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
                             child: _buildRutinaCard(r),
                           ),
                         ),
-                  const SizedBox(height: 30),
-
-                  // Mi progreso
-                  _buildSectionTitle('Mi progreso'),
-                  const SizedBox(height: 15),
-                  _buildProgressCard(),
                 ],
               ),
             ),

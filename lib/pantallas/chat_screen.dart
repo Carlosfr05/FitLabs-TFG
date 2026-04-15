@@ -8,6 +8,7 @@ import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart' show getTemporaryDirectory;
 import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/data/chat_service.dart';
+import 'package:pantallas_fitlabs/data/message_notification_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -45,6 +46,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    MessageNotificationService.instance.setActiveChat(widget.chatId);
     _cargarMensajes();
     _suscribirse();
     // Polling cada 5s como fallback si Realtime falla
@@ -55,6 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    MessageNotificationService.instance.setActiveChat(null);
     _pollTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
@@ -186,14 +189,21 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Icon(icon, color: AppColors.accentLila, size: 28),
           ),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(color: AppColors.textColor, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.textColor, fontSize: 13),
+          ),
         ],
       ),
     );
   }
 
   Future<void> _enviarFoto(ImageSource source) async {
-    final picked = await _picker.pickImage(source: source, imageQuality: 70, maxWidth: 1200);
+    final picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 70,
+      maxWidth: 1200,
+    );
     if (picked == null) return;
     setState(() => _enviandoMedia = true);
     try {
@@ -210,7 +220,10 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar imagen: $e'), backgroundColor: AppColors.accentRed),
+          SnackBar(
+            content: Text('Error al enviar imagen: $e'),
+            backgroundColor: AppColors.accentRed,
+          ),
         );
       }
     } finally {
@@ -219,7 +232,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _enviarVideo() async {
-    final picked = await _picker.pickVideo(source: ImageSource.gallery, maxDuration: const Duration(minutes: 2));
+    final picked = await _picker.pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(minutes: 2),
+    );
     if (picked == null) return;
     setState(() => _enviandoMedia = true);
     try {
@@ -236,7 +252,10 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar vídeo: $e'), backgroundColor: AppColors.accentRed),
+          SnackBar(
+            content: Text('Error al enviar vídeo: $e'),
+            backgroundColor: AppColors.accentRed,
+          ),
         );
       }
     } finally {
@@ -260,8 +279,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _iniciarGrabacion() async {
     if (await _recorder.hasPermission()) {
       final dir = await getTemporaryDirectory();
-      final path = '${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      await _recorder.start(const RecordConfig(encoder: AudioEncoder.aacLc), path: path);
+      final path =
+          '${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      await _recorder.start(
+        const RecordConfig(encoder: AudioEncoder.aacLc),
+        path: path,
+      );
       setState(() => _grabandoAudio = true);
     }
   }
@@ -284,7 +307,10 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar audio: $e'), backgroundColor: AppColors.accentRed),
+          SnackBar(
+            content: Text('Error al enviar audio: $e'),
+            backgroundColor: AppColors.accentRed,
+          ),
         );
       }
     } finally {
@@ -433,11 +459,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     loadingBuilder: (_, child, progress) {
                       if (progress == null) return child;
                       return Container(
-                        width: 220, height: 220,
+                        width: 220,
+                        height: 220,
                         alignment: Alignment.center,
                         child: CircularProgressIndicator(
                           value: progress.expectedTotalBytes != null
-                              ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                              ? progress.cumulativeBytesLoaded /
+                                    progress.expectedTotalBytes!
                               : null,
                           color: AppColors.accentLila,
                           strokeWidth: 2,
@@ -445,9 +473,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       );
                     },
                     errorBuilder: (_, _, _) => Container(
-                      width: 220, height: 100,
+                      width: 220,
+                      height: 100,
                       alignment: Alignment.center,
-                      child: const Icon(Icons.broken_image, color: Colors.white54, size: 40),
+                      child: const Icon(
+                        Icons.broken_image,
+                        color: Colors.white54,
+                        size: 40,
+                      ),
                     ),
                   ),
                 ),
@@ -456,11 +489,14 @@ class _ChatScreenState extends State<ChatScreen> {
               GestureDetector(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Reproductor de vídeo próximamente')),
+                    const SnackBar(
+                      content: Text('Reproductor de vídeo próximamente'),
+                    ),
                   );
                 },
                 child: Container(
-                  width: 220, height: 140,
+                  width: 220,
+                  height: 140,
                   decoration: BoxDecoration(
                     color: Colors.black26,
                     borderRadius: BorderRadius.circular(12),
@@ -468,9 +504,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.play_circle_fill, color: Colors.white, size: 48),
+                      Icon(
+                        Icons.play_circle_fill,
+                        color: Colors.white,
+                        size: 48,
+                      ),
                       SizedBox(height: 6),
-                      Text('Vídeo', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                      Text(
+                        'Vídeo',
+                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                      ),
                     ],
                   ),
                 ),
@@ -482,7 +525,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      _audioPlaying == mediaUrl ? Icons.stop_circle : Icons.play_circle_fill,
+                      _audioPlaying == mediaUrl
+                          ? Icons.stop_circle
+                          : Icons.play_circle_fill,
                       color: AppColors.accentLila,
                       size: 36,
                     ),
@@ -501,7 +546,9 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             const SizedBox(height: 4),
             Padding(
-              padding: tipo == 'imagen' ? const EdgeInsets.symmetric(horizontal: 10, vertical: 4) : EdgeInsets.zero,
+              padding: tipo == 'imagen'
+                  ? const EdgeInsets.symmetric(horizontal: 10, vertical: 4)
+                  : EdgeInsets.zero,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -538,11 +585,7 @@ class _ChatScreenState extends State<ChatScreen> {
             backgroundColor: Colors.transparent,
             iconTheme: const IconThemeData(color: Colors.white),
           ),
-          body: Center(
-            child: InteractiveViewer(
-              child: Image.network(url),
-            ),
-          ),
+          body: Center(child: InteractiveViewer(child: Image.network(url))),
         ),
       ),
     );
@@ -561,9 +604,19 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accentLila)),
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.accentLila,
+                    ),
+                  ),
                   const SizedBox(width: 10),
-                  const Text('Enviando archivo...', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                  const Text(
+                    'Enviando archivo...',
+                    style: TextStyle(color: Colors.white54, fontSize: 13),
+                  ),
                 ],
               ),
             ),
@@ -578,7 +631,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     color: AppColors.accentLila.withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.attach_file_rounded, color: _enviandoMedia ? Colors.white24 : AppColors.accentLila, size: 22),
+                  child: Icon(
+                    Icons.attach_file_rounded,
+                    color: _enviandoMedia
+                        ? Colors.white24
+                        : AppColors.accentLila,
+                    size: 22,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -612,7 +671,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: AppColors.accentRed,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.stop, color: Colors.white, size: 22),
+                    child: const Icon(
+                      Icons.stop,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 )
               else ...[
@@ -625,7 +688,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: AppColors.accentLila.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.mic_rounded, color: AppColors.accentLila, size: 22),
+                    child: const Icon(
+                      Icons.mic_rounded,
+                      color: AppColors.accentLila,
+                      size: 22,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -638,7 +705,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: Color(0xFF6C639F),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.send, color: Colors.white, size: 22),
+                    child: const Icon(
+                      Icons.send,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ),
               ],

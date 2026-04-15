@@ -1,7 +1,9 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
+import 'package:pantallas_fitlabs/data/message_notification_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/login.dart';
@@ -30,13 +32,56 @@ Future<void> main() async {
   // Si hay sesión activa, cargar perfil antes de mostrar la app
   if (Supabase.instance.client.auth.currentUser != null) {
     await SessionService.cargarPerfil();
+    await MessageNotificationService.instance.startListening();
   }
+
+  await MessageNotificationService.instance.initialize();
 
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  StreamSubscription<AuthState>? _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _authSub = Supabase.instance.client.auth.onAuthStateChange.listen((
+      data,
+    ) async {
+      final event = data.event;
+      final user = data.session?.user;
+
+      if (user != null &&
+          (event == AuthChangeEvent.signedIn ||
+              event == AuthChangeEvent.initialSession ||
+              event == AuthChangeEvent.tokenRefreshed)) {
+        await SessionService.cargarPerfil();
+        await MessageNotificationService.instance.startListening();
+        if (mounted) setState(() {});
+      }
+
+      if (event == AuthChangeEvent.signedOut) {
+        await MessageNotificationService.instance.stopListening();
+        SessionService.limpiar();
+        if (mounted) setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
 
   Widget _getHomeScreen() {
     if (!SessionService.isLoggedIn) return const LoginScreen();

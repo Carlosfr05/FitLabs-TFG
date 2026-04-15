@@ -134,43 +134,47 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = _itemsForRole();
+    const navBarColor = Color.fromARGB(255, 72, 68, 114);
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        height: 80,
-        color: const Color.fromARGB(255, 72, 68, 114),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(items.length, (index) {
-            final item = items[index];
-            final isSelected = currentIndex == index;
-            return GestureDetector(
-              onTap: () {
-                navigateToIndex(context, currentIndex, index);
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    item.icon,
-                    color: isSelected
-                        ? Colors.white
-                        : AppColors.navIconUnselected,
-                    size: 28,
-                  ),
-                  Text(
-                    item.label,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.white54,
-                      fontSize: 10,
+    return Container(
+      color: navBarColor,
+      child: SafeArea(
+        top: false,
+        child: Container(
+          height: 80,
+          color: navBarColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(items.length, (index) {
+              final item = items[index];
+              final isSelected = currentIndex == index;
+              return GestureDetector(
+                onTap: () {
+                  navigateToIndex(context, currentIndex, index);
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      item.icon,
+                      color: isSelected
+                          ? Colors.white
+                          : AppColors.navIconUnselected,
+                      size: 28,
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                    Text(
+                      item.label,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.white54,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
         ),
       ),
     );
