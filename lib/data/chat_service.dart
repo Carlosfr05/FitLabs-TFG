@@ -1,68 +1,87 @@
 import 'dart:io';
+import 'package:http/http.dart' show ClientException;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatService {
   static final _db = Supabase.instance.client;
 
+  static bool _isNetworkError(Object error) {
+    if (error is SocketException) return true;
+    if (error is ClientException) {
+      return error.message.toLowerCase().contains('failed host lookup');
+    }
+    final msg = error.toString().toLowerCase();
+    return msg.contains('failed host lookup') ||
+        msg.contains('socketexception') ||
+        msg.contains('no address associated with hostname');
+  }
+
   /// Obtiene los chats del usuario con info del otro participante y último mensaje.
   static Future<List<Map<String, dynamic>>> fetchChats(String userId) async {
-    // Chats donde el user es usuario1 o usuario2
-    final chats = await _db
-        .from('chats')
-        .select('id, id_usuario1, id_usuario2, actualizado_en')
-        .or('id_usuario1.eq.$userId,id_usuario2.eq.$userId')
-        .order('actualizado_en', ascending: false);
+    try {
+      // Chats donde el user es usuario1 o usuario2
+      final chats = await _db
+          .from('chats')
+          .select('id, id_usuario1, id_usuario2, actualizado_en')
+          .or('id_usuario1.eq.$userId,id_usuario2.eq.$userId')
+          .order('actualizado_en', ascending: false);
 
-    final List<Map<String, dynamic>> result = [];
+      final List<Map<String, dynamic>> result = [];
 
-    for (final chat in chats) {
-      final otherUserId = chat['id_usuario1'] == userId
-          ? chat['id_usuario2']
-          : chat['id_usuario1'];
+      for (final chat in chats) {
+        final otherUserId = chat['id_usuario1'] == userId
+            ? chat['id_usuario2']
+            : chat['id_usuario1'];
 
-      // Info del otro usuario
-      final perfil = await _db
-          .from('perfiles')
-          .select('id, username, nombre, avatar_url')
-          .eq('id', otherUserId)
-          .maybeSingle();
+        // Info del otro usuario
+        final perfil = await _db
+            .from('perfiles')
+            .select('id, username, nombre, avatar_url')
+            .eq('id', otherUserId)
+            .maybeSingle();
 
-      // Último mensaje
-      final lastMsg = await _db
-          .from('mensajes')
-          .select('contenido, creado_en, id_remitente, leido, tipo_contenido')
-          .eq('id_chat', chat['id'])
-          .order('creado_en', ascending: false)
-          .limit(1)
-          .maybeSingle();
+        // Último mensaje
+        final lastMsg = await _db
+            .from('mensajes')
+            .select('contenido, creado_en, id_remitente, leido, tipo_contenido')
+            .eq('id_chat', chat['id'])
+            .order('creado_en', ascending: false)
+            .limit(1)
+            .maybeSingle();
 
-      // Contar mensajes no leídos
-      final unread = await _db
-          .from('mensajes')
-          .select('id')
-          .eq('id_chat', chat['id'])
-          .neq('id_remitente', userId)
-          .eq('leido', false);
+        // Contar mensajes no leídos
+        final unread = await _db
+            .from('mensajes')
+            .select('id')
+            .eq('id_chat', chat['id'])
+            .neq('id_remitente', userId)
+            .eq('leido', false);
 
-      String lastMessagePreview = lastMsg?['contenido'] ?? '';
-      final lastTipo = lastMsg?['tipo_contenido']?.toString() ?? 'texto';
-      if (lastTipo == 'imagen') lastMessagePreview = '📷 Foto';
-      if (lastTipo == 'video') lastMessagePreview = '🎥 Vídeo';
-      if (lastTipo == 'audio') lastMessagePreview = '🎙️ Audio';
+        String lastMessagePreview = lastMsg?['contenido'] ?? '';
+        final lastTipo = lastMsg?['tipo_contenido']?.toString() ?? 'texto';
+        if (lastTipo == 'imagen') lastMessagePreview = '📷 Foto';
+        if (lastTipo == 'video') lastMessagePreview = '🎥 Vídeo';
+        if (lastTipo == 'audio') lastMessagePreview = '🎙️ Audio';
 
-      result.add({
-        'chatId': chat['id'],
-        'otherUserId': otherUserId,
-        'nombre': perfil?['nombre'] ?? perfil?['username'] ?? 'Usuario',
-        'avatarUrl': perfil?['avatar_url'],
-        'lastMessage': lastMessagePreview,
-        'lastMessageTime': lastMsg?['creado_en'],
-        'lastSenderId': lastMsg?['id_remitente'],
-        'unreadCount': (unread as List).length,
-      });
+        result.add({
+          'chatId': chat['id'],
+          'otherUserId': otherUserId,
+          'nombre': perfil?['nombre'] ?? perfil?['username'] ?? 'Usuario',
+          'avatarUrl': perfil?['avatar_url'],
+          'lastMessage': lastMessagePreview,
+          'lastMessageTime': lastMsg?['creado_en'],
+          'lastSenderId': lastMsg?['id_remitente'],
+          'unreadCount': (unread as List).length,
+        });
+      }
+
+      return result;
+    } catch (e) {
+      if (_isNetworkError(e)) {
+        return [];
+      }
+      rethrow;
     }
-
-    return result;
   }
 
   /// Obtiene o crea un chat entre dos usuarios. Devuelve el chatId.
@@ -90,13 +109,22 @@ class ChatService {
 
   /// Obtiene los mensajes de un chat, ordenados cronológicamente.
   static Future<List<Map<String, dynamic>>> fetchMensajes(String chatId) async {
-    final data = await _db
-        .from('mensajes')
-        .select('id, id_remitente, contenido, leido, creado_en, tipo_contenido, media_url')
-        .eq('id_chat', chatId)
-        .order('creado_en', ascending: true);
+    try {
+      final data = await _db
+          .from('mensajes')
+          .select(
+            'id, id_remitente, contenido, leido, creado_en, tipo_contenido, media_url',
+          )
+          .eq('id_chat', chatId)
+          .order('creado_en', ascending: true);
 
-    return List<Map<String, dynamic>>.from(data);
+      return List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      if (_isNetworkError(e)) {
+        return [];
+      }
+      rethrow;
+    }
   }
 
   /// Envía un mensaje y actualiza el timestamp del chat.
@@ -119,7 +147,11 @@ class ChatService {
   }
 
   /// Sube un archivo a Supabase Storage y devuelve la URL pública.
-  static Future<String> subirArchivo(String chatId, File file, String extension) async {
+  static Future<String> subirArchivo(
+    String chatId,
+    File file,
+    String extension,
+  ) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final path = '$chatId/$timestamp.$extension';
     await _db.storage.from('chat-media').upload(path, file);
