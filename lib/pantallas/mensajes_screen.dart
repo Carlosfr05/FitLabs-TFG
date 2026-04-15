@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_background.dart';
-import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/chat_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/data/cliente_service.dart';
@@ -210,164 +209,149 @@ class _MensajesScreenState extends State<MensajesScreen> {
     const cardColor = Color(0xFF2E2744);
     const accentRed = Color(0xFFFF3B30);
 
-    final navIndex = SessionService.isEntrenador ? 3 : 2;
-
     return Scaffold(
       extendBody: true,
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragEnd: (details) {
-          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
-        },
-        child: AppBackground(
-          child: SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                const Text(
-                  'Mensajes',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
+      body: AppBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Mensajes',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
                 ),
-                const SizedBox(height: 20),
+              ),
+              const SizedBox(height: 20),
 
-                // Barra de Búsqueda
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    height: 45,
-                    decoration: BoxDecoration(
-                      color: searchBarColor,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 15),
-                        const Icon(Icons.search, color: Colors.white70),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+              // Barra de Búsqueda
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: searchBarColor,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 15),
+                      const Icon(Icons.search, color: Colors.white70),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Buscar conversación',
+                            hintStyle: TextStyle(color: Colors.white70),
+                            isDense: true,
+                          ),
+                          onChanged: (value) =>
+                              setState(() => _searchQuery = value),
+                        ),
+                      ),
+                      if (_searchQuery.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 12),
+                            child: Icon(
+                              Icons.clear,
+                              color: Colors.white70,
+                              size: 18,
                             ),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Buscar conversación',
-                              hintStyle: TextStyle(color: Colors.white70),
-                              isDense: true,
-                            ),
-                            onChanged: (value) =>
-                                setState(() => _searchQuery = value),
                           ),
                         ),
-                        if (_searchQuery.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.only(right: 12),
-                              child: Icon(
-                                Icons.clear,
-                                color: Colors.white70,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-                // Lista de Chats
-                Expanded(
-                  child: _cargando
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white70,
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _cargarChats,
-                          child: Builder(
-                            builder: (context) {
-                              final filtered = _searchQuery.isEmpty
-                                  ? _chats
-                                  : _chats
-                                        .where(
-                                          (c) => (c['nombre'] as String)
-                                              .toLowerCase()
-                                              .contains(
-                                                _searchQuery.toLowerCase(),
-                                              ),
-                                        )
-                                        .toList();
+              // Lista de Chats
+              Expanded(
+                child: _cargando
+                    ? const Center(
+                        child: CircularProgressIndicator(color: Colors.white70),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _cargarChats,
+                        child: Builder(
+                          builder: (context) {
+                            final filtered = _searchQuery.isEmpty
+                                ? _chats
+                                : _chats
+                                      .where(
+                                        (c) => (c['nombre'] as String)
+                                            .toLowerCase()
+                                            .contains(
+                                              _searchQuery.toLowerCase(),
+                                            ),
+                                      )
+                                      .toList();
 
-                              if (filtered.isEmpty) {
-                                return ListView(
-                                  children: const [
-                                    SizedBox(height: 80),
-                                    Icon(
-                                      Icons.chat_bubble_outline,
-                                      color: Colors.white24,
-                                      size: 64,
-                                    ),
-                                    SizedBox(height: 16),
-                                    Center(
-                                      child: Text(
-                                        'Sin conversaciones',
-                                        style: TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 16,
-                                        ),
+                            if (filtered.isEmpty) {
+                              return ListView(
+                                children: const [
+                                  SizedBox(height: 80),
+                                  Icon(
+                                    Icons.chat_bubble_outline,
+                                    color: Colors.white24,
+                                    size: 64,
+                                  ),
+                                  SizedBox(height: 16),
+                                  Center(
+                                    child: Text(
+                                      'Sin conversaciones',
+                                      style: TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 16,
                                       ),
                                     ),
-                                  ],
-                                );
-                              }
-
-                              return ListView.separated(
-                                padding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  20,
-                                  20,
-                                ),
-                                itemCount: filtered.length,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(height: 12),
-                                itemBuilder: (context, index) {
-                                  final chat = filtered[index];
-                                  return _buildChatCard(
-                                    chat,
-                                    cardColor,
-                                    accentRed,
-                                  );
-                                },
+                                  ),
+                                ],
                               );
-                            },
-                          ),
+                            }
+
+                            return ListView.separated(
+                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
+                              itemCount: filtered.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final chat = filtered[index];
+                                return _buildChatCard(
+                                  chat,
+                                  cardColor,
+                                  accentRed,
+                                );
+                              },
+                            );
+                          },
                         ),
-                ),
-              ],
-            ),
+                      ),
+              ),
+            ],
           ),
         ),
       ),
 
       // FAB — Nuevo chat
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 10.0),
+        padding: const EdgeInsets.only(bottom: 75.0),
         child: GestureDetector(
           onTap: _mostrarNuevoChat,
           child: Container(
@@ -386,9 +370,6 @@ class _MensajesScreenState extends State<MensajesScreen> {
           ),
         ),
       ),
-
-      // Bottom Navigation Bar
-      bottomNavigationBar: AppBottomNavBar(currentIndex: navIndex),
     );
   }
 

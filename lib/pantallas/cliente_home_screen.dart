@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_background.dart';
-import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
 import 'package:pantallas_fitlabs/data/progreso_service.dart';
@@ -71,144 +70,135 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final nombre = SessionService.username ?? 'Cliente';
-    const navIndex = 0;
-
     return Scaffold(
       extendBody: true,
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragEnd: (details) {
-          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
-        },
-        child: AppBackground(
-          child: SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Cabecera
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '¡Hola, $nombre!',
-                              style: const TextStyle(
-                                color: AppColors.textColor,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Aquí tienes tu plan de hoy',
-                              style: TextStyle(
-                                color: AppColors.subTextColor,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
+      body: AppBackground(
+        child: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Cabecera
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.notifications,
-                            color: Colors.white,
-                            size: 28,
+                          Text(
+                            '¡Hola, $nombre!',
+                            style: const TextStyle(
+                              color: AppColors.textColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          const SizedBox(width: 12),
-                          GestureDetector(
-                            onTap: _logout,
-                            child: const Icon(
-                              Icons.logout,
-                              color: Colors.white70,
-                              size: 24,
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Aquí tienes tu plan de hoy',
+                            style: TextStyle(
+                              color: AppColors.subTextColor,
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-
-                  // Rutina del día
-                  _buildSectionTitle('Rutina de hoy'),
-                  const SizedBox(height: 15),
-                  if (_cargando)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: CircularProgressIndicator(
-                          color: AppColors.accentLila,
-                        ),
-                      ),
-                    )
-                  else if (_rutinasHoy.isEmpty)
-                    _buildEmptyCard(
-                      icon: Icons.fitness_center,
-                      title: 'Sin rutina asignada',
-                      subtitle:
-                          'Tu entrenador aún no te ha asignado una rutina para hoy.',
-                    )
-                  else
-                    ..._rutinasHoy.map(
-                      (r) => _buildRutinaCard(r, showComplete: true),
                     ),
-                  const SizedBox(height: 30),
-
-                  // Próximas sesiones
-                  _buildSectionTitle('Próximas sesiones'),
-                  const SizedBox(height: 15),
-                  if (_todasRutinas.where((r) {
-                    final fecha = r['fecha'] as String?;
-                    if (fecha == null) return false;
-                    return fecha.compareTo(
-                          DateTime.now().toIso8601String().split('T')[0],
-                        ) >
-                        0;
-                  }).isEmpty)
-                    _buildEmptyCard(
-                      icon: Icons.calendar_today,
-                      title: 'Sin sesiones programadas',
-                      subtitle:
-                          'Cuando tu entrenador programe sesiones, aparecerán aquí.',
-                    )
-                  else
-                    ..._todasRutinas
-                        .where((r) {
-                          final fecha = r['fecha'] as String?;
-                          if (fecha == null) return false;
-                          return fecha.compareTo(
-                                DateTime.now().toIso8601String().split('T')[0],
-                              ) >
-                              0;
-                        })
-                        .take(3)
-                        .map(
-                          (r) => Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _buildRutinaCard(r),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.notifications,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: _logout,
+                          child: const Icon(
+                            Icons.logout,
+                            color: Colors.white70,
+                            size: 24,
                           ),
                         ),
-                  const SizedBox(height: 30),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
 
-                  // Mi progreso
-                  _buildSectionTitle('Mi progreso'),
-                  const SizedBox(height: 15),
-                  _buildProgressCard(),
-                ],
-              ),
+                // Rutina del día
+                _buildSectionTitle('Rutina de hoy'),
+                const SizedBox(height: 15),
+                if (_cargando)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(
+                        color: AppColors.accentLila,
+                      ),
+                    ),
+                  )
+                else if (_rutinasHoy.isEmpty)
+                  _buildEmptyCard(
+                    icon: Icons.fitness_center,
+                    title: 'Sin rutina asignada',
+                    subtitle:
+                        'Tu entrenador aún no te ha asignado una rutina para hoy.',
+                  )
+                else
+                  ..._rutinasHoy.map(
+                    (r) => _buildRutinaCard(r, showComplete: true),
+                  ),
+                const SizedBox(height: 30),
+
+                // Próximas sesiones
+                _buildSectionTitle('Próximas sesiones'),
+                const SizedBox(height: 15),
+                if (_todasRutinas.where((r) {
+                  final fecha = r['fecha'] as String?;
+                  if (fecha == null) return false;
+                  return fecha.compareTo(
+                        DateTime.now().toIso8601String().split('T')[0],
+                      ) >
+                      0;
+                }).isEmpty)
+                  _buildEmptyCard(
+                    icon: Icons.calendar_today,
+                    title: 'Sin sesiones programadas',
+                    subtitle:
+                        'Cuando tu entrenador programe sesiones, aparecerán aquí.',
+                  )
+                else
+                  ..._todasRutinas
+                      .where((r) {
+                        final fecha = r['fecha'] as String?;
+                        if (fecha == null) return false;
+                        return fecha.compareTo(
+                              DateTime.now().toIso8601String().split('T')[0],
+                            ) >
+                            0;
+                      })
+                      .take(3)
+                      .map(
+                        (r) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: _buildRutinaCard(r),
+                        ),
+                      ),
+                const SizedBox(height: 30),
+
+                // Mi progreso
+                _buildSectionTitle('Mi progreso'),
+                const SizedBox(height: 15),
+                _buildProgressCard(),
+              ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: navIndex),
     );
   }
 

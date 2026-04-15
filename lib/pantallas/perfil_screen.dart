@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_background.dart';
-import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class PerfilScreen extends StatefulWidget {
@@ -36,8 +35,6 @@ class _PerfilScreenState extends State<PerfilScreen>
   final _nombreCtrl = TextEditingController();
   final _telefonoCtrl = TextEditingController();
   final _bioCtrl = TextEditingController();
-
-  int get navIndex => SessionService.isEntrenador ? 4 : 3;
 
   @override
   void initState() {
@@ -415,13 +412,8 @@ class _PerfilScreenState extends State<PerfilScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragEnd: (details) {
-          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
-        },
-        child: AppBackground(
-          child: _loading
+      body: AppBackground(
+        child: _loading
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.accentLila),
               )
@@ -450,8 +442,6 @@ class _PerfilScreenState extends State<PerfilScreen>
                 ),
               ),
       ),
-      ),
-      bottomNavigationBar: AppBottomNavBar(currentIndex: navIndex),
     );
   }
 

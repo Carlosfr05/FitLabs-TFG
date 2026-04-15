@@ -23,6 +23,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
   List<Map<String, dynamic>> _ejercicios = [];
   bool _cargando = true;
   bool _guardando = false;
+  String? _sesionId; // Se crea al abrir la pantalla
   final TextEditingController _notasController = TextEditingController();
 
   // Estado de completado por ejercicio
@@ -32,7 +33,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarEjercicios();
+    _iniciarSesion();
   }
 
   @override
@@ -41,18 +42,48 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
     super.dispose();
   }
 
-  Future<void> _cargarEjercicios() async {
+  /// Crea (o recupera) la sesión y carga los ejercicios.
+  Future<void> _iniciarSesion() async {
     try {
+      final clientId = SessionService.userId!;
+
+      // ¿Ya hay sesión activa de hoy para esta rutina?
+      _sesionId = await ProgresoService.fetchSesionActiva(
+        widget.rutinaId,
+        clientId,
+      );
+
+      // Si no existe, crear sesión nueva
+      _sesionId ??= await ProgresoService.crearSesion(
+        rutinaId: widget.rutinaId,
+        clientId: clientId,
+      );
+
+      // Cargar ejercicios de la rutina
       final data = await RutinaService.fetchEjerciciosRutina(widget.rutinaId);
+
+      // Restaurar estado si la sesión ya tenía ejercicios marcados
+      final completados =
+          await ProgresoService.fetchEjerciciosCompletadosDeSesion(_sesionId!);
+      final Map<String, Map<String, dynamic>> completadosMap = {};
+      for (final c in completados) {
+        completadosMap[c['id_ejercicio_rutina'] as String] = c;
+      }
+
       if (!mounted) return;
       setState(() {
         _ejercicios = data;
         for (final ej in data) {
           final id = ej['id'] as String;
+          final prev = completadosMap[id];
           _estado[id] = _EjercicioState(
-            completado: false,
-            pesoReal: (ej['peso'] as num?)?.toDouble(),
-            repsReal: ej['repeticiones'] as int?,
+            completado: prev?['completado'] == true,
+            pesoReal: prev != null
+                ? (prev['peso_real'] as num?)?.toDouble()
+                : (ej['peso'] as num?)?.toDouble(),
+            repsReal: prev != null
+                ? (prev['reps_real'] as num?)?.toInt()
+                : ej['repeticiones'] as int?,
           );
         }
         _cargando = false;
@@ -62,31 +93,52 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
     }
   }
 
-  Future<void> _guardarSesion() async {
+  /// Guarda un ejercicio individual en la BD (llamado al marcar/desmarcar).
+  Future<void> _guardarEjercicio(String idEjercicioRutina) async {
+    if (_sesionId == null) return;
+    final estado = _estado[idEjercicioRutina];
+    if (estado == null) return;
+
+    try {
+      await ProgresoService.upsertEjercicioCompletado(
+        sesionId: _sesionId!,
+        idEjercicioRutina: idEjercicioRutina,
+        completado: estado.completado,
+        pesoReal: estado.pesoReal,
+        repsReal: estado.repsReal,
+      );
+    } catch (_) {
+      // Silencioso: se reintentará al finalizar
+    }
+  }
+
+  /// Finaliza la sesión.
+  Future<void> _finalizarSesion() async {
+    if (_sesionId == null) return;
     setState(() => _guardando = true);
     try {
-      final ejerciciosData = _estado.entries.map((entry) {
-        return {
-          'id_ejercicio_rutina': entry.key,
-          'completado': entry.value.completado,
-          'peso_real': entry.value.pesoReal,
-          'reps_real': entry.value.repsReal,
-        };
-      }).toList();
+      // Guardar todos los ejercicios por si alguno falló
+      for (final entry in _estado.entries) {
+        await ProgresoService.upsertEjercicioCompletado(
+          sesionId: _sesionId!,
+          idEjercicioRutina: entry.key,
+          completado: entry.value.completado,
+          pesoReal: entry.value.pesoReal,
+          repsReal: entry.value.repsReal,
+        );
+      }
 
-      await ProgresoService.completarRutina(
-        rutinaId: widget.rutinaId,
-        clientId: SessionService.userId!,
-        notas: _notasController.text.trim().isNotEmpty
+      await ProgresoService.finalizarSesion(
+        _sesionId!,
+        _notasController.text.trim().isNotEmpty
             ? _notasController.text.trim()
             : null,
-        ejerciciosCompletados: ejerciciosData,
       );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('¡Sesión registrada! 💪'),
+          content: Text('¡Sesión finalizada! 💪'),
           backgroundColor: Colors.green,
         ),
       );
@@ -95,7 +147,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al guardar: $e'),
+          content: Text('Error al finalizar: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -270,6 +322,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
                   setState(() {
                     estado.completado = !estado.completado;
                   });
+                  _guardarEjercicio(id);
                 },
                 child: Container(
                   width: 28,
@@ -328,6 +381,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
                     initial: estado.pesoReal?.toString() ?? '',
                     onChanged: (val) {
                       estado.pesoReal = double.tryParse(val);
+                      _guardarEjercicio(id);
                     },
                     isDecimal: true,
                   ),
@@ -339,6 +393,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
                     initial: estado.repsReal?.toString() ?? '',
                     onChanged: (val) {
                       estado.repsReal = int.tryParse(val);
+                      _guardarEjercicio(id);
                     },
                     isDecimal: false,
                   ),
@@ -412,7 +467,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
 
   Widget _buildGuardarButton() {
     return GestureDetector(
-      onTap: _guardando ? null : _guardarSesion,
+      onTap: _guardando ? null : _finalizarSesion,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -434,7 +489,7 @@ class _CompletarRutinaScreenState extends State<CompletarRutinaScreen> {
                 )
               : Text(
                   _completados > 0
-                      ? 'Registrar sesión ($_completados/${_ejercicios.length})'
+                      ? 'Finalizar sesión ($_completados/${_ejercicios.length})'
                       : 'Marca al menos un ejercicio',
                   style: const TextStyle(
                     color: Colors.white,

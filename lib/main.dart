@@ -5,15 +5,10 @@ import 'package:pantallas_fitlabs/data/exercise.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/login.dart';
-import 'package:pantallas_fitlabs/pantallas/resumen_dia.dart';
-import 'package:pantallas_fitlabs/pantallas/mis_clientes.dart';
-import 'package:pantallas_fitlabs/pantallas/calendario_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/home_shell.dart';
 import 'package:pantallas_fitlabs/pantallas/registrarse.dart';
 import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
-import 'package:pantallas_fitlabs/pantallas/mensajes_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/search_exercise_screen.dart';
-import 'package:pantallas_fitlabs/pantallas/cliente_home_screen.dart';
-import 'package:pantallas_fitlabs/pantallas/perfil_screen.dart';
 
 const String supabaseUrl = 'https://dsvxjscgruadxqelwqaj.supabase.co';
 const String supabaseAnonKey =
@@ -40,9 +35,7 @@ class MainApp extends StatelessWidget {
 
   Widget _getHomeScreen() {
     if (!SessionService.isLoggedIn) return const LoginScreen();
-    return SessionService.isEntrenador
-        ? const ResumenDiaScreen()
-        : const ClienteHomeScreen();
+    return const HomeShell();
   }
 
   @override
@@ -60,15 +53,10 @@ class MainApp extends StatelessWidget {
       home: _getHomeScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/mensajes': (context) => const MensajesScreen(),
-        '/resumen': (context) => const ResumenDiaScreen(),
-        '/clientes': (context) => const MisClientesScreen(),
-        '/calendario': (context) => const CalendarioScreen(),
+        '/home': (context) => const HomeShell(),
         '/registrarse': (context) => const RegistrarseScreen(),
         '/crear-rutina': (context) => const CrearRutinaScreen(),
         '/search-ejercicio': (context) => const SearchExerciseScreen(),
-        '/cliente-home': (context) => const ClienteHomeScreen(),
-        '/perfil': (context) => const PerfilScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/exercise-detail') {

@@ -140,6 +140,47 @@ class RutinaService {
     await _db.from('rutinas').delete().eq('id', rutinaId);
   }
 
+  /// Actualiza los campos editables de una rutina.
+  static Future<void> actualizarRutina({
+    required String rutinaId,
+    String? titulo,
+    String? descripcion,
+    String? fecha,
+    String? horaInicio,
+    String? horaFin,
+  }) async {
+    final data = <String, dynamic>{};
+    if (titulo != null) data['title'] = titulo;
+    if (descripcion != null) data['description'] = descripcion;
+    if (fecha != null) data['fecha'] = fecha;
+    if (horaInicio != null) data['hora_inicio'] = horaInicio;
+    if (horaFin != null) data['hora_fin'] = horaFin;
+    if (data.isNotEmpty) {
+      await _db.from('rutinas').update(data).eq('id', rutinaId);
+    }
+  }
+
+  /// Actualiza un ejercicio de la rutina (series, reps, peso, etc.).
+  static Future<void> actualizarEjercicioRutina({
+    required String ejercicioRutinaId,
+    int? series,
+    int? repeticiones,
+    double? peso,
+    int? descanso,
+  }) async {
+    final data = <String, dynamic>{};
+    if (series != null) data['serie'] = series;
+    if (repeticiones != null) data['repeticiones'] = repeticiones;
+    if (peso != null) data['peso'] = peso;
+    if (descanso != null) data['descanso'] = descanso;
+    if (data.isNotEmpty) {
+      await _db
+          .from('ejercicios_rutina')
+          .update(data)
+          .eq('id', ejercicioRutinaId);
+    }
+  }
+
   /// Obtiene todas las rutinas de un mes completo (para indicadores del calendario).
   static Future<List<Map<String, dynamic>>> fetchRutinasPorMes(
     String userId,

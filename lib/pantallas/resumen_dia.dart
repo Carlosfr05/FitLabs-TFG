@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_background.dart';
-import 'package:pantallas_fitlabs/core/shared_widgets.dart';
-import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
+import 'package:pantallas_fitlabs/pantallas/home_shell.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
 import 'package:pantallas_fitlabs/data/chat_service.dart';
@@ -202,77 +201,68 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
 
   @override
   Widget build(BuildContext context) {
-    const navIndex = 0;
-
     return Scaffold(
       extendBody: true,
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragEnd: (details) {
-          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
-        },
-        child: AppBackground(
-          child: SafeArea(
-            bottom: false,
-            child: RefreshIndicator(
-              color: AppColors.accentLila,
-              backgroundColor: AppColors.surfaceColor2,
-              onRefresh: () async {
-                _staggerController.forward(from: 0);
-                await _cargarDatos();
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _staggerWrap(0, _buildHeader()),
-                    const SizedBox(height: 28),
-                    _staggerWrap(1, _buildSummaryCard()),
-                    const SizedBox(height: 28),
-                    _staggerWrap(2, _buildWeeklyActivity()),
-                    const SizedBox(height: 28),
-                    _staggerWrap(3, _buildClientCards()),
-                    const SizedBox(height: 28),
-                    _staggerWrap(
-                      4,
-                      _buildActionButtonsGrid(
-                        AppColors.surfaceColor,
-                        0,
-                        AppColors.textColor,
-                      ),
+      body: AppBackground(
+        child: SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            color: AppColors.accentLila,
+            backgroundColor: AppColors.surfaceColor2,
+            onRefresh: () async {
+              _staggerController.forward(from: 0);
+              await _cargarDatos();
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _staggerWrap(0, _buildHeader()),
+                  const SizedBox(height: 28),
+                  _staggerWrap(1, _buildSummaryCard()),
+                  const SizedBox(height: 28),
+                  _staggerWrap(2, _buildWeeklyActivity()),
+                  const SizedBox(height: 28),
+                  _staggerWrap(3, _buildClientCards()),
+                  const SizedBox(height: 28),
+                  _staggerWrap(
+                    4,
+                    _buildActionButtonsGrid(
+                      AppColors.surfaceColor,
+                      0,
+                      AppColors.textColor,
                     ),
-                    const SizedBox(height: 48),
-                    _staggerWrap(
-                      5,
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Entrenamientos Próximos',
-                            style: TextStyle(
-                              color: AppColors.textColor,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  ),
+                  const SizedBox(height: 48),
+                  _staggerWrap(
+                    5,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Entrenamientos Próximos',
+                          style: TextStyle(
+                            color: AppColors.textColor,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 16),
-                          _buildWorkoutList(
-                            AppColors.textColor,
-                            AppColors.subTextColor,
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildWorkoutList(
+                          AppColors.textColor,
+                          AppColors.subTextColor,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: navIndex),
     );
   }
 
@@ -350,7 +340,8 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
         ),
         // Campana con badge real + bounce
         GestureDetector(
-          onTap: () => Navigator.pushReplacementNamed(context, '/mensajes'),
+          onTap: () =>
+              HomeShell.switchTab(context, SessionService.isEntrenador ? 3 : 2),
           child: Stack(
             clipBehavior: Clip.none,
             children: [

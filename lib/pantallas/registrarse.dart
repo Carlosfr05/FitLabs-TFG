@@ -139,10 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await _crearPerfil(response.user!.id, name, email, phone);
         await SessionService.cargarPerfil();
         if (mounted) {
-          Navigator.pushReplacementNamed(
-            context,
-            SessionService.isEntrenador ? '/resumen' : '/cliente-home',
-          );
+          Navigator.pushReplacementNamed(context, '/home');
         }
       }
     } on AuthException catch (e) {

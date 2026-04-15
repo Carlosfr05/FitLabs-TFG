@@ -73,10 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await SessionService.cargarPerfil();
       }
       if (mounted) {
-        Navigator.pushReplacementNamed(
-          context,
-          SessionService.isEntrenador ? '/resumen' : '/cliente-home',
-        );
+        Navigator.pushReplacementNamed(context, '/home');
       }
     } on AuthException catch (e) {
       final msg = e.message.toLowerCase();

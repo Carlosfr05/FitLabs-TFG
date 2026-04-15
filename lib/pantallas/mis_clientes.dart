@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/cliente_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/pantallas/detalle_cliente.dart';
@@ -79,216 +78,208 @@ class _ClientsScreenState extends State<ClientsScreen> {
     final bgBottom = const Color(0xFF1E1A2B);
     final searchBarColor = const Color(0xFF4B4584);
     final filterPillColor = const Color(0xFF413E60);
-    const navIndex = 1;
-
     return Scaffold(
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragEnd: (details) {
-          AppBottomNavBar.handleHorizontalSwipe(context, navIndex, details);
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [bgTop, const Color(0xFF2A223E), bgBottom],
-              stops: const [0.0, 0.3, 1.0],
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [bgTop, const Color(0xFF2A223E), bgBottom],
+            stops: const [0.0, 0.3, 1.0],
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Mis Clientes',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                const Text(
+                  'Mis Clientes',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
                   ),
-                  const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 20),
 
-                  // --- Barra de Búsqueda ---
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(
-                      height: 45,
-                      decoration: BoxDecoration(
-                        color: searchBarColor,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 15),
-                          const Icon(Icons.search, color: Colors.white70),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Buscar Cliente',
-                                hintStyle: TextStyle(color: Colors.white70),
-                                isDense: true,
-                              ),
-                              onChanged: (value) =>
-                                  setState(() => _searchQuery = value),
-                            ),
-                          ),
-                          if (_searchQuery.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                _searchController.clear();
-                                setState(() => _searchQuery = '');
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.only(right: 12),
-                                child: Icon(
-                                  Icons.clear,
-                                  color: Colors.white70,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
+                // --- Barra de Búsqueda ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: Container(
+                    height: 45,
+                    decoration: BoxDecoration(
+                      color: searchBarColor,
+                      borderRadius: BorderRadius.circular(25),
                     ),
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  // --- Filtros ---
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Todos tus clientes",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(width: 15),
+                        const Icon(Icons.search, color: Colors.white70),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Buscar Cliente',
+                              hintStyle: TextStyle(color: Colors.white70),
+                              isDense: true,
+                            ),
+                            onChanged: (value) =>
+                                setState(() => _searchQuery = value),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: filterPillColor,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.white12),
-                          ),
-                          child: const Row(
-                            children: [
-                              Text(
-                                "Ordenar por: Recientes",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Icon(
-                                Icons.keyboard_arrow_down,
+                        if (_searchQuery.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.only(right: 12),
+                              child: Icon(
+                                Icons.clear,
                                 color: Colors.white70,
-                                size: 16,
+                                size: 18,
                               ),
-                            ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 10),
+                const SizedBox(height: 25),
 
-                  // --- Lista de Clientes ---
-                  Expanded(
-                    child: _cargando
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFFAEA6E8),
+                // --- Filtros ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Todos tus clientes",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: filterPillColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white12),
+                        ),
+                        child: const Row(
+                          children: [
+                            Text(
+                              "Ordenar por: Recientes",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
                             ),
-                          )
-                        : Builder(
-                            builder: (context) {
-                              final filteredClients = _searchQuery.isEmpty
-                                  ? _clientes
-                                  : _clientes.where((c) {
-                                      final perfil =
-                                          c['client'] as Map<String, dynamic>?;
-                                      final nombre =
-                                          (perfil?['nombre'] ??
-                                                  perfil?['username'] ??
-                                                  '')
-                                              as String;
-                                      return nombre.toLowerCase().contains(
-                                        _searchQuery.toLowerCase(),
-                                      );
-                                    }).toList();
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.keyboard_arrow_down,
+                              color: Colors.white70,
+                              size: 16,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-                              if (filteredClients.isEmpty) {
-                                return Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.people_outline,
-                                        color: Colors.white30,
-                                        size: 64,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        _searchQuery.isNotEmpty
-                                            ? 'Sin resultados'
-                                            : 'Aún no tienes clientes\nPulsa + para invitar uno',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
+                const SizedBox(height: 10),
 
-                              return RefreshIndicator(
-                                onRefresh: _cargarClientes,
-                                color: const Color(0xFFAEA6E8),
-                                child: ListView.separated(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    20,
-                                    10,
-                                    20,
-                                    20,
-                                  ),
-                                  itemCount: filteredClients.length,
-                                  separatorBuilder: (_, _) =>
-                                      const SizedBox(height: 20),
-                                  itemBuilder: (context, index) {
-                                    final rel = filteredClients[index];
-                                    return _buildClientRow(rel);
-                                  },
+                // --- Lista de Clientes ---
+                Expanded(
+                  child: _cargando
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFAEA6E8),
+                          ),
+                        )
+                      : Builder(
+                          builder: (context) {
+                            final filteredClients = _searchQuery.isEmpty
+                                ? _clientes
+                                : _clientes.where((c) {
+                                    final perfil =
+                                        c['client'] as Map<String, dynamic>?;
+                                    final nombre =
+                                        (perfil?['nombre'] ??
+                                                perfil?['username'] ??
+                                                '')
+                                            as String;
+                                    return nombre.toLowerCase().contains(
+                                      _searchQuery.toLowerCase(),
+                                    );
+                                  }).toList();
+
+                            if (filteredClients.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.people_outline,
+                                      color: Colors.white30,
+                                      size: 64,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      _searchQuery.isNotEmpty
+                                          ? 'Sin resultados'
+                                          : 'Aún no tienes clientes\nPulsa + para invitar uno',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               );
-                            },
-                          ),
-                  ),
-                ],
-              ),
+                            }
+
+                            return RefreshIndicator(
+                              onRefresh: _cargarClientes,
+                              color: const Color(0xFFAEA6E8),
+                              child: ListView.separated(
+                                padding: const EdgeInsets.fromLTRB(
+                                  5,
+                                  10,
+                                  5,
+                                  20,
+                                ),
+                                itemCount: filteredClients.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: 20),
+                                itemBuilder: (context, index) {
+                                  final rel = filteredClients[index];
+                                  return _buildClientRow(rel);
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
             ),
           ),
         ),
@@ -296,7 +287,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
       // --- FAB ---
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 70.0),
+        padding: const EdgeInsets.only(bottom: 75.0),
         child: GestureDetector(
           onTap: _mostrarDialogoInvitar,
           child: Container(
@@ -314,9 +305,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
           ),
         ),
       ),
-
-      // --- Barra de Navegación ---
-      bottomNavigationBar: const AppBottomNavBar(currentIndex: navIndex),
     );
   }
 
@@ -377,18 +365,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          Row(
-            children: [
-              const Icon(Icons.fitness_center, color: Colors.white70, size: 24),
-              const SizedBox(width: 10),
-              const Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.white30,
-                size: 16,
-              ),
-            ],
-          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.fitness_center, color: Colors.white70, size: 20),
+          const SizedBox(width: 6),
+          const Icon(Icons.arrow_forward_ios, color: Colors.white30, size: 14),
         ],
       ),
     );
