@@ -22,7 +22,7 @@ RF-06 & Mis Clientes & El entrenador podrá consultar la lista de sus clientes c
 RF-07 & Mis Clientes & El entrenador podrá acceder al perfil detallado de cada cliente (IMC, estado, sesiones realizadas, progreso de peso). \\
 RF-08 & Mis Clientes & Se mostrarán las sesiones pasadas del cliente con valoración (sistema de estrellas). \\
 RF-09 & Crear Rutina & El entrenador podrá crear una rutina asignada a un cliente, con título y ejercicios configurables. \\
-RF-10 & Crear Rutina & El sistema permitirá buscar ejercicios en una API externa por nombre o grupo muscular. \\
+RF-10 & Crear Rutina & El sistema permitirá buscar ejercicios en un catálogo local por nombre o grupo muscular, tras haber evaluado una API externa durante el desarrollo. \\
 RF-11 & Crear Rutina & Cada ejercicio añadido a la rutina tendrá series, repeticiones y peso configurables. \\
 RF-12 & Calendario & El entrenador podrá visualizar las sesiones programadas en un calendario mensual. \\
 RF-13 & Calendario & Las sesiones se mostrarán con el nombre del cliente y el tipo de sesión. \\
@@ -54,6 +54,65 @@ RNF-08 & Mantenibilidad & El código debe organizarse en módulos (pantallas) in
 \label{tab:rnf}
 \end{longtable}
 
+\section{Historias de usuario y criterios de aceptación}
+
+Para convertir los requisitos en funcionalidades implementables, se redactaron historias de usuario en formato ágil. Esta capa intermedia permitió pasar de una definición general a criterios observables y verificables en pruebas.
+
+\begin{longtable}{@{}p{1.3cm}p{5.5cm}p{6.7cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Historia de usuario} & \textbf{Criterios de aceptación} \\
+\midrule
+\endhead
+HU-01 & Como entrenador, quiero registrarme con mis datos para acceder a la app. & El alta crea usuario en Auth y perfil en BD; validación de campos obligatorios; mensaje de error claro si el email ya existe. \\
+HU-02 & Como entrenador, quiero iniciar sesión para acceder a mi panel de trabajo. & Redirección a Resumen del Día con credenciales válidas; error controlado si la autenticación falla. \\
+HU-03 & Como entrenador, quiero ver mis clientes para organizar el trabajo diario. & Solo se muestran clientes asociados al usuario autenticado; listado ordenado y cargado sin errores. \\
+HU-04 & Como entrenador, quiero buscar clientes por nombre para ahorrar tiempo. & Filtro en tiempo real sin recarga completa de pantalla; admite coincidencias parciales. \\
+HU-05 & Como entrenador, quiero crear rutinas personalizadas para cada cliente. & Guardado correcto de rutina y ejercicios vinculados; validación de título obligatorio. \\
+HU-06 & Como entrenador, quiero consultar el calendario para planificar sesiones. & Días con sesiones visibles; detalle de sesiones al seleccionar fecha. \\
+HU-07 & Como entrenador, quiero enviar mensajes para resolver dudas de clientes. & Mensaje persistido en BD y visualizado por ambos usuarios; actualización en tiempo real. \\
+HU-08 & Como entrenador, quiero identificar mensajes no leídos para priorizar respuestas. & Contador de no leídos visible y actualizado tras lectura. \\
+\bottomrule
+\caption{Historias de usuario priorizadas para la versión entregada.}
+\end{longtable}
+
+\section{Priorización funcional (MoSCoW)}
+
+Se aplicó una priorización MoSCoW para gestionar alcance y proteger la entrega final frente a cambios de última hora.
+
+\begin{longtable}{@{}p{2cm}p{11.5cm}@{}}
+\toprule
+\textbf{Nivel} & \textbf{Funcionalidades asociadas} \\
+\midrule
+\endhead
+Must Have & Registro/login, roles, resumen diario, gestión de clientes, detalle de cliente, creación de rutinas, calendario, mensajería en tiempo real. \\
+Should Have & Indicadores visuales avanzados, limpieza automática de estados de formulario, mejoras de UX en flujos de alta frecuencia. \\
+Could Have & Integración de API externa de ejercicios en producción, perfil avanzado con preferencias, métricas extendidas. \\
+Won't Have (v1) & Pagos integrados, videollamadas, modo offline completo, integración con wearables. \\
+\bottomrule
+\caption{Priorización de alcance mediante técnica MoSCoW.}
+\end{longtable}
+
+\section{Casos de uso principales}
+
+A nivel de modelado funcional, los casos de uso centrales del sistema son los siguientes:
+
+\begin{enumerate}
+  \item \textbf{CU-01: Gestionar autenticación}. Actor principal: Entrenador. Resultado: sesión iniciada y perfil cargado.
+  \item \textbf{CU-02: Consultar cartera de clientes}. Actor principal: Entrenador. Resultado: listado filtrable y acceso a detalle.
+  \item \textbf{CU-03: Diseñar rutina personalizada}. Actor principal: Entrenador. Resultado: rutina persistida con ejercicios parametrizados.
+  \item \textbf{CU-04: Planificar sesiones en calendario}. Actor principal: Entrenador. Resultado: agenda mensual consultable y accionable.
+  \item \textbf{CU-05: Mantener comunicación con clientes}. Actor principal: Entrenador/Cliente. Resultado: intercambio de mensajes en tiempo real.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \resizebox{0.8\textwidth}{!}{\includegraphics{casos_uso.png}}
+  \caption{Diagrama de casos de uso de FitLabs con actores (Entrenador y Cliente) y funcionalidades principales.}
+  \label{fig:casos_uso}
+\end{figure}
+
+Estos casos de uso se tomaron como referencia para estructurar tanto el diseño de pantallas como la planificación de pruebas del capítulo de validación.
+
 \section{Arquitectura del sistema}
 
 FitLabs sigue una arquitectura cliente-servidor \textbf{en tres capas}:
@@ -64,7 +123,7 @@ FitLabs sigue una arquitectura cliente-servidor \textbf{en tres capas}:
   \item \textbf{Capa de datos}: Base de datos PostgreSQL alojada en la infraestructura cloud de Supabase, con políticas RLS aplicadas.
 \end{enumerate}
 
-Adicionalmente, la aplicación se comunica con una \textbf{API REST externa} (catálogo de ejercicios) mediante peticiones HTTP directas desde el cliente Flutter.
+Adicionalmente, durante el desarrollo se evaluó una \textbf{API REST externa} para el catálogo de ejercicios. La versión final del proyecto utiliza un catálogo local de ejercicios para reducir dependencias externas y asegurar el cierre funcional de la aplicación.
 
 \begin{figure}[H]
   \centering
@@ -74,7 +133,7 @@ Adicionalmente, la aplicación se comunica con una \textbf{API REST externa} (ca
   \label{fig:arquitectura}
 \end{figure}
 
-% TODO: Exportar el diagrama de arquitectura desde draw.io o Figma y guardarlo como imagenes/diagrama_arquitectura.png
+% Exportar el diagrama de arquitectura desde draw.io o Figma y guardarlo como imagenes/diagrama_arquitectura.png.
 
 \section{Esquema de la base de datos}
 
@@ -178,14 +237,30 @@ Las columnas clave de \texttt{mensajes} son: \texttt{id\_chat} (FK $\to$ chats),
 
 Estas tablas replican funcionalidades de red social básicas sobre rutinas compartidas públicamente: seguidores entre usuarios, reacciones y comentarios en rutinas.
 
-\section{Diagrama Entidad-Relación}
+\subsection{Relaciones y cardinalidades}
 
+Para que el diagrama ER refleje correctamente la lógica del sistema, las relaciones clave deben representarse con su cardinalidad y participación:
+
+\begin{itemize}
+  \item \texttt{perfiles} a \texttt{rutinas}: una relación 1:N, ya que un entrenador puede crear muchas rutinas y cada rutina pertenece a un único creador.
+  \item \texttt{perfiles} a \texttt{clientes\_entrenador}: una relación N:M materializada mediante una tabla intermedia, con participación obligatoria de ambas partes en la relación activa.
+  \item \texttt{rutinas} a \texttt{ejercicios\_rutina}: una relación 1:N, dado que una rutina puede contener múltiples ejercicios.
+  \item \texttt{chats} a \texttt{mensajes}: una relación 1:N, porque cada chat agrupa múltiples mensajes.
+  \item \texttt{perfiles} a \texttt{chats}: dos relaciones 1:N desde cada usuario participante, con participación total del chat respecto a ambos usuarios.
+\end{itemize}
+
+Esta lectura ayuda a rehacer el diagrama de forma más precisa en draw.io, incorporando cardinalidad y participación explícitas para cada relación.
+
+\clearpage
+\begin{landscape}
+\section{Diagrama Entidad-Relación}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.9\textwidth]{diagrama_er.png}
+  \includegraphics[width=0.98\linewidth,height=0.78\textheight,keepaspectratio]{diagrama_er.png}
   \caption{Diagrama Entidad-Relación del esquema de base de datos de FitLabs.}
   \label{fig:diagrama_er}
 \end{figure}
+\end{landscape}
 
 \section{Diagrama de flujo -- Proceso de autenticación}
 
@@ -196,8 +271,23 @@ Estas tablas replican funcionalidades de red social básicas sobre rutinas compa
   \label{fig:flujo_auth}
 \end{figure}
 
-% TODO: Crear flujo_autenticacion.png usando draw.io o similar con:
+% Crear flujo_autenticacion.png usando draw.io o similar con:
 %  1. Usuario introduce email+contraseña
 %  2. Llamada a Supabase Auth
 %  3. Si éxito -> Crear perfil en tabla perfiles -> Redirigir a /resumen
 %  4. Si error -> Mostrar mensaje de error
+
+\subsection{Integración histórica con ExerciseDB}
+
+Durante el desarrollo se llegó a probar una integración HTTP con ExerciseDB. El historial del repositorio conserva ese enfoque, que incluía paginación y timeout:
+
+\begin{lstlisting}[caption={Fragmento histórico de consulta a ExerciseDB}]
+final uri = Uri.https('exercisedb.dev', '/api/v1/exercises/search', {
+  'q': query,
+  'offset': offset.toString(),
+  'limit': '10',
+});
+final response = await http.get(uri).timeout(const Duration(seconds: 10));
+\end{lstlisting}
+
+Ese intento se descartó al cambiar las condiciones de uso del proveedor, y la solución final quedó apoyada en un catálogo local de ejercicios.

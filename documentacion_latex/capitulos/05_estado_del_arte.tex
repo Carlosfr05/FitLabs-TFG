@@ -9,7 +9,7 @@ El mercado global de aplicaciones de salud y fitness experimentó un crecimiento
 
 En España, el sector del fitness ha experimentado una notable recuperación y transformación digital tras la pandemia. Los gimnasios y entrenadores personales han adoptado progresivamente herramientas digitales para complementar o sustituir la actividad presencial.
 
-% TODO: Ampliar con datos estadísticos actualizados sobre el número de usuarios de apps de fitness en España y Europa. Fuentes: Statista, Federación Nacional de Empresarios de Instalaciones Deportivas (FNEID), Digital Health 2024 Report.
+La tendencia más relevante para FitLabs no es solo el crecimiento del mercado, sino la especialización: las soluciones que mejor encajan son las que resuelven un flujo de trabajo concreto para entrenadores, en lugar de intentar cubrir todo el ecosistema del fitness con una plataforma genérica.
 
 \section{Aplicaciones similares existentes}
 
@@ -82,12 +82,23 @@ La elección final de Supabase se justifica en detalle en el capítulo de Tecnol
 
 \section{APIs de ejercicios}
 
-Para el módulo de creación de rutinas, FitLabs integra una API externa de ejercicios. Las principales opciones evaluadas fueron:
+Para el módulo de creación de rutinas, FitLabs evaluó una API externa de ejercicios durante la fase de desarrollo. Las principales opciones consideradas fueron:
 
 \begin{itemize}
-  \item \textbf{ExerciseDB} (RapidAPI): Amplio catálogo con imágenes GIF animadas de demostración. Modelo freemium con límite de peticiones en el plan gratuito.
+  \item \textbf{ExerciseDB} (RapidAPI): Amplio catálogo con imágenes GIF animadas de demostración. Fue la opción más cercana al enfoque inicial del proyecto, pero terminó descartándose por pasar el servicio a un modelo de pago y por la necesidad de depender de cuotas externas.
   \item \textbf{API Ninjas Exercises API}: Catálogo extenso, peticiones REST simples, plan gratuito con límite razonable.
   \item \textbf{wger Workout Manager API}: Open source, auto-alojable, interfaz REST estándar.
 \end{itemize}
 
-% TODO: Indicar cuál fue la API finalmente seleccionada y los criterios concretos de elección (límites de peticiones, coste, riqueza de datos).
+Durante el desarrollo se llegó a implementar una primera versión de integración HTTP con ExerciseDB. El historial del repositorio conserva esa aproximación, incluyendo la llamada REST con paginación y timeout. Un fragmento representativo de esa implementación fue el siguiente:
+
+\begin{lstlisting}[caption={Fragmento histórico de la integración con ExerciseDB}]
+final uri = Uri.https('exercisedb.dev', '/api/v1/exercises/search', {
+  'q': query,
+  'offset': offset.toString(),
+  'limit': '10',
+});
+final response = await http.get(uri).timeout(const Duration(seconds: 10));
+\end{lstlisting}
+
+La versión final del proyecto sustituye esa dependencia por un catálogo local de ejercicios, que ofrece mayor estabilidad y evita bloqueos por cambios en las condiciones del proveedor.

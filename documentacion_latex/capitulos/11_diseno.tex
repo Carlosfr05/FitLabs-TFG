@@ -25,7 +25,7 @@ Esta estructura facilita la mantenibilidad y la incorporación de nuevas pantall
 
 \section{Sistema de diseño visual}
 
-La identidad visual de FitLabs fue definida antes del inicio del desarrollo mediante prototipado en Figma. Los elementos principales del sistema de diseño son:
+La identidad visual de FitLabs fue definida antes del inicio del desarrollo mediante prototipado en Figma. El diseño puede revisarse en el prototipo público disponible en \url{https://www.figma.com/design/xCVkUSQO1mjtpJQ3Z64uXH/Sin-título?node-id=0-1&t=Yd1SPcBnxRwi8qKQ-1}. Los elementos principales del sistema de diseño son:
 
 \begin{itemize}
   \item \textbf{Paleta de colores}: Fondo degradado en tonos púrpura oscuro (\texttt{\#1A0A3C} $\to$ \texttt{\#3D2B6B}), acentos en púrpura claro (\texttt{\#9B7FD4}) y blanco para texto principal.
@@ -64,15 +64,47 @@ Dashboard principal del entrenador. Muestra contadores de sesiones realizadas, p
 
 Listado paginado de clientes del entrenador con buscador en tiempo real. Cada tarjeta de cliente muestra el avatar, el nombre, el estado de la última sesión y accesos rápidos al chat y a las rutinas asignadas.
 
+Además del filtrado por nombre, la pantalla incorpora estados visuales para mejorar la lectura rápida de la carga de trabajo del entrenador. En la implementación final se priorizó la interacción en un máximo de dos toques para acceder a cualquier cliente, reduciendo el tiempo medio de navegación en sesiones con alta rotación de usuarios.
+
+Desde el punto de vista de arquitectura de UI, esta pantalla concentra tres patrones clave de Flutter que luego se reutilizan en otros módulos:
+
+\begin{itemize}
+  \item \textbf{Búsqueda reactiva con estado local}: actualización inmediata de la lista a medida que el usuario escribe.
+  \item \textbf{Tarjetas reutilizables}: componente visual común para representar entidades de negocio (clientes, conversaciones, sesiones).
+  \item \textbf{Acciones contextuales}: botones de acceso rápido para abrir chat, ver perfil o asignar una rutina sin abandonar la pantalla.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.36\textwidth]{pantalla_buscar_cliente.png}
+  \caption{Pantalla de búsqueda y filtrado de clientes.}
+  \label{fig:buscar_cliente}
+\end{figure}
+
 \subsection{Detalle de Cliente}
 
 Perfil completo del cliente con datos biométricos (IMC, estado de suscripción, sesiones realizadas), gráfico de progreso de peso y listado de sesiones pasadas con valoración.
+
+Este módulo se diseñó como una vista de decisión para el entrenador. No solo presenta información histórica, sino que también facilita la toma de decisiones sobre la progresión de carga y frecuencia de sesiones. Por ello, se agruparon los datos en tres bloques:
+
+\begin{enumerate}
+  \item \textbf{Resumen de estado}: métricas rápidas para evaluar la situación actual del cliente.
+  \item \textbf{Evolución}: comparación de medidas y desempeño por periodos.
+  \item \textbf{Histórico operativo}: sesiones completadas con valoración para detectar adherencia.
+\end{enumerate}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.35\textwidth]{pantalla_detalle_cliente.png}
   \caption{Pantalla de Detalle de Cliente.}
   \label{fig:detalle_cliente}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pantalla_estadisticas_cliente.png}
+  \caption{Vista de estadísticas y evolución del cliente.}
+  \label{fig:estadisticas_cliente}
 \end{figure}
 
 \subsection{Crear Rutina}
@@ -90,6 +122,15 @@ Formulario de creación de rutinas con selección de cliente objetivo y buscador
 
 Vista de calendario mensual con los días que tienen sesiones programadas marcados visualmente. Al seleccionar un día, se desplazan las sesiones del día seleccionado en la parte inferior de la pantalla.
 
+La finalidad principal de esta pantalla es reducir conflictos de agenda. Para ello, el diseño prioriza la percepción temporal sobre el detalle, mostrando primero la ocupación del mes y solo después el detalle del día seleccionado. Este enfoque evita sobrecargar la interfaz con información de todas las sesiones simultáneamente.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.36\textwidth]{pantalla_calendario.png}
+  \caption{Pantalla de calendario mensual con sesiones programadas.}
+  \label{fig:calendario}
+\end{figure}
+
 \subsection{Mensajes}
 
 Listado de conversaciones activas con buscador. El contador de mensajes no leídos se muestra como insignia roja sobre el avatar del cliente.
@@ -100,6 +141,51 @@ Listado de conversaciones activas con buscador. El contador de mensajes no leíd
   \caption{Pantalla de Mensajes.}
   \label{fig:mensajes}
 \end{figure}
+
+\subsection{Perfil del entrenador}
+
+La pantalla de perfil centraliza la configuración personal y los datos de identidad profesional del entrenador. Desde esta vista se preparó la base para futuras ampliaciones como preferencias de notificaciones, personalización visual y gestión de plan de suscripción.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.34\textwidth]{pantalla_perfil_entrenador.png}
+  \caption{Pantalla de perfil del entrenador.}
+  \label{fig:perfil_entrenador}
+\end{figure}
+
+\subsection{Flujo de ejecución de rutinas}
+
+Durante la validación funcional se incluyó una vista de seguimiento de sesión para representar el estado de los ejercicios ya completados y pendientes, permitiendo cerrar entrenamientos con trazabilidad. Aunque esta pantalla forma parte de la evolución del módulo, se documenta aquí por su relevancia en el diseño de interacción.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.35\textwidth]{pantalla_completar_rutina.png}
+  \caption{Pantalla de seguimiento/completado de rutina.}
+  \label{fig:completar_rutina}
+\end{figure}
+
+\section{Criterios de usabilidad y diseño de interacción}
+
+Para evaluar la calidad de la interfaz se aplicaron principios heurísticos sencillos, adaptados al nivel de un proyecto DAM y orientados a uso móvil real:
+
+\begin{itemize}
+  \item \textbf{Visibilidad del estado del sistema}: uso de mensajes de confirmación, indicadores de carga y estados vacíos en listados.
+  \item \textbf{Consistencia visual}: misma jerarquía de tipografías, espaciados y estilo de botones en todos los módulos.
+  \item \textbf{Prevención de errores}: validación de formularios antes de enviar datos a Supabase y confirmaciones en acciones sensibles.
+  \item \textbf{Reconocimiento antes que recuerdo}: iconografía estable y navegación fija inferior para reducir carga cognitiva.
+  \item \textbf{Eficiencia de uso}: accesos rápidos a acciones frecuentes (crear rutina, abrir chat, ver cliente) desde pantallas principales.
+\end{itemize}
+
+\section{Decisiones de diseño orientadas a mantenibilidad}
+
+Más allá del apartado visual, se tomaron decisiones de diseño con impacto directo en la evolución del código:
+
+\begin{enumerate}
+  \item \textbf{Widgets reutilizables}: tarjetas, cabeceras y campos de formulario con estilos homogéneos para minimizar duplicidad.
+  \item \textbf{Nomenclatura de rutas explícita}: rutas nominales claras y consistentes para simplificar depuración y navegación.
+  \item \textbf{Separación por pantallas}: cada módulo en su archivo para reducir acoplamiento y facilitar trabajo en paralelo del equipo.
+  \item \textbf{Preparación para escalado}: estructura compatible con migración futura a gestor de estado (Provider/BLoC) sin rehacer la UI.
+\end{enumerate}
 
 \section{Decisiones de diseño destacadas}
 

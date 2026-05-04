@@ -54,15 +54,13 @@ Guarda las siguientes imágenes en la carpeta `imagenes/`:
 
 Puedes usar las capturas de pantalla del Figma adjunto (`png` del proyecto) como fuente.
 
-## Apartados que requieren completar manualmente
+## Apartados que todavía conviene revisar antes de la entrega final
 
-Los siguientes bloques están marcados con `% TODO:` en los archivos `.tex`:
-
-- **Cap. 3**: Ampliar con estadísticas del sector fitness-tech.
-- **Cap. 5**: Completar datos estadísticos (Statista) y confirmar la API de ejercicios elegida.
-- **Cap. 7** (`07_tecnologias.tex`): Completar la sección "Propuesta inicial" con los detalles reales de vuestra intención original.
-- **Cap. 10**: Añadir los diagramas de arquitectura y flujo de autenticación como imágenes.
-- **Cap. 11**: Insertar las capturas de pantalla reales de la aplicación.
+- **Cap. 3**: Si vais a incluir estadísticas concretas del sector fitness-tech, añadidlas con fuente final.
+- **Cap. 5**: Revisad bibliografía y cifras si finalmente queréis cerrar con datos cuantitativos.
+- **Cap. 10**: Exportad los diagramas de arquitectura y de flujo de autenticación a PNG para que Overleaf compile sin dependencias de draw.io.
+- **Cap. 11**: Insertad las capturas reales de la aplicación final.
+- **Cap. 12 en adelante**: Verificad que las pruebas, conclusiones y anexos estén alineados con la versión final de la app.
 
 ## Notas de formato
 

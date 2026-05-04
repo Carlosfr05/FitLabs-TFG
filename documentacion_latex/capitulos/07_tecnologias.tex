@@ -30,9 +30,9 @@ En esta sección se describen las tecnologías y herramientas utilizadas en el d
 
 \subsection{API de ejercicios}
 
-Para el módulo de búsqueda y selección de ejercicios al crear rutinas, FitLabs consume una API REST externa que proporciona un catálogo extenso de ejercicios con información detallada (nombre, grupo muscular, equipamiento necesario, imagen demostrativa).
+Para el módulo de búsqueda y selección de ejercicios al crear rutinas, FitLabs evaluó inicialmente una API REST externa que proporcionaba un catálogo extenso de ejercicios con información detallada (nombre, grupo muscular, equipamiento necesario, imagen demostrativa).
 
-La integración se realiza mediante el paquete \texttt{http} de Flutter, con peticiones GET autenticadas mediante \textit{API Key} en los headers de la solicitud.
+La integración se llegó a prototipar mediante el paquete \texttt{http} de Flutter, con peticiones GET autenticadas mediante \textit{API Key} en los headers de la solicitud. Sin embargo, la API pasó a un modelo de pago y la solución final se recondujo a un catálogo local para garantizar estabilidad y continuidad del proyecto.
 
 \subsection{Figma}
 
@@ -44,7 +44,17 @@ La integración se realiza mediante el paquete \texttt{http} de Flutter, con pet
   \item Definición del sistema de diseño: paleta de colores, tipografías, componentes reutilizables (tarjetas, botones, formularios).
 \end{itemize}
 
-La identidad visual de FitLabs se basa en una paleta en tonos púrpura oscuro (\texttt{\#3D2B6B} como color primario), que transmite profesionalidad y dinamismo.
+La identidad visual de FitLabs se basa en una paleta en tonos púrpura oscuro (\texttt{\#3D2B6B} como color primario), que transmite profesionalidad y dinamismo. El prototipo puede consultarse en \url{https://www.figma.com/design/xCVkUSQO1mjtpJQ3Z64uXH/Sin-título?node-id=0-1&t=Yd1SPcBnxRwi8qKQ-1}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fitlabs_figma.png}
+  \caption{Prototipo de diseño en Figma con pantallas principales de FitLabs.}
+  \label{fig:figma_prototipo}
+\end{figure}
+\FloatBarrier
+
+% Se ha eliminado el gráfico comparativo de frameworks por indicación del autor.
 
 \subsection{Otras herramientas}
 
@@ -66,18 +76,10 @@ Uno de los aspectos más enriquecedores del presente proyecto fue la evolución 
 
 En las fases tempranas del proyecto, el equipo exploraba distintos enfoques posibles para construir la plataforma. Las ideas iniciales incluían:
 
-% TODO: Completa esta sub-sección con los detalles reales de vuestra propuesta inicial. Por ejemplo:
-% - ¿Teníais pensado usar un framework diferente (e.g. React Native)?
-% - ¿Considerabais usar Firebase en lugar de Supabase?
-% - ¿El scope inicial era diferente? (¿Más o menos funcionalidades?)
-% - ¿El modelo de base de datos era distinto?
-% A continuación se incluyen ejemplos generales que deberías reemplazar por los reales:
-
 \begin{itemize}
-  \item Utilizar \textbf{React Native} como framework de desarrollo, dado el mayor volumen de recursos y tutoriales disponibles en el momento de la investigación inicial.
-  \item Emplear \textbf{Firebase} como backend, especialmente Firebase Firestore (NoSQL) para el almacenamiento de datos, junto con Firebase Authentication.
-  \item Un alcance funcional más limitado, centrado exclusivamente en la creación de rutinas y el seguimiento de peso, sin incluir el módulo de mensajería ni el calendario.
-  \item Una interfaz de usuario más simple, sin un sistema de diseño definido ni prototipado previo en Figma.
+  \item Utilizar inicialmente una API externa para el catálogo de ejercicios, con un enfoque centrado en el consumo de datos de terceros.
+  \item Mantener el alcance en las funcionalidades principales del entrenador, priorizando autenticación, gestión de clientes y creación de rutinas.
+  \item Desarrollar una interfaz visual propia, pero sin cerrar todavía un sistema de diseño tan definido como el adoptado finalmente.
 \end{itemize}
 
 \subsection{Motivos del cambio}
@@ -92,6 +94,8 @@ Los principales motivos que llevaron a replantear las decisiones tecnológicas i
   \item \textbf{Ampliación del alcance}: A medida que el equipo ganó confianza en las tecnologías adoptadas, se decidió ampliar el alcance original para incluir el módulo de mensajería (que aprovecha Supabase Realtime) y el calendario de sesiones, añadiendo un valor diferencial significativo al producto final.
 
   \item \textbf{Diseño con Figma}: La incorporación de Figma como herramienta de prototipado, no contemplada en el plan inicial, demostró ser fundamental para alinear la visión del equipo, reducir las iteraciones de rediseño durante la implementación y obtener un resultado visualmente más profesional.
+
+  \item \textbf{Catálogo de ejercicios local}: La sustitución de la API externa por un catálogo local fue una decisión de estabilidad y cierre de proyecto, permitiendo mantener la funcionalidad sin depender de cambios comerciales o límites del proveedor.
 \end{enumerate}
 
 \subsection{Tabla comparativa: Propuesta inicial vs. Solución final}
@@ -111,7 +115,7 @@ Módulo de calendario & No contemplado & Calendario de sesiones \\
 Prototipado UI & Esbozos informales & Figma (alta fidelidad) \\
 Sistema de diseño & No definido & Paleta y componentes FitLabs \\
 Número de pantallas & $\approx$4 & 9 pantallas funcionales \\
-API de ejercicios & No contemplada & API REST externa integrada \\
+API de ejercicios & No contemplada & Catálogo local de ejercicios \\
 \bottomrule
 \caption{Comparativa entre la propuesta inicial y la solución final de FitLabs.}
 \label{tab:evolucion_tecnologica}

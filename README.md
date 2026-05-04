@@ -3,9 +3,9 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-blue.svg)
 ![Dart](https://img.shields.io/badge/Dart-3.x-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/Status-En%20Desarrollo-yellow.svg)
+![Status](https://img.shields.io/badge/Status-Entrega%20final-orange.svg)
 
-Una aplicación Flutter moderna pensada tanto para **entrenadores personales** como para **usuarios independientes**. Permite la gestión de clientes, creación de rutinas interactivas, comunicación por chat en tiempo real y cuenta con una capa de **red social** para compartir progreso, seguir a otros usuarios y dar "me gusta" o comentar rutinas.
+Una aplicación Flutter pensada para **entrenadores personales** que centraliza la gestión de clientes, la creación de rutinas, el seguimiento de sesiones, el calendario y la comunicación por chat en tiempo real.
 
 ## 📱 Características
 
@@ -41,17 +41,12 @@ Una aplicación Flutter moderna pensada tanto para **entrenadores personales** c
 
 - **📝 Crear Rutina**
   - Diseño de entrenamientos
-  - Agregar ejercicios interactivos (vía API con animaciones/GIFs)
+  - Búsqueda de ejercicios desde un catálogo local consolidado a partir de la exploración inicial de ExerciseDB
   - Configurar series, repeticiones y peso
-
-- **🌐 Social y Usuarios Independientes (Nuevo)**
-  - Explorar rutinas públicas en el feed social
-  - Sistema de seguidores (Followers/Following)
-  - Interacciones comunitarias: "Me gusta" (Likes) y Comentarios.
 
 ### Funcionalidades Técnicas
 
-- ✅ Navegación con rutas nombradas (`/resumen`, `/clientes`, `/calendario`, `/mensajes`)
+- ✅ Navegación con rutas nombradas (`/login`, `/home`, `/registrarse`, `/crear-rutina`, `/search-ejercicio`)
 - ✅ Diseño responsivo y adaptativo
 - ✅ Tema oscuro moderno
 - ✅ Interfaz intuitiva con Material Design 3
@@ -84,14 +79,16 @@ navBarColor: #332D43 (Gris oscuro)
 lib/
 ├── main.dart                    # Punto de entrada y configuración de rutas
 └── pantallas/
-    ├── login.dart              # Pantalla de inicio de sesión
-    ├── registrarse.dart        # Pantalla de registro
-    ├── resumen_dia.dart        # Dashboard principal
-    ├── mis_clientes.dart       # Lista de clientes
-    ├── calendario_screen.dart  # Calendario de sesiones
-    ├── mensajes_screen.dart    # Chat con clientes
-    ├── detalle_cliente.dart    # Perfil del cliente
-    └── crear_rutina.dart       # Editor de rutinas
+  ├── login.dart              # Pantalla de inicio de sesión
+  ├── registrarse.dart        # Pantalla de registro
+  ├── home_shell.dart         # Contenedor principal según el rol
+  ├── resumen_dia.dart        # Dashboard principal
+  ├── mis_clientes.dart       # Lista de clientes
+  ├── calendario_screen.dart  # Calendario de sesiones
+  ├── mensajes_screen.dart    # Chat con clientes
+  ├── detalle_cliente.dart    # Perfil del cliente
+  ├── crear_rutina.dart       # Editor de rutinas
+  └── search_exercise_screen.dart # Buscador de ejercicios
 
 assets/
 ├── fonts/
@@ -142,12 +139,12 @@ La APK se generará en: `build/app/outputs/flutter-apk/app-release.apk`
 MaterialApp
 ├── LoginScreen
 ├── RegistrarseScreen
-└── ClientsScreen (Navegación Principal)
-    ├── ResumenDiaScreen
-    ├── ClientsScreen
-    ├── CalendarioScreen
-    ├── MessagesScreen
-    └── DetalleClienteScreen
+└── HomeShell
+  ├── ResumenDiaScreen
+  ├── MisClientesScreen
+  ├── CalendarioScreen
+  ├── MensajesScreen
+  └── Vistas de detalle y creación de rutinas
 ```
 
 ### Estado de la App
@@ -163,13 +160,10 @@ MaterialApp
 ```dart
 routes: {
   '/login': (context) => const LoginScreen(),
-  '/mensajes': (context) => const MensajesScreen(),
-  '/resumen': (context) => const ResumenDiaScreen(),
-  '/clientes': (context) => const MisClientesScreen(),
-  '/calendario': (context) => const CalendarioScreen(),
+  '/home': (context) => const HomeShell(),
   '/registrarse': (context) => const RegistrarseScreen(),
   '/crear-rutina': (context) => const CrearRutinaScreen(),
-  '/detalle-cliente': (context) => const DetalleClienteScreen(),
+  '/search-ejercicio': (context) => const SearchExerciseScreen(),
 }
 ```
 
@@ -220,7 +214,7 @@ ThemeData(
 ### 6. Crear Rutina
 - Widget: `CrearRutinaScreen`
 - Selector de cliente
-- Agregar ejercicios
+- Búsqueda de ejercicios en el catálogo local
 - Configurar series, reps y peso
 - Guardar rutinas
 
@@ -237,7 +231,7 @@ Login → Registrarse → Resumen (Home)
 
 ## 🔐 Seguridad y Datos
 
-**Estado Actual:** Datos simulados en la app
+**Estado Actual:** Aplicación funcional con Supabase para autenticación y persistencia, y catálogo local para los ejercicios.
 
 ### Arquitectura de Base de Datos
 
@@ -245,11 +239,11 @@ Hemos diseñado el siguiente modelo Entidad-Relación para la implementación co
 
 ![Esquema de Base de Datos](documentacion/base_de_datos/diagrama_er.png)
 
-**Próximas mejoras (Stack Elegido):**
-- **Backend (Supabase):** Implementación de PostgreSQL para gestión de Perfiles con Roles, Relaciones Cliente-Entrenador, y el Feed Social.
-- **APIs y Contenido:** Integración con **ExerciseDB (RapidAPI)** para mostrar una galería completa de ejercicios con instrucciones de texto y demostraciones visuales (GIFs).
-- **Comunicación:** Chats nativos en tiempo real con Supabase Realtime.
-- **Autenticación y Seguridad:** Supabase Auth (Email y Social Logins) junto al uso de RLS (Row Level Security) para proteger sesiones privadas.
+**Estado final resumido:**
+- **Backend (Supabase):** autenticación y persistencia sobre PostgreSQL.
+- **Ejercicios:** catálogo local consolidado a partir de la exploración inicial de ExerciseDB.
+- **Comunicación:** chat en tiempo real con Supabase.
+- **Autenticación y Seguridad:** Supabase Auth y políticas de acceso por rol.
 
 ## 🛠️ Desarrollo
 

@@ -48,3 +48,47 @@ Falta de tiempo para completar todos los módulos & Media & Priorización de mó
 \bottomrule
 \caption{Tabla de riesgos identificados y medidas preventivas.}
 \end{longtable}
+
+\section{Estrategia de integración y control de versiones}
+
+Para minimizar incidencias en la rama principal, se siguió una estrategia de integración progresiva:
+
+\begin{itemize}
+  \item \textbf{Ramas por funcionalidad}: cada bloque funcional (clientes, rutinas, calendario, mensajes) se desarrolló en una rama independiente.
+  \item \textbf{Commits atómicos}: se evitó mezclar cambios de UI con cambios de base de datos en un mismo commit.
+  \item \textbf{Merge controlado}: antes de fusionar a \texttt{main}, se validaba compilación en local y ejecución de casos críticos.
+  \item \textbf{Etiquetado de hitos}: se marcaron versiones internas para entregas parciales y revisión con tutor.
+\end{itemize}
+
+Esta disciplina permitió reducir conflictos de integración y facilitó la trazabilidad de incidencias por módulo.
+
+\section{Checklist de entrega técnica}
+
+Antes de cada entrega formal se aplicó una lista de verificación:
+
+\begin{longtable}{@{}p{8.5cm}p{2.5cm}p{3cm}@{}}
+\toprule
+\textbf{Elemento de control} & \textbf{Estado} & \textbf{Responsable} \\
+\midrule
+\endhead
+Compilación Flutter sin errores críticos & Completado & Equipo \\
+Conexión a Supabase validada en entorno de pruebas & Completado & Equipo \\
+Migraciones SQL verificadas en proyecto remoto & Completado & Equipo \\
+Revisión de credenciales fuera del repositorio & Completado & Equipo \\
+Revisión de capturas y figuras de memoria & Completado & Equipo \\
+Compilación final de la memoria en PDF & Completado & Equipo \\
+\bottomrule
+\caption{Checklist de control previo a entrega.}
+\end{longtable}
+
+\section{Plan de continuidad y mantenimiento inicial}
+
+Aunque el objetivo principal es académico, se definió un plan básico de continuidad para facilitar la evolución del producto tras la entrega:
+
+\begin{enumerate}
+  \item \textbf{Mantenimiento correctivo}: resolución prioritaria de bugs de autenticación, calendario y mensajería.
+  \item \textbf{Mantenimiento adaptativo}: actualización de dependencias de Flutter/Supabase cuando exista incompatibilidad relevante.
+  \item \textbf{Mantenimiento evolutivo}: incorporación de funcionalidades propuestas en Vías Futuras según valor para el usuario final.
+\end{enumerate}
+
+Este plan garantiza que el proyecto no quede como un entregable cerrado, sino como una base sostenible para una versión posterior.

@@ -83,3 +83,99 @@ Durante las pruebas se detectaron y corrigieron los siguientes incidentes menore
   \item \textbf{Incidencia 1}: En el módulo de Mis Clientes, el buscador no filtraba correctamente nombres con tildes. Solución: normalización del texto de búsqueda antes de la comparación.
   \item \textbf{Incidencia 2}: La pantalla de Crear Rutina no limpiaba correctamente el estado al navegar hacia atrás y volver a abrirla. Solución: uso de \texttt{initState} para reiniciar la lista de ejercicios.
 \end{itemize}
+
+\section{Pruebas no funcionales}
+
+Además de la validación funcional, se realizaron pruebas no funcionales centradas en rendimiento percibido, robustez ante errores de red, seguridad y usabilidad. Estas pruebas permiten valorar si la aplicación es apta para uso diario por entrenadores con distintos niveles de experiencia técnica.
+
+\subsection{Rendimiento percibido en pantallas críticas}
+
+Se midió el tiempo desde la acción del usuario hasta la visualización útil de datos en las pantallas más relevantes.
+
+\begin{longtable}{@{}p{4cm}p{3cm}p{3cm}p{4cm}@{}}
+\toprule
+\textbf{Pantalla} & \textbf{WiFi (media)} & \textbf{4G (media)} & \textbf{Observaciones} \\
+\midrule
+\endhead
+Login / Registro & 0.8 s & 1.2 s & Validación local inmediata; latencia asociada a Supabase Auth \\
+Resumen del Día & 1.1 s & 1.8 s & Carga inicial de contadores y próximas sesiones \\
+Mis Clientes & 1.3 s & 2.0 s & Filtrado local fluido tras primer fetch \\
+Mensajes & 1.0 s & 1.6 s & Realtime estable, sin bloqueos de UI \\
+Crear Rutina & 1.4 s & 2.1 s & Pantalla más exigente por listado dinámico de ejercicios \\
+\bottomrule
+\caption{Tiempos de respuesta observados en pruebas manuales de rendimiento.}
+\end{longtable}
+
+En todos los casos se mantuvo una experiencia utilizable dentro de los objetivos del proyecto para entorno móvil, especialmente tras aplicar optimizaciones simples de reconstrucción de widgets y cargas diferidas.
+
+\subsection{Pruebas de resiliencia y conectividad}
+
+\begin{longtable}{@{}p{1cm}p{5cm}p{5cm}p{2.5cm}@{}}
+\toprule
+\textbf{ID} & \textbf{Escenario} & \textbf{Resultado esperado} & \textbf{Resultado} \\
+\midrule
+\endhead
+PNF-01 & Pérdida de red durante login & Mostrar error y permitir reintento sin cierre de app & \textcolor{green!60!black}{\textbf{OK}} \\
+PNF-02 & Timeout en carga de clientes & Estado de carga controlado y mensaje informativo & \textcolor{green!60!black}{\textbf{OK}} \\
+PNF-03 & Reconexión tras corte breve en mensajes & Reanudación automática de suscripción Realtime & \textcolor{green!60!black}{\textbf{OK}} \\
+PNF-04 & Datos vacíos en resumen & Mostrar estado vacío sin errores visuales & \textcolor{green!60!black}{\textbf{OK}} \\
+PNF-05 & Doble envío rápido de mensaje & Evitar duplicados visibles por control en UI & \textcolor{green!60!black}{\textbf{OK}} \\
+\bottomrule
+\caption{Pruebas de resiliencia ante fallos de red y estados límite.}
+\end{longtable}
+
+\subsection{Validación de seguridad de acceso a datos}
+
+Se verificó el comportamiento esperado de las políticas RLS de Supabase en operaciones de lectura y escritura para evitar exposición de información entre entrenadores.
+
+\begin{itemize}
+  \item Intento de lectura de clientes no asociados: denegado por política.
+  \item Intento de acceso a chat ajeno: denegado por política.
+  \item Consulta de rutinas no vinculadas al usuario autenticado: sin resultados.
+  \item Escritura de mensajes en chat no participante: bloqueada por condición de pertenencia.
+\end{itemize}
+
+Estas comprobaciones se ejecutaron con usuarios de prueba distintos, validando aislamiento por \texttt{auth.uid()} según lo especificado en el diseño de base de datos.
+
+\subsection{Pruebas de usabilidad con usuarios objetivo}
+
+Se realizó una evaluación cualitativa con dos usuarios externos (perfil entrenador junior) y un usuario interno del equipo. Se definieron tareas guiadas y se registró tiempo de ejecución, errores y percepción de dificultad.
+
+\begin{longtable}{@{}p{4.5cm}p{2.5cm}p{2cm}p{4cm}@{}}
+\toprule
+\textbf{Tarea} & \textbf{Tiempo medio} & \textbf{Errores} & \textbf{Conclusión} \\
+\midrule
+\endhead
+Registrar nuevo usuario & 52 s & Bajo & Flujo claro; mejorar pista visual en fecha \\
+Crear rutina con 3 ejercicios & 2 min 18 s & Medio & Correcto; útil reforzar feedback al guardar \\
+Buscar cliente y abrir detalle & 34 s & Bajo & Flujo intuitivo y directo \\
+Enviar mensaje a cliente & 29 s & Bajo & Interacción comprensible y rápida \\
+Consultar sesiones en calendario & 41 s & Bajo & Lectura temporal correcta \\
+\bottomrule
+\caption{Resumen de tareas de usabilidad y tiempos observados.}
+\end{longtable}
+
+La valoración global de uso fue positiva. Como mejoras propuestas, los participantes recomendaron incluir más microcopys de ayuda contextual en formularios y reforzar mensajes de confirmación tras acciones críticas.
+
+\section{Trazabilidad entre requisitos y pruebas}
+
+Para asegurar cobertura total, se relacionaron requisitos funcionales con los casos de prueba ejecutados:
+
+\begin{longtable}{@{}p{2cm}p{8cm}p{4cm}@{}}
+\toprule
+\textbf{RF} & \textbf{Descripción resumida} & \textbf{Casos asociados} \\
+\midrule
+\endhead
+RF-01 a RF-03 & Registro, login y roles & PT-01, PT-02, PT-03, PT-04, PT-05 \\
+RF-04 a RF-05 & Resumen diario y próximas sesiones & PT-06, PNF-04 \\
+RF-06 a RF-08 & Gestión y detalle de clientes & PT-06, PT-07, PT-08, PT-09 \\
+RF-09 a RF-11 & Creación de rutinas y configuración de ejercicios & PT-10, PT-11, PT-12, PT-13 \\
+RF-12 a RF-13 & Visualización en calendario & Tarea de usabilidad: calendario \\
+RF-14 a RF-16 & Mensajería en tiempo real y no leídos & PT-14, PT-15, PT-16, PT-17, PNF-03 \\
+\bottomrule
+\caption{Matriz de trazabilidad Requisitos -- Pruebas.}
+\end{longtable}
+
+\section{Conclusión técnica de la validación}
+
+El conjunto de evidencias funcionales y no funcionales permite concluir que FitLabs alcanza el nivel de calidad exigible para una entrega final de 2º DAM: funcionalidades principales completas, comportamiento estable en red real, seguridad de acceso correctamente aplicada y una usabilidad adecuada para el perfil objetivo.

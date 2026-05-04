@@ -2,7 +2,7 @@
 %  FitLabs - TFG DAM 2025-2026
 %  Archivo principal - compilar con pdflatex o en Overleaf
 % ============================================================
-\documentclass[12pt,a4paper]{report}
+\documentclass[11pt,a4paper]{report}
 
 % --- Codificación y fuentes ----------------------------------
 \usepackage[T1]{fontenc}
@@ -33,6 +33,13 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{placeins}
+\usepackage{pdflscape}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{polar}
+\usepackage{tikz}
+\usetikzlibrary{positioning,shadows,fit}
 \graphicspath{{./imagenes/}}
 
 % --- Tablas mejoradas ----------------------------------------
@@ -62,9 +69,12 @@
 % --- Listas --------------------------------------------------
 \usepackage{enumitem}
 
+% --- Símbolos matemáticos ------------------------------------
+\usepackage{amssymb}
+
 % --- Citas ---------------------------------------------------
 \usepackage{csquotes}
-\usepackage[style=apa, backend=biber]{biblatex}
+\usepackage[backend=bibtex]{biblatex}
 \addbibresource{bibliografia.bib}
 
 % --- Diagrama de Gantt inline --------------------------------
@@ -84,11 +94,13 @@
 % ---- PORTADA -----------------------------------------------
 \begin{titlepage}
   \centering
-  \vspace*{1cm}
+  \includegraphics[width=10cm]{ilerna_portada.png}\par
+  \vspace{1cm}
+  
   {\Huge \textbf{\textcolor{fitlabsPurple}{FitLabs}}}\\[0.3cm]
-  {\large \textit{Aplicación Móvil para la Gestión Integral de Entrenadores Personales}}\\[2cm]
+  {\large \textit{Aplicación Móvil para la Gestión Integral de Entrenadores Personales}}\\[1.5cm]
 
-  \includegraphics[width=5cm]{logo_fitlabs.png}\par
+  \includegraphics[width=4cm]{logo_fitlabs.png}\par
   \vspace{1.5cm}
 
   {\large \textbf{Autores}}\\[0.2cm]
@@ -114,8 +126,8 @@
 % ============================================================
 % CAPÍTULOS
 % ============================================================
-\input{capitulos/03_sector_productivo}
 \input{capitulos/04_introduccion}
+\input{capitulos/03_sector_productivo}
 \input{capitulos/05_estado_del_arte}
 \input{capitulos/06_metodologia}
 \input{capitulos/07_tecnologias}

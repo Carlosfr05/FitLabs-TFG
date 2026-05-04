@@ -9,10 +9,10 @@ La idea de FitLabs surge de una necesidad real observada en el entorno del entre
 
 La motivación personal detrás del proyecto radica en la posibilidad de aplicar los conocimientos adquiridos durante el ciclo de Desarrollo de Aplicaciones Multiplataforma para dar solución a un problema real, construyendo desde cero una aplicación funcional, atractiva visualmente y escalable. Adicionalmente, el proyecto supone un reto técnico relevante al incorporar tecnologías modernas ampliamente demandadas en el mercado laboral: Flutter, Supabase y el consumo de APIs REST externas.
 
-\section{Abstract}
+\section{Resumen}
 
 \begin{quote}
-\textit{FitLabs is a cross-platform mobile application developed with Flutter and backed by Supabase, designed to help personal trainers manage their professional activity. The application provides tools for client management, personalised workout routine creation using an external exercise API, scheduling via a built-in calendar, real-time messaging between trainers and clients, and client progress tracking. The project follows a structured development methodology, with a modular Flutter architecture, a PostgreSQL relational database secured by Row Level Security policies, and a clean, trainer-focused user interface designed in Figma. The result is a fully operational MVP that covers the core needs of a personal trainer in a single, unified platform.}
+\textit{FitLabs es una aplicación móvil multiplataforma desarrollada con Flutter y respaldada por Supabase, diseñada para ayudar a entrenadores personales a gestionar su actividad profesional. La aplicación ofrece herramientas para la gestión de clientes, la creación de rutinas de entrenamiento personalizadas, la planificación mediante un calendario integrado, la mensajería en tiempo real entre entrenadores y clientes y el seguimiento del progreso de los usuarios. El proyecto sigue una metodología de desarrollo estructurada, con una arquitectura modular en Flutter, una base de datos relacional PostgreSQL protegida mediante políticas de Row Level Security y una interfaz limpia, orientada al entrenador, diseñada en Figma. Durante el desarrollo se evaluó y prototipó parcialmente una API externa de ejercicios, pero la versión final utiliza un catálogo local para evitar problemas de dependencia y licencias. El resultado es un MVP plenamente operativo que cubre las necesidades básicas de un entrenador personal en una única plataforma unificada.}
 \end{quote}
 
 \section{Objetivos}
@@ -27,7 +27,7 @@ Diseñar y desarrollar una aplicación móvil multiplataforma que permita a los 
   \item \textbf{OF-01} -- Implementar un sistema de autenticación seguro mediante Supabase Auth que soporte el registro e inicio de sesión de usuarios con rol de entrenador o cliente.
   \item \textbf{OF-02} -- Desarrollar la pantalla de \textit{Resumen del Día}, que centralice los eventos próximos, el estado general de los clientes y las notificaciones pendientes.
   \item \textbf{OF-03} -- Crear el módulo de \textit{Mis Clientes} con listado, búsqueda y acceso al detalle individual de cada cliente.
-  \item \textbf{OF-04} -- Diseñar e implementar el módulo de \textit{Crear Rutina}, integrando la API externa de ejercicios (ExerciseDB / API Ninjas) para la búsqueda y selección de ejercicios.
+  \item \textbf{OF-04} -- Diseñar e implementar el módulo de \textit{Crear Rutina}, incluyendo la búsqueda y selección de ejercicios con un catálogo local tras valorar una API externa de ejercicios.
   \item \textbf{OF-05} -- Construir el módulo de \textit{Calendario} que permita visualizar y gestionar las sesiones programadas con clientes.
   \item \textbf{OF-06} -- Desarrollar el módulo de \textit{Mensajes} con sistema de chat 1:1 entre entrenador y cliente.
   \item \textbf{OF-07} -- Diseñar una interfaz de usuario coherente y funcional utilizando Figma como herramienta de prototipado, con una identidad visual definida.

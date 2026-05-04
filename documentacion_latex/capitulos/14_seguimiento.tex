@@ -9,7 +9,7 @@ La evaluación del progreso del proyecto se realizó en tres momentos clave:
 
 \begin{enumerate}
   \item \textbf{Entrega del 1er trimestre (diciembre 2025)}: Se entregó la primera versión de la memoria con los apartados de análisis, diseño de la base de datos y los primeros módulos implementados (autenticación y resumen del día). El tutor revisó la documentación y proporcionó retroalimentación sobre la estructura y el alcance.
-  \item \textbf{Entrega del 2º trimestre (febrero 2026)}: Se presentó una versión funcional intermedia de la aplicación con los módulos de clientes, rutinas y calendario operativos.
+  \item \textbf{Entrega del 2do trimestre (febrero 2026)}: Se presentó una versión funcional intermedia de la aplicación con los módulos de clientes, rutinas y calendario operativos.
   \item \textbf{Entrega final (4 de mayo de 2026)}: Versión completa del proyecto con todos los módulos implementados, pruebas realizadas y memoria finalizada.
 \end{enumerate}
 
@@ -63,3 +63,47 @@ Mensajes en tiempo real (RF-14 a RF-16) & Sí & Completo \\
 \end{tabular}
 \caption{Grado de cumplimiento de requisitos funcionales.}
 \end{table}
+
+\section{Métricas de seguimiento por iteración}
+
+Con el objetivo de disponer de un control cuantitativo del avance, se definieron métricas ligeras por iteración quincenal. Estas métricas no sustituyen a una metodología formal, pero aportan una visión objetiva del progreso y de la estabilidad del producto.
+
+\begin{longtable}{@{}p{2.2cm}p{3.2cm}p{3cm}p{5.6cm}@{}}
+\toprule
+\textbf{Iteración} & \textbf{Métrica principal} & \textbf{Resultado} & \textbf{Interpretación} \\
+\midrule
+\endhead
+I1 (Nov) & Historias completadas / planificadas & 6 / 8 & Avance inicial correcto; se replanifican dos historias de UI \\
+I2 (Dic) & Incidencias abiertas al cierre & 5 & Carga asumible para periodo vacacional \\
+I3 (Ene) & Tiempo medio de cierre de incidencia & 2.3 días & Buena capacidad de respuesta técnica \\
+I4 (Feb) & Requisitos funcionales cerrados & 78\,\% & Se alcanza hito de versión intermedia funcional \\
+I5 (Mar) & Casos de prueba en verde & 88\,\% & Madurez alta; pendientes ajustes de usabilidad \\
+I6 (Abr) & Casos de prueba en verde & 100\,\% & Entrega final estable y validada \\
+\bottomrule
+\caption{Evolución de métricas de seguimiento por iteración.}
+\end{longtable}
+
+\section{Control de calidad documental}
+
+Además del control del software, se aplicó control sobre la propia memoria técnica para asegurar trazabilidad y cumplimiento de la guía académica:
+
+\begin{itemize}
+  \item Revisión de coherencia entre requisitos (capítulo de análisis) y pruebas (capítulo de validación).
+  \item Revisión cruzada de numeración de figuras, tablas y referencias internas.
+  \item Comprobación de estilo uniforme (tipografía, márgenes, estructura de capítulos y pies de figura).
+  \item Verificación de que cada decisión de diseño relevante tuviese justificación técnica explícita.
+\end{itemize}
+
+Este control permitió detectar desalineaciones tempranas, especialmente en la correspondencia entre capturas de pantalla y funcionalidades realmente implementadas.
+
+\section{Lecciones de gestión del proyecto}
+
+Desde la perspectiva de dirección técnica, se identificaron tres prácticas de alto impacto positivo:
+
+\begin{enumerate}
+  \item \textbf{Cerrar verticales funcionales}: completar un flujo extremo a extremo (UI + lógica + BD + prueba) antes de iniciar otro módulo.
+  \item \textbf{Revisiones cortas y frecuentes}: validar cada avance en sesiones breves evita acumulación de deuda técnica.
+  \item \textbf{Documentación incremental}: redactar la memoria en paralelo al desarrollo mejora precisión y reduce trabajo de última hora.
+\end{enumerate}
+
+Estas prácticas se consideran transferibles a futuros proyectos académicos y profesionales, especialmente en equipos pequeños como el del presente TFG.
