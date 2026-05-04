@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "568140400001",
+    "project_id": "fitlabs-cd73c",
+    "storage_bucket": "fitlabs-cd73c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568140400001:android:388aa5fed188aa105e9480",
+        "android_client_info": {
+          "package_name": "com.example.pantallas_fitlabs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-X42BhAtWHBkwXgIxcBbnkwE_AFINJys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

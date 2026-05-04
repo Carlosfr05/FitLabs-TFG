@@ -5,6 +5,30 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ChatService {
   static final _db = Supabase.instance.client;
 
+  static Future<void> _enviarNotificacionPush({
+    required String chatId,
+    required String senderId,
+    required String tipoContenido,
+    String? contenido,
+  }) async {
+    try {
+      await _db.functions.invoke(
+        'send-message-notification',
+        body: {
+          'record': {
+            'id_chat': chatId,
+            'id_remitente': senderId,
+            'contenido': contenido ?? '',
+            'tipo_contenido': tipoContenido,
+          },
+        },
+      );
+    } catch (e) {
+      // No bloqueamos el envío del mensaje si la push falla.
+      print('No se pudo invocar send-message-notification: $e');
+    }
+  }
+
   static bool _isNetworkError(Object error) {
     if (error is SocketException) return true;
     if (error is ClientException) {
@@ -144,6 +168,13 @@ class ChatService {
         .from('chats')
         .update({'actualizado_en': DateTime.now().toIso8601String()})
         .eq('id', chatId);
+
+    await _enviarNotificacionPush(
+      chatId: chatId,
+      senderId: senderId,
+      tipoContenido: 'texto',
+      contenido: contenido,
+    );
   }
 
   /// Sube un archivo a Supabase Storage y devuelve la URL pública.
@@ -179,6 +210,13 @@ class ChatService {
         .from('chats')
         .update({'actualizado_en': DateTime.now().toIso8601String()})
         .eq('id', chatId);
+
+    await _enviarNotificacionPush(
+      chatId: chatId,
+      senderId: senderId,
+      tipoContenido: tipoContenido,
+      contenido: textoOpcional,
+    );
   }
 
   /// Marca como leídos los mensajes del otro usuario en un chat.
@@ -212,6 +250,29 @@ class ChatService {
           ),
           callback: (payload) {
             onNuevo(payload.newRecord);
+          },
+        )
+        .subscribe();
+  }
+
+  /// Suscribirse a cambios de lectura en un chat (Realtime).
+  static RealtimeChannel suscribirseALeidos(
+    String chatId,
+    void Function() onCambio,
+  ) {
+    return _db
+        .channel('chat-read-$chatId')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'mensajes',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'id_chat',
+            value: chatId,
+          ),
+          callback: (_) {
+            onCambio();
           },
         )
         .subscribe();

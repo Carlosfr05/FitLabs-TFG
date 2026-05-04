@@ -5,12 +5,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
 import 'package:pantallas_fitlabs/data/message_notification_service.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
+import 'package:pantallas_fitlabs/data/firebase_token_service.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/login.dart';
 import 'package:pantallas_fitlabs/pantallas/home_shell.dart';
 import 'package:pantallas_fitlabs/pantallas/registrarse.dart';
 import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
 import 'package:pantallas_fitlabs/pantallas/search_exercise_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart';
 
 const String supabaseUrl = 'https://dsvxjscgruadxqelwqaj.supabase.co';
 const String supabaseAnonKey =
@@ -18,19 +22,31 @@ const String supabaseAnonKey =
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializamos Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Inicializamos Supabase
   await Supabase.initialize(
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
     authOptions: FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
   );
 
-  // Si hay sesión activa, cargar perfil antes de mostrar la app
-  if (Supabase.instance.client.auth.currentUser != null) {
-    await SessionService.cargarPerfil();
-    await MessageNotificationService.instance.startListening();
-  }
-
+  // Inicializamos el servicio de notificaciones para manejar mensajes entrantes
   await MessageNotificationService.instance.initialize();
+
+  // Si hay sesión activa, cargar perfil y token FCM antes de mostrar la app
+  if (Supabase.instance.client.auth.currentUser != null) {
+    print(
+      '✅ Usuario encontrado en sesión: ${Supabase.instance.client.auth.currentUser?.id}',
+    );
+    await SessionService.cargarPerfil();
+    await FirebaseTokenService.setupAndSaveToken();
+    await MessageNotificationService.instance.startListening();
+  } else {
+    print('ℹ️ No hay sesión activa, token FCM se obtendrá después del login');
+  }
 
   runApp(const MainApp());
 }
