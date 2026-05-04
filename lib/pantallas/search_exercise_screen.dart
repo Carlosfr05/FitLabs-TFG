@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pantallas_fitlabs/core/app_background.dart';
+import 'package:pantallas_fitlabs/core/app_bottom_navbar.dart';
 import 'package:pantallas_fitlabs/data/exercise.dart';
 import 'package:pantallas_fitlabs/data/exercise_search_repository.dart';
 import 'dart:async';
@@ -8,6 +9,7 @@ import 'package:pantallas_fitlabs/data/exercise_search_response.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_config_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 import 'package:pantallas_fitlabs/data/history_service.dart';
+import 'package:pantallas_fitlabs/data/session_service.dart';
 
 class SearchExerciseScreen extends StatefulWidget {
   const SearchExerciseScreen({super.key});
@@ -59,7 +61,7 @@ class _SearchExerciseScreenState extends State<SearchExerciseScreen> {
             // HEADER
             Padding(
               padding: const EdgeInsets.only(
-                top: 30,
+                top: 60,
                 left: 20,
                 right: 20,
                 bottom: 20,

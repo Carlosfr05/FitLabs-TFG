@@ -9,8 +9,8 @@ import 'package:pantallas_fitlabs/data/firebase_token_service.dart';
 import 'package:pantallas_fitlabs/pantallas/exercise_detail_screen.dart';
 import 'package:pantallas_fitlabs/pantallas/login.dart';
 import 'package:pantallas_fitlabs/pantallas/home_shell.dart';
+import 'package:pantallas_fitlabs/pantallas/mis_clientes.dart';
 import 'package:pantallas_fitlabs/pantallas/registrarse.dart';
-import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
 import 'package:pantallas_fitlabs/pantallas/search_exercise_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -115,8 +115,12 @@ class _MainAppState extends State<MainApp> {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeShell(),
+        '/clientes': (context) => const HomeShell(initialIndex: 1),
+        '/calendario': (context) =>
+            HomeShell(initialIndex: SessionService.isEntrenador ? 2 : 1),
+        '/mensajes': (context) =>
+            HomeShell(initialIndex: SessionService.isEntrenador ? 3 : 2),
         '/registrarse': (context) => const RegistrarseScreen(),
-        '/crear-rutina': (context) => const CrearRutinaScreen(),
         '/search-ejercicio': (context) => const SearchExerciseScreen(),
       },
       onGenerateRoute: (settings) {

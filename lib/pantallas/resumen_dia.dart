@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_background.dart';
 import 'package:pantallas_fitlabs/pantallas/home_shell.dart';
+import 'package:pantallas_fitlabs/pantallas/calendario_screen.dart';
+import 'package:pantallas_fitlabs/pantallas/crear_rutina.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
 import 'package:pantallas_fitlabs/data/rutina_service.dart';
 import 'package:pantallas_fitlabs/data/chat_service.dart';
@@ -1033,7 +1035,10 @@ class _ResumenDiaScreenState extends State<ResumenDiaScreen>
               child: _actionButton(
                 label: 'Crear\nrutina',
                 icon: Icons.fitness_center_rounded,
-                onTap: () => Navigator.pushNamed(context, '/crear-rutina'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CrearRutinaScreen()),
+                ),
               ),
             ),
           ],
