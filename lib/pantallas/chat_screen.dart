@@ -34,6 +34,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _cargando = true;
   bool _enviandoMedia = false;
   RealtimeChannel? _channel;
+  RealtimeChannel? _readStatusChannel;
   Timer? _pollTimer;
   final ImagePicker _picker = ImagePicker();
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -49,6 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
     MessageNotificationService.instance.setActiveChat(widget.chatId);
     _cargarMensajes();
     _suscribirse();
+    _escucharCambiosDeLectura();
     // Polling cada 5s como fallback si Realtime falla
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       _refrescarMensajes();
@@ -65,6 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _recorder.dispose();
     if (_channel != null) {
       ChatService.cancelarSuscripcion(_channel!);
+    }
+    if (_readStatusChannel != null) {
+      ChatService.cancelarSuscripcion(_readStatusChannel!);
     }
     super.dispose();
   }
@@ -84,15 +89,42 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _refrescarMensajes() async {
     final data = await ChatService.fetchMensajes(widget.chatId);
     if (!mounted) return;
-    // Contar mensajes reales (sin temporales)
-    final realCount = _mensajes
+    final current = _mensajes
         .where((m) => !(m['id']?.toString().startsWith('temp-') ?? false))
-        .length;
-    if (data.length > realCount) {
+        .toList();
+
+    final hasDifferentLength = data.length != current.length;
+    final hasDifferentReadState =
+        !hasDifferentLength && _mensajesTienenCambios(current, data);
+
+    if (hasDifferentLength || hasDifferentReadState) {
       setState(() => _mensajes = data);
       _scrollToBottom();
       ChatService.marcarComoLeido(widget.chatId, _myId);
     }
+  }
+
+  bool _mensajesTienenCambios(
+    List<Map<String, dynamic>> actuales,
+    List<Map<String, dynamic>> nuevos,
+  ) {
+    if (actuales.length != nuevos.length) return true;
+
+    for (var i = 0; i < actuales.length; i++) {
+      final actual = actuales[i];
+      final nuevo = nuevos[i];
+      if (actual['id']?.toString() != nuevo['id']?.toString()) return true;
+      if (actual['leido'] != nuevo['leido']) return true;
+    }
+
+    return false;
+  }
+
+  void _escucharCambiosDeLectura() {
+    _readStatusChannel = ChatService.suscribirseALeidos(widget.chatId, () {
+      if (!mounted) return;
+      _refrescarMensajes();
+    });
   }
 
   void _suscribirse() {

@@ -72,7 +72,11 @@ class _ClienteHomeScreenState extends State<ClienteHomeScreen> {
     final nombre = SessionService.username ?? 'Cliente';
     return Scaffold(
       extendBody: true,
+      backgroundColor:
+          Colors.transparent, // Añadido para evitar parpadeos blancos
       body: AppBackground(
+        width: double.infinity,
+        height: double.infinity,
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(

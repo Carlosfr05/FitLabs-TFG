@@ -319,6 +319,9 @@ class _PerfilScreenState extends State<PerfilScreen>
               primary: AppColors.accentPurple,
               surface: AppColors.cardBg,
             ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
+            ),
           ),
           child: child!,
         );
@@ -364,7 +367,7 @@ class _PerfilScreenState extends State<PerfilScreen>
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text(
               'Cancelar',
-              style: TextStyle(color: AppColors.accentLila),
+              style: TextStyle(color: Color.fromARGB(255, 247, 246, 255)),
             ),
           ),
           TextButton(
@@ -412,7 +415,10 @@ class _PerfilScreenState extends State<PerfilScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
+      backgroundColor: Colors.transparent,
       body: AppBackground(
+        width: double.infinity,
+        height: double.infinity,
         child: _loading
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.accentLila),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:pantallas_fitlabs/core/app_colors.dart';
 import 'package:pantallas_fitlabs/data/session_service.dart';
+import 'package:pantallas_fitlabs/data/firebase_token_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -70,7 +71,13 @@ class _LoginScreenState extends State<LoginScreen> {
             'role': 'entrenador',
           });
         }
+        print('✅ [LoginScreen] Usuario autenticado: ${response.user!.id}');
         await SessionService.cargarPerfil();
+        print(
+          '✅ [LoginScreen] Perfil cargado, iniciando obtención de token...',
+        );
+        await FirebaseTokenService.setupAndSaveToken();
+        print('✅ [LoginScreen] Retornando de setupAndSaveToken');
       }
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/home');
